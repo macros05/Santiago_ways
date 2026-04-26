@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { getAuth, getOptionalAuth } from '@lib/auth';
-import { created, handleApiError, ok, paginationParams } from '@lib/http';
+import { canPostCommunity } from '@lib/permissions';
+import { created, err, handleApiError, ok, paginationParams } from '@lib/http';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +52,18 @@ const createSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuth(req);
+    const user = await prisma.user.findUnique({
+      where: { id: auth.sub },
+      include: { subscription: true },
+    });
+    if (!canPostCommunity(user)) {
+      return err(
+        'Necesitas el plan Buen Camino para publicar',
+        403,
+        'PLAN_REQUIRED',
+        { requiredPlan: 'buen_camino' },
+      );
+    }
     const body = createSchema.parse(await req.json());
     const post = await prisma.post.create({
       data: { ...body, userId: auth.sub },

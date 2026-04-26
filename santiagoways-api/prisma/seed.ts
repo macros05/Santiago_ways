@@ -4,6 +4,17 @@ import { ROUTES } from './data/routes';
 import { ALBERGUES } from './data/albergues';
 import { WAYPOINTS } from './data/waypoints';
 import { ACHIEVEMENTS } from './data/achievements';
+import { getStageImage } from './data/stage-images';
+
+const ROUTE_HERO_IMAGES: Record<string, string> = {
+  'camino-frances': 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1600&q=80',
+  'camino-portugues': 'https://images.unsplash.com/photo-1488751045188-3c55bbf9a3fa?w=1600&q=80',
+  'camino-del-norte': 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=1600&q=80',
+  'camino-primitivo': 'https://images.unsplash.com/photo-1465056836041-7f43ac27dcb5?w=1600&q=80',
+  'camino-ingles': 'https://images.unsplash.com/photo-1530841344095-502ed862e2bb?w=1600&q=80',
+  'via-de-la-plata': 'https://images.unsplash.com/photo-1543968996-ee822b8176ba?w=1600&q=80',
+  'camino-aragones': 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1600&q=80',
+};
 import {
   DEMO_USERS,
   DEMO_POSTS,
@@ -20,6 +31,11 @@ const daysAgo = (n?: number) => (n == null ? new Date() : new Date(Date.now() - 
 
 async function clear() {
   // Order matters because of FKs.
+  await prisma.chatMessage.deleteMany();
+  await prisma.chatRoom.deleteMany();
+  await prisma.healthSnapshot.deleteMany();
+  await prisma.subscription.deleteMany();
+  await prisma.featuredAlbergue.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.userAchievement.deleteMany();
   await prisma.achievement.deleteMany();
@@ -42,6 +58,74 @@ async function clear() {
   await prisma.user.deleteMany();
 }
 
+async function seedFeaturedAlbergues() {
+  // Pick a few popular albergues and feature them for the next 30 days.
+  const albergues = await prisma.albergue.findMany({ take: 4 });
+  if (albergues.length === 0) return;
+  const now = new Date();
+  const in30 = new Date(Date.now() + 30 * 86_400_000);
+  for (const [i, a] of albergues.entries()) {
+    await prisma.featuredAlbergue.create({
+      data: {
+        albergueId: a.id,
+        startsAt: now,
+        endsAt: in30,
+        priority: 100 - i * 10,
+      },
+    });
+  }
+}
+
+async function seedChatRooms() {
+  const routes = await prisma.route.findMany();
+  await prisma.chatRoom.create({
+    data: {
+      name: '🐚 Composteleros · General',
+      type: 'compostelero_general',
+    },
+  });
+  for (const r of routes.slice(0, 4)) {
+    await prisma.chatRoom.create({
+      data: {
+        name: `${r.name}`,
+        type: 'route_specific',
+        routeId: r.id,
+      },
+    });
+  }
+}
+
+async function seedDemoSubscriptions() {
+  // Promote first demo user to compostelero, second to buen_camino — to make it easy
+  // to verify gating end-to-end during dev.
+  const users = await prisma.user.findMany({ orderBy: { createdAt: 'asc' }, take: 2 });
+  if (users.length === 0) return;
+  if (users[0]) {
+    await prisma.subscription.upsert({
+      where: { userId: users[0].id },
+      create: {
+        userId: users[0].id,
+        plan: 'compostelero',
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 365 * 86_400_000),
+      },
+      update: {},
+    });
+  }
+  if (users[1]) {
+    await prisma.subscription.upsert({
+      where: { userId: users[1].id },
+      create: {
+        userId: users[1].id,
+        plan: 'buen_camino',
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 30 * 86_400_000),
+      },
+      update: {},
+    });
+  }
+}
+
 async function seedRoutes() {
   let totalStages = 0;
   for (const r of ROUTES) {
@@ -57,6 +141,7 @@ async function seedRoutes() {
         description: r.description,
         color: r.color,
         isPopular: r.isPopular,
+        imageUrl: ROUTE_HERO_IMAGES[r.slug] ?? null,
         stages: {
           create: r.stages.map((s) => ({
             number: s.number,
@@ -69,6 +154,13 @@ async function seedRoutes() {
             difficulty: s.difficulty,
             description: s.description,
             tips: s.tips,
+            imageUrl: getStageImage({
+              routeSlug: r.slug,
+              number: s.number,
+              startPoint: s.startPoint,
+              endPoint: s.endPoint,
+              elevationGain: s.elevationGain,
+            }),
             coordinates: {
               type: 'LineString',
               coordinates: [s.startCoord, s.endCoord],
@@ -369,6 +461,12 @@ async function main() {
   await seedDemoAchievements();
   console.log('  Pilgrimages…');
   await seedDemoPilgrimages();
+  console.log('  Featured albergues (ads)…');
+  await seedFeaturedAlbergues();
+  console.log('  Chat rooms…');
+  await seedChatRooms();
+  console.log('  Demo subscriptions…');
+  await seedDemoSubscriptions();
   console.log('✓ Done.');
 }
 

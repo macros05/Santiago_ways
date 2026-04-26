@@ -101,6 +101,18 @@ const translations = {
 export const i18n = new I18n(translations);
 i18n.enableFallback = true;
 i18n.defaultLocale = 'es';
-i18n.locale = Localization.getLocales()[0]?.languageCode === 'en' ? 'en' : 'es';
+
+// Forzamos español por defecto: el contenido del backend (rutas, etapas,
+// descripciones, posts) está mayoritariamente en castellano. Si en el futuro
+// añadimos un selector de idioma en Settings, persistir aquí desde Zustand.
+i18n.locale = 'es';
+
+export function setLocale(locale: 'es' | 'en') {
+  i18n.locale = locale;
+}
+
+export function getDeviceLocale(): 'es' | 'en' {
+  return Localization.getLocales()[0]?.languageCode === 'en' ? 'en' : 'es';
+}
 
 export const t = (key: string, options?: Record<string, unknown>) => i18n.t(key, options);

@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -11,9 +11,19 @@ import { Badge } from '@components/Badge';
 import { ProgressRing } from '@components/ProgressRing';
 import { Button } from '@components/Button';
 import { StageCard } from '@components/StageCard';
+import { HomeBanner } from '@components/ads/HomeBanner';
+import { FeaturedAlbergueCard } from '@components/ads/FeaturedAlbergueCard';
 import { colors, layout, radius, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
-import { pilgrimageStats, useMyPilgrimage, useRoutes } from '@hooks/usePilgrimage';
+import {
+  isLockedRoute,
+  pilgrimageStats,
+  useMyPilgrimage,
+  useRoutes,
+  type RouteListItem,
+} from '@hooks/usePilgrimage';
+import { useFeaturedAlbergues } from '@hooks/useFeaturedAlbergues';
+import { useShowAds, usePlan } from '@hooks/useSubscription';
 import { greeting } from '@lib/format';
 import { t } from '@lib/i18n';
 
@@ -31,6 +41,9 @@ export default function ExploreScreen() {
   const user = useAuth((s) => s.user);
   const myQ = useMyPilgrimage();
   const routesQ = useRoutes();
+  const featuredQ = useFeaturedAlbergues();
+  const showAds = useShowAds();
+  const plan = usePlan();
   const tip = TIPS[new Date().getDate() % TIPS.length]!;
 
   const stats = pilgrimageStats(myQ.data);
@@ -51,13 +64,24 @@ export default function ExploreScreen() {
           <Text variant="small" color={colors.stone400}>
             {t(`explore.${greeting()}`)}
           </Text>
-          <Text variant="display" color={colors.cream} numberOfLines={1}>
-            {user?.name?.split(' ')[0] ?? 'Pilgrim'}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
+            <Text variant="display" color={colors.cream} numberOfLines={1} style={{ flexShrink: 1 }}>
+              {user?.name?.split(' ')[0] ?? 'Pilgrim'}
+            </Text>
+            {plan === 'compostelero' ? (
+              <Text style={{ fontSize: 22 }}>🐚</Text>
+            ) : plan === 'buen_camino' ? (
+              <Ionicons name="star" size={20} color={colors.amber400} />
+            ) : null}
+          </View>
         </View>
-        <View style={styles.bell}>
-          <Ionicons name="notifications-outline" size={22} color={colors.cream} />
-        </View>
+        <Pressable
+          onPress={() => router.push('/plans')}
+          hitSlop={8}
+          style={styles.bell}
+        >
+          <Ionicons name="diamond-outline" size={20} color={colors.amber400} />
+        </Pressable>
       </View>
 
       {myQ.isLoading ? (
@@ -133,6 +157,12 @@ export default function ExploreScreen() {
         </Card>
       )}
 
+      {showAds ? (
+        <View style={{ marginTop: spacing['6'] }}>
+          <HomeBanner />
+        </View>
+      ) : null}
+
       {/* Próximas etapas */}
       {upcoming && upcoming.length > 0 ? (
         <Section
@@ -162,6 +192,51 @@ export default function ExploreScreen() {
                 }}
                 onPress={() => router.push(`/stage/${entry.stage.id}`)}
               />
+            ))}
+          </ScrollView>
+        </Section>
+      ) : null}
+
+      {/* Compostelero: AI guide entry */}
+      {plan === 'compostelero' ? (
+        <Section title="Tu Guía IA" subtitle="Recomendaciones personalizadas para hoy">
+          <View style={{ paddingHorizontal: spacing['5'] }}>
+            <Pressable onPress={() => router.push('/ai-guide')}>
+              <Card elevation="raised" style={styles.aiCard}>
+                <LinearGradient
+                  colors={['rgba(255,215,0,0.10)', 'rgba(255,215,0,0.02)']}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={styles.aiIcon}>
+                  <Ionicons name="sparkles" size={20} color="#FFD700" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyBold" color={colors.cream}>
+                    Pide consejo a tu peregrino veterano
+                  </Text>
+                  <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
+                    Etapa, salud, meteo y joyas ocultas, en segundos.
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.stone400} />
+              </Card>
+            </Pressable>
+          </View>
+        </Section>
+      ) : null}
+
+      {/* Albergues destacados (free plan only) */}
+      {showAds && featuredQ.data && featuredQ.data.length > 0 ? (
+        <Section title="Albergues destacados" subtitle="Recomendados por SantiagoWays">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.hScroll}
+          >
+            {featuredQ.data.map((a) => (
+              <View key={a.id} style={{ width: 260 }}>
+                <FeaturedAlbergueCard albergue={a} />
+              </View>
             ))}
           </ScrollView>
         </Section>
@@ -199,28 +274,59 @@ export default function ExploreScreen() {
               <Skeleton height={88} borderRadius={radius.lg} />
             </>
           ) : (
-            routesQ.data?.map((r) => (
-              <Card
-                key={r.id}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}
-              >
-                <View style={[styles.routeDot, { backgroundColor: r.color }]} />
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
-                    <Text variant="bodyBold" color={colors.cream}>{r.name}</Text>
-                    {r.isPopular ? <Badge label="popular" variant="gold" size="sm" /> : null}
-                  </View>
-                  <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
-                    {r.totalKm.toFixed(0)} km · {r._count?.stages ?? '?'} etapas · {r.startCity}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.stone400} />
-              </Card>
-            ))
+            routesQ.data?.map((r: RouteListItem) =>
+              isLockedRoute(r) ? (
+                <LockedRouteRow key={r.id} route={r} onPress={() => router.push('/plans')} />
+              ) : (
+                <Pressable key={r.id} onPress={() => router.push(`/route/${r.slug}`)}>
+                  <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
+                    <View style={[styles.routeDot, { backgroundColor: r.color }]} />
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
+                        <Text variant="bodyBold" color={colors.cream}>{r.name}</Text>
+                        {r.isPopular ? <Badge label="popular" variant="gold" size="sm" /> : null}
+                      </View>
+                      <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
+                        {r.totalKm.toFixed(0)} km · {r._count?.stages ?? '?'} etapas · {r.startCity}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color={colors.stone400} />
+                  </Card>
+                </Pressable>
+              ),
+            )
           )}
         </View>
       </Section>
     </ScrollView>
+  );
+}
+
+function LockedRouteRow({
+  route,
+  onPress,
+}: {
+  route: import('@hooks/usePilgrimage').LockedRoute;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress}>
+      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'], opacity: 0.85 }}>
+        <View style={[styles.routeDot, { backgroundColor: route.color, opacity: 0.4 }]} />
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
+            <Text variant="bodyBold" color={colors.stone300}>{route.name}</Text>
+            <Badge label="Premium" variant="gold" size="sm" />
+          </View>
+          <Text variant="small" color={colors.stone500} style={{ marginTop: 2 }}>
+            {route.preview.totalKm.toFixed(0)} km · {route.preview.startCity} · Buen Camino
+          </Text>
+        </View>
+        <View style={styles.lockBadge}>
+          <Ionicons name="lock-closed" size={14} color={colors.amber400} />
+        </View>
+      </Card>
+    </Pressable>
   );
 }
 
@@ -305,5 +411,30 @@ const styles = StyleSheet.create({
     width: 10,
     height: 56,
     borderRadius: 5,
+  },
+  lockBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(251,191,36,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(251,191,36,0.3)',
+  },
+  aiCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['3'],
+    overflow: 'hidden',
+    borderColor: 'rgba(255,215,0,0.4)',
+  },
+  aiIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,215,0,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

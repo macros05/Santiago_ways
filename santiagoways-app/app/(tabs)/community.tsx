@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,8 +10,10 @@ import { Text } from '@design/text';
 import { Avatar } from '@components/Avatar';
 import { Skeleton } from '@components/Skeleton';
 import { Card } from '@components/Card';
+import { UpgradeBottomSheet } from '@components/UpgradeBottomSheet';
 import { colors, layout, radius, shadows, spacing } from '@design/tokens';
 import { type Post, useLikePost, usePostsFeed } from '@hooks/usePosts';
+import { useCanAccess } from '@hooks/useSubscription';
 import { timeAgo } from '@lib/format';
 
 export default function CommunityScreen() {
@@ -19,6 +21,8 @@ export default function CommunityScreen() {
   const router = useRouter();
   const feed = usePostsFeed();
   const like = useLikePost();
+  const canPost = useCanAccess('community_post');
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const onEndReached = useCallback(() => {
     if (feed.hasNextPage && !feed.isFetchingNextPage) feed.fetchNextPage();
@@ -74,10 +78,30 @@ export default function CommunityScreen() {
 
       <Pressable
         style={[styles.fab, { bottom: layout.tabBarHeight + insets.bottom + spacing['4'] }]}
-        onPress={() => router.push('/post/new')}
+        onPress={() => {
+          if (canPost) {
+            router.push('/post/new');
+          } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+            setUpgradeOpen(true);
+          }
+        }}
       >
-        <Ionicons name="add" size={28} color={colors.stone950} />
+        <Ionicons name={canPost ? 'add' : 'lock-closed'} size={canPost ? 28 : 22} color={colors.stone950} />
       </Pressable>
+
+      <UpgradeBottomSheet
+        visible={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        requiredPlan="buen_camino"
+        iconName="chatbubbles"
+        title="Comparte tu experiencia"
+        bullets={[
+          'Publica fotos y vivencias del Camino',
+          'Comenta y conecta con otros peregrinos',
+          'Tu voz en la comunidad SantiagoWays',
+        ]}
+      />
     </View>
   );
 }

@@ -13,6 +13,8 @@ import { colors, radius, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
 import { toast } from '@stores/toast';
 import { api } from '@lib/api';
+import { isLockedRoute, useRoutes } from '@hooks/usePilgrimage';
+import { Skeleton } from '@components/Skeleton';
 
 export default function ProfileSetup() {
   const router = useRouter();
@@ -25,6 +27,7 @@ export default function ProfileSetup() {
   const [bio, setBio] = useState('');
   const [routeSlug, setRouteSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const routesQ = useRoutes();
 
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -133,26 +136,76 @@ export default function ProfileSetup() {
               ¿Qué Camino vas a empezar?
             </Text>
             <View style={{ gap: spacing['3'], marginTop: spacing['8'] }}>
-              {[
-                { slug: 'camino-frances', name: 'Camino Francés', km: '779 km · 33 etapas' },
-                { slug: 'camino-portugues', name: 'Camino Portugués', km: '240 km · 14 etapas' },
-                { slug: 'camino-del-norte', name: 'Camino del Norte', km: '825 km · 33 etapas' },
-              ].map((r) => (
-                <Pressable key={r.slug} onPress={() => setRouteSlug(r.slug)}>
-                  <Card
-                    elevation={routeSlug === r.slug ? 'floating' : 'flat'}
-                    style={{
-                      borderColor: routeSlug === r.slug ? colors.amber400 : colors.stone700,
-                      borderWidth: 1,
-                    }}
-                  >
-                    <Text variant="bodyBold" color={colors.cream}>{r.name}</Text>
-                    <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
-                      {r.km}
-                    </Text>
-                  </Card>
-                </Pressable>
-              ))}
+              {routesQ.isLoading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} height={70} borderRadius={radius.lg} />
+                  ))
+                : (routesQ.data ?? []).map((r) => {
+                    const locked = isLockedRoute(r);
+                    const totalKm = locked ? r.preview.totalKm : r.totalKm;
+                    const startCity = locked ? r.preview.startCity : r.startCity;
+                    const stagesCount = locked ? null : r._count?.stages;
+                    const selectable = !locked;
+                    return (
+                      <Pressable
+                        key={r.slug}
+                        onPress={() => (selectable ? setRouteSlug(r.slug) : router.push('/plans'))}
+                      >
+                        <Card
+                          elevation={routeSlug === r.slug ? 'floating' : 'flat'}
+                          style={{
+                            borderColor: routeSlug === r.slug ? colors.amber400 : colors.stone700,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: spacing['3'],
+                            opacity: locked ? 0.7 : 1,
+                          }}
+                        >
+                          <View
+                            style={{
+                              width: 8,
+                              height: 44,
+                              borderRadius: 4,
+                              backgroundColor: r.color,
+                            }}
+                          />
+                          <View style={{ flex: 1 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
+                              <Text variant="bodyBold" color={colors.cream}>{r.name}</Text>
+                              {locked ? (
+                                <Ionicons name="lock-closed" size={12} color={colors.amber400} />
+                              ) : null}
+                            </View>
+                            <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
+                              {totalKm.toFixed(0)} km
+                              {stagesCount !== null ? ` · ${stagesCount} etapas` : ''}
+                              {' · '}{startCity}
+                            </Text>
+                            {locked ? (
+                              <Text variant="caption" color={colors.amber400} style={{ marginTop: 2 }}>
+                                Disponible con plan Buen Camino
+                              </Text>
+                            ) : null}
+                          </View>
+                          {routeSlug === r.slug && selectable ? (
+                            <View
+                              style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: 11,
+                                backgroundColor: colors.amber400,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Ionicons name="checkmark" size={14} color={colors.stone950} />
+                            </View>
+                          ) : null}
+                        </Card>
+                      </Pressable>
+                    );
+                  })}
             </View>
             <Button
               label="Empezar mi Camino"

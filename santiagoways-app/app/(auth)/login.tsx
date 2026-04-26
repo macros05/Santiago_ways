@@ -10,11 +10,13 @@ import { colors, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
 import { toast } from '@stores/toast';
 import { ApiError } from '@lib/api';
+import { useGoogleAuth } from '@hooks/useGoogleAuth';
 
 export default function Login() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const signIn = useAuth((s) => s.signIn);
+  const google = useGoogleAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -98,8 +100,9 @@ export default function Login() {
           label="Continuar con Google"
           variant="secondary"
           fullWidth
+          disabled={!google.ready}
           iconLeft={<Ionicons name="logo-google" size={18} color={colors.cream} />}
-          onPress={() => toast.info('Configura GOOGLE_CLIENT_ID para activar.')}
+          onPress={() => google.promptAsync()}
         />
         <Button
           label="Continuar con Apple"

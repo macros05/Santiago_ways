@@ -17,6 +17,28 @@ export type Route = {
   _count?: { stages: number };
 };
 
+export type LockedRoute = {
+  id: string;
+  slug: string;
+  name: string;
+  nameEn: string;
+  country: string;
+  color: string;
+  locked: true;
+  preview: {
+    imageUrl: string | null;
+    totalKm: number;
+    difficulty: string;
+    startCity: string;
+  };
+};
+
+export type RouteListItem = Route | LockedRoute;
+
+export function isLockedRoute(r: RouteListItem): r is LockedRoute {
+  return (r as LockedRoute).locked === true;
+}
+
 export type PilgrimageStageEntry = {
   id: string;
   status: 'pending' | 'active' | 'completed';
@@ -50,7 +72,7 @@ export type Pilgrimage = {
 export function useRoutes() {
   return useQuery({
     queryKey: ['routes'],
-    queryFn: () => api<Route[]>('/routes'),
+    queryFn: () => api<RouteListItem[]>('/routes'),
   });
 }
 

@@ -7,6 +7,13 @@ export type AuthUser = {
   username: string;
   name: string;
   avatar: string | null;
+  bio?: string | null;
+  nationality?: string | null;
+  timesCompleted?: number;
+  totalKm?: number;
+  isOnCamino?: boolean;
+  language?: string;
+  plan?: 'free' | 'buen_camino' | 'compostelero';
 };
 
 type AuthState = {

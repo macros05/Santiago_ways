@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { getAuth } from '@lib/auth';
 import { handleApiError, notFound, ok } from '@lib/http';
+import { getPlan } from '@lib/permissions';
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,10 +24,20 @@ export async function GET(req: NextRequest) {
         shareLocation: true,
         language: true,
         createdAt: true,
+        subscription: {
+          select: {
+            plan: true,
+            status: true,
+            currentPeriodEnd: true,
+            cancelAtPeriodEnd: true,
+            revenueCatId: true,
+          },
+        },
       },
     });
     if (!user) return notFound('User not found');
-    return ok(user);
+    const plan = getPlan({ subscription: user.subscription ?? null });
+    return ok({ ...user, plan });
   } catch (e) {
     return handleApiError(e);
   }

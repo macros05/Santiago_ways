@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@lib/queryClient';
 import { useAuth } from '@stores/auth';
+import { useSubscription } from '@stores/subscription';
 import { ToastHost } from '@components/Toast';
 import { colors } from '@design/tokens';
 
@@ -15,10 +16,21 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 export default function RootLayout() {
   const bootstrap = useAuth((s) => s.bootstrap);
   const isReady = useAuth((s) => s.isReady);
+  const user = useAuth((s) => s.user);
+  const initSub = useSubscription((s) => s.initialize);
+  const resetSub = useSubscription((s) => s.reset);
 
   useEffect(() => {
     bootstrap().finally(() => SplashScreen.hideAsync().catch(() => {}));
   }, [bootstrap]);
+
+  useEffect(() => {
+    if (user?.id) {
+      initSub(user.id);
+    } else {
+      resetSub();
+    }
+  }, [user?.id, initSub, resetSub]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.stone950 }}>
@@ -38,6 +50,11 @@ export default function RootLayout() {
             <Stack.Screen name="stage/[id]" options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="albergue/[id]" />
             <Stack.Screen name="post/[id]" />
+            <Stack.Screen name="plans" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+            <Stack.Screen name="ai-guide" />
+            <Stack.Screen name="health-dashboard" />
+            <Stack.Screen name="chat/index" />
+            <Stack.Screen name="chat/[id]" />
           </Stack>
           {isReady ? <ToastHost /> : null}
         </QueryClientProvider>

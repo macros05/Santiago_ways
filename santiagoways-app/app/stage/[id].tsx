@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -11,9 +12,12 @@ import { Badge } from '@components/Badge';
 import { Card } from '@components/Card';
 import { Skeleton } from '@components/Skeleton';
 import { Button } from '@components/Button';
+import { MapMarker } from '@components/MapMarker';
+import { UpgradeBottomSheet } from '@components/UpgradeBottomSheet';
 import { colors, radius, spacing } from '@design/tokens';
 import { api } from '@lib/api';
 import { formatElevation, formatKm } from '@lib/format';
+import { useCanAccess } from '@hooks/useSubscription';
 
 type Stage = {
   id: string;
@@ -28,9 +32,43 @@ type Stage = {
   description: string;
   tips: string;
   imageUrl: string | null;
+  coordinates: { type: 'LineString'; coordinates: [number, number][] } | null;
   route: { name: string; color: string };
-  waypoints: Array<{ id: string; name: string; type: string; description: string | null }>;
+  waypoints: Array<{
+    id: string;
+    name: string;
+    type: string;
+    description: string | null;
+    lat: number;
+    lng: number;
+  }>;
+  offlineAvailable?: boolean;
 };
+
+type StageAlbergue =
+  | {
+      id: string;
+      name: string;
+      city: string;
+      type: string;
+      pricePerNight: number | null;
+      totalBeds: number | null;
+      amenities: string[];
+      imageUrl: string | null;
+      ratingAvg: number | null;
+      ratingCount: number;
+    }
+  | {
+      id: string;
+      locked: true;
+      preview: { name: string; city: string; type: string; imageUrl: string | null };
+    };
+
+function isLockedAlbergue(
+  a: StageAlbergue,
+): a is Extract<StageAlbergue, { locked: true }> {
+  return (a as { locked?: boolean }).locked === true;
+}
 
 type Tab = 'overview' | 'map' | 'albergues' | 'tips';
 
@@ -38,11 +76,19 @@ export default function StageDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>('overview');
+  const [offlineUpgrade, setOfflineUpgrade] = useState(false);
+  const canOffline = useCanAccess('offline_maps');
 
   const stageQ = useQuery({
     queryKey: ['stage', id],
     queryFn: () => api<Stage>(`/stages/${id}`),
     enabled: !!id,
+  });
+
+  const albergueQ = useQuery({
+    queryKey: ['stage', id, 'albergues'],
+    queryFn: () => api<StageAlbergue[]>(`/stages/${id}/albergues`),
+    enabled: !!id && tab === 'albergues',
   });
 
   const stage = stageQ.data;
@@ -126,31 +172,162 @@ export default function StageDetail() {
           </View>
         ) : null}
 
-        {tab === 'map' ? (
+        {tab === 'map' && stage ? (
           <View style={styles.section}>
-            <Card style={{ height: 320, padding: 0, alignItems: 'center', justifyContent: 'center' }}>
-              <Ionicons name="map-outline" size={48} color={colors.stone600} />
-              <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-                Mapa de la etapa (Mapbox)
-              </Text>
-            </Card>
+            <View style={styles.mapWrap}>
+              {stage.coordinates ? (
+                <MapView
+                  provider={PROVIDER_DEFAULT}
+                  style={StyleSheet.absoluteFill}
+                  initialRegion={regionFor(stage.coordinates.coordinates)}
+                  scrollEnabled
+                  zoomEnabled
+                >
+                  <Polyline
+                    coordinates={stage.coordinates.coordinates.map(([lng, lat]) => ({
+                      latitude: lat,
+                      longitude: lng,
+                    }))}
+                    strokeColor={stage.route.color}
+                    strokeWidth={4}
+                  />
+                  <Marker
+                    coordinate={{
+                      latitude: stage.coordinates.coordinates[0]![1],
+                      longitude: stage.coordinates.coordinates[0]![0],
+                    }}
+                    title={stage.startPoint}
+                  >
+                    <MapMarker type="info" size={28} />
+                  </Marker>
+                  <Marker
+                    coordinate={{
+                      latitude: stage.coordinates.coordinates.at(-1)![1],
+                      longitude: stage.coordinates.coordinates.at(-1)![0],
+                    }}
+                    title={stage.endPoint}
+                  >
+                    <MapMarker type="church" size={28} />
+                  </Marker>
+                  {stage.waypoints.map((w) => (
+                    <Marker
+                      key={w.id}
+                      coordinate={{ latitude: w.lat, longitude: w.lng }}
+                      title={w.name}
+                      description={w.description ?? undefined}
+                    >
+                      <MapMarker type={waypointType(w.type)} size={22} />
+                    </Marker>
+                  ))}
+                </MapView>
+              ) : (
+                <View style={styles.mapEmpty}>
+                  <Ionicons name="map-outline" size={48} color={colors.stone600} />
+                  <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
+                    Esta etapa no tiene coordenadas
+                  </Text>
+                </View>
+              )}
+            </View>
             <Button
-              label="Descargar para offline"
+              label={canOffline ? 'Descargar para offline' : 'Descarga offline · Premium'}
               variant="secondary"
               fullWidth
-              iconLeft={<Ionicons name="cloud-download-outline" size={18} color={colors.cream} />}
+              iconLeft={
+                <Ionicons
+                  name={canOffline ? 'cloud-download-outline' : 'lock-closed'}
+                  size={18}
+                  color={canOffline ? colors.cream : colors.amber400}
+                />
+              }
               style={{ marginTop: spacing['4'] }}
-              onPress={() => null}
+              onPress={() => {
+                if (canOffline) {
+                  // TODO: trigger MBTiles download
+                } else {
+                  setOfflineUpgrade(true);
+                }
+              }}
             />
           </View>
         ) : null}
 
         {tab === 'albergues' ? (
           <View style={styles.section}>
-            <Text variant="body" color={colors.stone400}>
-              Cargando albergues de esta etapa…
-            </Text>
-            <Skeleton height={120} borderRadius={radius.lg} style={{ marginTop: spacing['4'] }} />
+            {albergueQ.isLoading ? (
+              <View style={{ gap: spacing['3'] }}>
+                <Skeleton height={120} borderRadius={radius.lg} />
+                <Skeleton height={120} borderRadius={radius.lg} />
+                <Skeleton height={120} borderRadius={radius.lg} />
+              </View>
+            ) : (
+              <View style={{ gap: spacing['3'] }}>
+                {albergueQ.data?.map((a) =>
+                  isLockedAlbergue(a) ? (
+                    <Pressable key={a.id} onPress={() => router.push('/plans')}>
+                      <Card style={styles.lockedAlbergue}>
+                        <View style={styles.lockedThumb}>
+                          <Ionicons name="lock-closed" size={20} color={colors.amber400} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text variant="bodyMedium" color={colors.stone300}>
+                            {a.preview.name}
+                          </Text>
+                          <Text variant="caption" color={colors.stone500}>
+                            {a.preview.city} · {a.preview.type}
+                          </Text>
+                        </View>
+                        <Text variant="caption" color={colors.amber400}>
+                          Premium
+                        </Text>
+                      </Card>
+                    </Pressable>
+                  ) : (
+                    <Pressable key={a.id} onPress={() => router.push(`/albergue/${a.id}`)}>
+                      <Card style={{ flexDirection: 'row', gap: spacing['3'] }}>
+                        {a.imageUrl ? (
+                          <Image source={{ uri: a.imageUrl }} style={styles.albergueThumb} />
+                        ) : (
+                          <View style={[styles.albergueThumb, { backgroundColor: colors.stone800 }]}>
+                            <Ionicons name="bed" size={20} color={colors.stone500} />
+                          </View>
+                        )}
+                        <View style={{ flex: 1 }}>
+                          <Text variant="bodyBold" color={colors.cream} numberOfLines={1}>
+                            {a.name}
+                          </Text>
+                          <Text variant="caption" color={colors.stone400}>
+                            {a.city} · {a.type}
+                          </Text>
+                          <View style={{ flexDirection: 'row', gap: spacing['3'], marginTop: 4 }}>
+                            {a.pricePerNight != null ? (
+                              <Text variant="caption" color={colors.amber400}>
+                                €{a.pricePerNight.toFixed(0)}
+                              </Text>
+                            ) : null}
+                            {a.ratingAvg != null ? (
+                              <Text variant="caption" color={colors.stone400}>
+                                ★ {a.ratingAvg.toFixed(1)}
+                              </Text>
+                            ) : null}
+                            {a.totalBeds != null ? (
+                              <Text variant="caption" color={colors.stone400}>
+                                {a.totalBeds} camas
+                              </Text>
+                            ) : null}
+                          </View>
+                        </View>
+                      </Card>
+                    </Pressable>
+                  ),
+                )}
+                {albergueQ.data?.length === 0 ? (
+                  <Text variant="small" color={colors.stone400}>
+                    Sin albergues registrados en esta etapa.
+                  </Text>
+                ) : null}
+              </View>
+            )}
           </View>
         ) : null}
 
@@ -167,6 +344,19 @@ export default function StageDetail() {
           </View>
         ) : null}
       </ScrollView>
+
+      <UpgradeBottomSheet
+        visible={offlineUpgrade}
+        onClose={() => setOfflineUpgrade(false)}
+        requiredPlan="buen_camino"
+        iconName="cloud-download"
+        title="Mapas para llevar offline"
+        bullets={[
+          'Descarga etapas completas para sin cobertura',
+          'GPS preciso aunque pierdas señal',
+          'Lleva el Camino siempre en el bolsillo',
+        ]}
+      />
     </View>
   );
 }
@@ -185,6 +375,32 @@ function iconFor(type: string): keyof typeof import('@expo/vector-icons').Ionico
     info: 'information-circle',
   };
   return map[type] ?? 'flag';
+}
+
+function waypointType(t: string): import('@components/MapMarker').MarkerType {
+  const allowed: import('@components/MapMarker').MarkerType[] = [
+    'albergue', 'waypoint', 'pilgrim', 'danger', 'church',
+    'fountain', 'viewpoint', 'bar', 'info',
+  ];
+  return (allowed.includes(t as import('@components/MapMarker').MarkerType)
+    ? (t as import('@components/MapMarker').MarkerType)
+    : 'info');
+}
+
+function regionFor(coords: [number, number][]) {
+  const lats = coords.map((c) => c[1]);
+  const lngs = coords.map((c) => c[0]);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const padding = 0.1;
+  return {
+    latitude: (minLat + maxLat) / 2,
+    longitude: (minLng + maxLng) / 2,
+    latitudeDelta: Math.max(0.05, (maxLat - minLat) * (1 + padding * 2)),
+    longitudeDelta: Math.max(0.05, (maxLng - minLng) * (1 + padding * 2)),
+  };
 }
 
 function Stat({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
@@ -248,6 +464,42 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     backgroundColor: 'rgba(251,191,36,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapWrap: {
+    height: 360,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.stone700,
+    backgroundColor: colors.stone900,
+  },
+  mapEmpty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  albergueThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockedAlbergue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['3'],
+    opacity: 0.85,
+  },
+  lockedThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(251,191,36,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(251,191,36,0.3)',
     alignItems: 'center',
     justifyContent: 'center',
   },

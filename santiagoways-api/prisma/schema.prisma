@@ -48,6 +48,9 @@ model User {
   notifications   Notification[]
   oauthAccounts   OAuthAccount[]
   refreshTokens   RefreshToken[]
+  subscription    Subscription?
+  healthSnapshots HealthSnapshot[]
+  chatMessages    ChatMessage[]
 
   @@index([username])
   @@index([isOnCamino])
@@ -163,8 +166,9 @@ model Albergue {
   imageUrl           String?
   description        String?
 
-  stages   StageAlbergue[]
-  reviews  AlbergueReview[]
+  stages    StageAlbergue[]
+  reviews   AlbergueReview[]
+  featured  FeaturedAlbergue?
 
   @@index([city])
 }
@@ -345,4 +349,76 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@index([userId, isRead])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Subscriptions, health, chat
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              String    // free | buen_camino | compostelero
+  status            String    // active | cancelled | expired | trial
+  revenueCatId      String?
+  currentPeriodEnd  DateTime?
+  cancelAtPeriodEnd Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([plan])
+  @@index([status])
+}
+
+model HealthSnapshot {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime
+  steps         Int?
+  heartRateAvg  Int?
+  heartRateMax  Int?
+  calories      Int?
+  distanceKm    Float?
+  sleepHours    Float?
+  elevationM    Int?
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId])
+}
+
+model FeaturedAlbergue {
+  id          String   @id @default(cuid())
+  albergueId  String   @unique
+  albergue    Albergue @relation(fields: [albergueId], references: [id], onDelete: Cascade)
+  startsAt    DateTime
+  endsAt      DateTime
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([startsAt, endsAt])
+}
+
+model ChatRoom {
+  id        String        @id @default(cuid())
+  name      String
+  type      String        // compostelero_general | route_specific
+  routeId   String?
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  content   String
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([roomId, createdAt])
+  @@index([userId])
 }

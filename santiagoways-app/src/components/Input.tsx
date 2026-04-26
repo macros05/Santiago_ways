@@ -109,12 +109,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.stone900,
     borderWidth: 1,
     borderRadius: radius.md,
-    paddingHorizontal: spacing['4'],
-    minHeight: 56,
+    paddingHorizontal: spacing['5'],
+    minHeight: 64,
   },
   inputArea: {
     flex: 1,
     justifyContent: 'center',
+    paddingVertical: spacing['2'],
   },
   labelWrapper: {
     position: 'absolute',
@@ -124,14 +125,18 @@ const styles = StyleSheet.create({
     color: colors.cream,
     fontFamily: typography.body,
     fontSize: 16,
-    paddingTop: 14,
-    paddingBottom: 6,
+    lineHeight: 22,
+    letterSpacing: 0.2,
+    paddingTop: 18,
+    paddingBottom: 8,
+    minHeight: 28,
   },
   icon: {
-    paddingHorizontal: spacing['2'],
+    paddingHorizontal: spacing['3'],
+    paddingVertical: spacing['2'],
   },
   helper: {
-    marginTop: spacing['1'],
+    marginTop: spacing['2'],
     marginLeft: spacing['1'],
   },
 });
