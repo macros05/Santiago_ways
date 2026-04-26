@@ -1,0 +1,33 @@
+{
+  "name": "santiagoways",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SantiagoWays — Your ultimate Camino de Santiago companion",
+  "workspaces": [
+    "santiagoways-app",
+    "santiagoways-api"
+  ],
+  "scripts": {
+    "app": "npm run start --workspace=santiagoways-app",
+    "app:ios": "npm run ios --workspace=santiagoways-app",
+    "app:android": "npm run android --workspace=santiagoways-app",
+    "api": "npm run dev --workspace=santiagoways-api",
+    "api:build": "npm run build --workspace=santiagoways-api",
+    "db:generate": "npm run prisma:generate --workspace=santiagoways-api",
+    "db:migrate": "npm run prisma:migrate --workspace=santiagoways-api",
+    "db:seed": "npm run prisma:seed --workspace=santiagoways-api",
+    "db:studio": "npm run prisma:studio --workspace=santiagoways-api",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "overrides": {
+    "expo-font": "~14.0.11",
+    "react-native-worklets": "0.5.1"
+  }
+}

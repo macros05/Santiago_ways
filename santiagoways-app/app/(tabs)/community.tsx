@@ -1,0 +1,209 @@
+import { useCallback } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { FlashList } from '@shopify/flash-list';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { Text } from '@design/text';
+import { Avatar } from '@components/Avatar';
+import { Skeleton } from '@components/Skeleton';
+import { Card } from '@components/Card';
+import { colors, layout, radius, shadows, spacing } from '@design/tokens';
+import { type Post, useLikePost, usePostsFeed } from '@hooks/usePosts';
+import { timeAgo } from '@lib/format';
+
+export default function CommunityScreen() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const feed = usePostsFeed();
+  const like = useLikePost();
+
+  const onEndReached = useCallback(() => {
+    if (feed.hasNextPage && !feed.isFetchingNextPage) feed.fetchNextPage();
+  }, [feed]);
+
+  const items = feed.data?.pages.flatMap((p) => p.items) ?? [];
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing['3'] }]}>
+        <Text variant="display" color={colors.cream}>Comunidad</Text>
+      </View>
+
+      <FlashList<Post>
+        data={items}
+        keyExtractor={(p) => p.id}
+        contentContainerStyle={{
+          paddingHorizontal: spacing['5'],
+          paddingBottom: layout.tabBarHeight + insets.bottom + spacing['8'],
+        }}
+        ItemSeparatorComponent={() => <View style={{ height: spacing['4'] }} />}
+        ListEmptyComponent={
+          feed.isLoading ? (
+            <View style={{ gap: spacing['4'] }}>
+              <Skeleton height={300} borderRadius={radius.lg} />
+              <Skeleton height={300} borderRadius={radius.lg} />
+            </View>
+          ) : (
+            <View style={{ alignItems: 'center', marginTop: 80 }}>
+              <Ionicons name="leaf-outline" size={56} color={colors.stone600} />
+              <Text variant="bodyMedium" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
+                Aún no hay publicaciones.
+              </Text>
+              <Text variant="small" color={colors.stone500} style={{ marginTop: 4 }}>
+                Sé el primer peregrino en compartir.
+              </Text>
+            </View>
+          )
+        }
+        renderItem={({ item }) => (
+          <PostCard
+            post={item}
+            onLike={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+              like.mutate(item.id);
+            }}
+            onPress={() => router.push(`/post/${item.id}`)}
+          />
+        )}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.4}
+      />
+
+      <Pressable
+        style={[styles.fab, { bottom: layout.tabBarHeight + insets.bottom + spacing['4'] }]}
+        onPress={() => router.push('/post/new')}
+      >
+        <Ionicons name="add" size={28} color={colors.stone950} />
+      </Pressable>
+    </View>
+  );
+}
+
+function PostCard({
+  post,
+  onLike,
+  onPress,
+}: {
+  post: Post;
+  onLike: () => void;
+  onPress: () => void;
+}) {
+  return (
+    <Card padding="4" elevation="raised">
+      <Pressable onPress={onPress}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
+          <Avatar source={post.user.avatar} name={post.user.name} size="md" />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyMedium" color={colors.cream}>
+              {post.user.name} {post.user.nationality ? `·  ${flag(post.user.nationality)}` : ''}
+            </Text>
+            <Text variant="caption" color={colors.stone400}>
+              @{post.user.username} · {timeAgo(post.createdAt)}
+            </Text>
+          </View>
+        </View>
+
+        <Text variant="body" color={colors.cream} style={{ marginTop: spacing['3'] }}>
+          {post.content}
+        </Text>
+
+        {post.images.length > 0 ? (
+          <Image
+            source={{ uri: post.images[0]! }}
+            style={styles.image}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : null}
+
+        {post.locationName ? (
+          <View style={styles.location}>
+            <Ionicons name="location" size={14} color={colors.amber400} />
+            <Text variant="caption" color={colors.amber400}>{post.locationName}</Text>
+          </View>
+        ) : null}
+      </Pressable>
+
+      <View style={styles.actions}>
+        <Pressable onPress={onLike} hitSlop={8} style={styles.action}>
+          <Ionicons
+            name={post.likedByMe ? 'heart' : 'heart-outline'}
+            size={22}
+            color={post.likedByMe ? colors.error : colors.stone300}
+          />
+          <Text variant="small" color={colors.stone300}>
+            {post._count.likes}
+          </Text>
+        </Pressable>
+        <Pressable onPress={onPress} hitSlop={8} style={styles.action}>
+          <Ionicons name="chatbubble-outline" size={20} color={colors.stone300} />
+          <Text variant="small" color={colors.stone300}>
+            {post._count.comments}
+          </Text>
+        </Pressable>
+        <Pressable hitSlop={8} style={styles.action}>
+          <Ionicons
+            name={post.bookmarkedByMe ? 'bookmark' : 'bookmark-outline'}
+            size={20}
+            color={post.bookmarkedByMe ? colors.amber400 : colors.stone300}
+          />
+        </Pressable>
+      </View>
+    </Card>
+  );
+}
+
+function flag(iso: string): string {
+  if (!iso || iso.length !== 2) return '';
+  const codePoints = iso
+    .toUpperCase()
+    .split('')
+    .map((c) => 127397 + c.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+}
+
+const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: spacing['5'],
+    paddingBottom: spacing['3'],
+  },
+  image: {
+    width: '100%',
+    height: 280,
+    marginTop: spacing['3'],
+    borderRadius: radius.md,
+  },
+  location: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: spacing['3'],
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: spacing['5'],
+    marginTop: spacing['4'],
+    paddingTop: spacing['3'],
+    borderTopWidth: 1,
+    borderColor: colors.stone800,
+  },
+  action: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['1'],
+  },
+  fab: {
+    position: 'absolute',
+    right: spacing['5'],
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.amber400,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.lg,
+  },
+});

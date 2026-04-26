@@ -1,0 +1,348 @@
+// SantiagoWays — primary data model.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Users & social graph
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String?
+  name            String
+  username        String    @unique
+  avatar          String?
+  bio             String?
+  nationality     String?
+  timesCompleted  Int       @default(0)
+  totalKm         Float     @default(0)
+  currentLat      Float?
+  currentLng      Float?
+  lastLocationAt  DateTime?
+  isOnCamino      Boolean   @default(false)
+  privateAccount  Boolean   @default(false)
+  shareLocation   Boolean   @default(true)
+  language        String    @default("es")
+  pushToken       String?
+  emailVerified   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  pilgrimages     Pilgrimage[]
+  posts           Post[]
+  comments        Comment[]
+  likes           Like[]
+  followers       Follow[]          @relation("following")
+  following       Follow[]          @relation("follower")
+  bookmarks       Bookmark[]
+  reviews         AlbergueReview[]
+  achievements    UserAchievement[]
+  notifications   Notification[]
+  oauthAccounts   OAuthAccount[]
+  refreshTokens   RefreshToken[]
+
+  @@index([username])
+  @@index([isOnCamino])
+}
+
+model OAuthAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider     String   // google | apple
+  providerId   String
+  createdAt    DateTime @default(now())
+
+  @@unique([provider, providerId])
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Routes, stages, waypoints
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Route {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  nameEn      String
+  totalKm     Float
+  difficulty  String
+  startCity   String
+  country     String
+  description String
+  imageUrl    String?
+  color       String
+  isPopular   Boolean  @default(false)
+
+  stages      Stage[]
+  pilgrimages Pilgrimage[]
+}
+
+model Stage {
+  id              String   @id @default(cuid())
+  routeId         String
+  route           Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  number          Int
+  name            String
+  startPoint      String
+  endPoint        String
+  distanceKm      Float
+  elevationGain   Int
+  elevationLoss   Int
+  difficulty      String
+  description     String
+  tips            String
+  coordinates     Json     // GeoJSON LineString { type, coordinates: [[lng, lat], ...] }
+  imageUrl        String?
+
+  waypoints       Waypoint[]
+  albergues       StageAlbergue[]
+  pilgrimageStages PilgrimageStage[]
+  posts           Post[]
+
+  @@unique([routeId, number])
+  @@index([routeId])
+}
+
+model Waypoint {
+  id          String   @id @default(cuid())
+  stageId     String
+  stage       Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  name        String
+  type        String   // albergue | church | bar | fountain | viewpoint | danger | info
+  lat         Float
+  lng         Float
+  description String?
+  imageUrl    String?
+  isOfficial  Boolean  @default(false)
+
+  @@index([stageId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Albergues
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Albergue {
+  id                 String   @id @default(cuid())
+  name               String
+  lat                Float
+  lng                Float
+  address            String
+  city               String
+  phone              String?
+  email              String?
+  website            String?
+  pricePerNight      Float?
+  totalBeds          Int?
+  type               String   // municipal | private | parochial | association
+  amenities          String[]
+  bookingPropertyId  String?
+  isOpenYearRound    Boolean  @default(false)
+  imageUrl           String?
+  description        String?
+
+  stages   StageAlbergue[]
+  reviews  AlbergueReview[]
+
+  @@index([city])
+}
+
+model StageAlbergue {
+  stageId    String
+  albergueId String
+  stage      Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  albergue   Albergue @relation(fields: [albergueId], references: [id], onDelete: Cascade)
+
+  @@id([stageId, albergueId])
+  @@index([albergueId])
+}
+
+model AlbergueReview {
+  id         String   @id @default(cuid())
+  userId     String
+  albergueId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  albergue   Albergue @relation(fields: [albergueId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@index([albergueId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pilgrimages, GPS tracks
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Pilgrimage {
+  id        String     @id @default(cuid())
+  userId    String
+  routeId   String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  route     Route      @relation(fields: [routeId], references: [id])
+  startDate DateTime
+  endDate   DateTime?
+  status    String     // planning | active | completed | paused
+  totalKm   Float      @default(0)
+  createdAt DateTime   @default(now())
+
+  stages PilgrimageStage[]
+  tracks GpsTrack[]
+
+  @@index([userId])
+}
+
+model PilgrimageStage {
+  id             String     @id @default(cuid())
+  pilgrimageId   String
+  stageId        String
+  pilgrimage     Pilgrimage @relation(fields: [pilgrimageId], references: [id], onDelete: Cascade)
+  stage          Stage      @relation(fields: [stageId], references: [id])
+  status         String     // pending | active | completed
+  startedAt      DateTime?
+  completedAt    DateTime?
+  distanceWalked Float      @default(0)
+
+  @@unique([pilgrimageId, stageId])
+}
+
+model GpsTrack {
+  id           String     @id @default(cuid())
+  pilgrimageId String
+  pilgrimage   Pilgrimage @relation(fields: [pilgrimageId], references: [id], onDelete: Cascade)
+  coordinates  Json       // [{lat, lng, timestamp, altitude}]
+  distanceKm   Float
+  durationMin  Int
+  recordedAt   DateTime   @default(now())
+
+  @@index([pilgrimageId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Community
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Post {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content      String
+  images       String[]
+  lat          Float?
+  lng          Float?
+  locationName String?
+  stageId      String?
+  stage        Stage?     @relation(fields: [stageId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  likes     Like[]
+  comments  Comment[]
+  bookmarks Bookmark[]
+
+  @@index([userId])
+  @@index([stageId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+}
+
+model Like {
+  userId    String
+  postId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  follower    User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+model Bookmark {
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Achievements & notifications
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Achievement {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  description String
+  icon        String
+  condition   Json
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  userId        String
+  achievementId String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  unlockedAt    DateTime    @default(now())
+
+  @@id([userId, achievementId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // like | comment | follow | achievement | system
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
