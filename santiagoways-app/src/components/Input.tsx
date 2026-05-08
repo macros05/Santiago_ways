@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -33,6 +33,13 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
   const labelProgress = useSharedValue(value ? 1 : 0);
+
+  // Sync the floating label when `value` changes externally (e.g. autofill,
+  // form prefill) — without this the label stays "down" until the next focus.
+  useEffect(() => {
+    if (focused) return;
+    labelProgress.value = withTiming(value ? 1 : 0, { duration: duration.fast });
+  }, [value, focused, labelProgress]);
 
   const labelStyle = useAnimatedStyle(() => ({
     transform: [

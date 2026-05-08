@@ -48,8 +48,8 @@ const TIER_THEME: Record<
   },
   compostelero: {
     bg: { backgroundColor: colors.stone900 },
-    border: '#FFD700',
-    badgeBg: '#FFD700',
+    border: colors.gold,
+    badgeBg: colors.gold,
     badgeColor: colors.stone950,
   },
 };
@@ -112,7 +112,7 @@ export function PlanCard({
       </View>
 
       <View style={{ marginBottom: spacing['5'] }}>
-        <Text variant="h1" color={isCompostelero ? '#FFD700' : colors.amber400}>
+        <Text variant="h1" color={isCompostelero ? colors.gold : colors.amber400}>
           {priceLine}
         </Text>
         {secondaryPrice ? (
@@ -138,7 +138,7 @@ export function PlanCard({
         onPress={onPressCta}
         style={
           isCompostelero
-            ? { backgroundColor: '#FFD700' }
+            ? { backgroundColor: colors.gold }
             : undefined
         }
       />
@@ -159,7 +159,7 @@ function FeatureRow({
     icon = <Ionicons name="close" size={16} color={colors.stone500} />;
     color = colors.stone500;
   } else if (feature.highlight) {
-    icon = <Ionicons name="star" size={14} color={highlightTier === 'compostelero' ? '#FFD700' : colors.amber400} />;
+    icon = <Ionicons name="star" size={14} color={highlightTier === 'compostelero' ? colors.gold : colors.amber400} />;
     color = colors.cream;
   } else {
     icon = (
@@ -196,7 +196,7 @@ const amberGlow: ViewStyle = {
 
 const goldGlow: ViewStyle = {
   ...shadows.lg,
-  shadowColor: '#FFD700',
+  shadowColor: colors.gold,
 };
 
 const styles = StyleSheet.create({

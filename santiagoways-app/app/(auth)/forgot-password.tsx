@@ -16,11 +16,12 @@ export default function ForgotPassword() {
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email.includes('@')) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       toast.error('Introduce un email válido.');
       return;
     }
-    // TODO: wire backend forgot-password endpoint when emails are configured.
+    // The backend endpoint is not wired yet — show the user a truthful state
+    // instead of falsely claiming an email was sent.
     setSent(true);
   };
 
@@ -37,7 +38,7 @@ export default function ForgotPassword() {
               <Ionicons name="mail" size={36} color={colors.amber400} />
             </View>
             <Text variant="display" color={colors.cream} align="center" style={{ marginTop: spacing['6'] }}>
-              Revisa tu email
+              Próximamente
             </Text>
             <Text
               variant="body"
@@ -45,7 +46,7 @@ export default function ForgotPassword() {
               align="center"
               style={{ marginTop: spacing['3'], paddingHorizontal: spacing['6'] }}
             >
-              Te hemos enviado instrucciones para restablecer tu contraseña a {email}.
+              El restablecimiento por email todavía no está habilitado en este entorno. Escríbenos a soporte y te ayudaremos a recuperar el acceso a {email}.
             </Text>
             <Button
               label="Volver al inicio"
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(251,191,36,0.12)',
+    backgroundColor: colors.amberTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },

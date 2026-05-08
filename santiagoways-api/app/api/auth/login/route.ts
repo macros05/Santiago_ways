@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { signAccessToken, signRefreshToken } from '@lib/jwt';
 import { err, handleApiError, ok } from '@lib/http';
+import { checkRate, RATE_AUTH } from '@lib/rateLimit';
 
 const schema = z.object({
   email: z.string().email().toLowerCase(),
@@ -12,6 +13,8 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = checkRate(req, 'login', RATE_AUTH);
+    if (limited) return limited;
     const body = schema.parse(await req.json());
 
     const user = await prisma.user.findUnique({ where: { email: body.email } });

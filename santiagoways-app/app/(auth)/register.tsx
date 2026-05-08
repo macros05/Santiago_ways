@@ -24,17 +24,40 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (name.trim().length < 1 || !email.includes('@') || password.length < 8 || username.length < 3) {
-      toast.error('Revisa los campos. La contraseña debe tener 8+ caracteres.');
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedUsername = username.trim();
+    if (trimmedName.length < 1) {
+      toast.error('Introduce tu nombre.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      toast.error('Introduce un email válido.');
+      return;
+    }
+    if (trimmedUsername.length < 3 || trimmedUsername.length > 24) {
+      toast.error('El usuario debe tener entre 3 y 24 caracteres.');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
+      toast.error('El usuario solo puede contener letras, números y guiones bajos.');
+      return;
+    }
+    if (password.length < 8) {
+      toast.error('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (!/^[A-Z]{2}$/.test(nationality)) {
+      toast.error('Introduce un código de nacionalidad válido (2 letras).');
       return;
     }
     setLoading(true);
     try {
       await register({
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
+        name: trimmedName,
+        email: trimmedEmail.toLowerCase(),
         password,
-        username: username.trim(),
+        username: trimmedUsername,
         nationality,
       });
       router.replace('/(auth)/profile-setup');
@@ -77,6 +100,7 @@ export default function Register() {
             value={username}
             onChangeText={setUsername}
             autoCapitalize="none"
+            maxLength={24}
             helperText="Letras, números y _ — entre 3 y 24 caracteres."
           />
           <Input label="Contraseña" value={password} onChangeText={setPassword} secure helperText="Mínimo 8 caracteres." />

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -29,9 +29,15 @@ export default function ProfileSetup() {
   const [loading, setLoading] = useState(false);
   const routesQ = useRoutes();
 
+  const mounted = useRef(true);
+  useEffect(() => () => { mounted.current = false; }, []);
+
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) return Alert.alert('Permiso requerido', 'Activa el acceso a fotos.');
+    if (!perm.granted) {
+      toast.error('Activa el acceso a fotos para elegir un avatar.');
+      return;
+    }
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
@@ -56,12 +62,13 @@ export default function ProfileSetup() {
         method: 'POST',
         body: { routeSlug, startDate: new Date().toISOString() },
       });
+      if (!mounted.current) return;
       if (user) setUser({ ...user, avatar });
       router.replace('/(tabs)/explore');
-    } catch (e) {
-      toast.error('No pudimos crear tu peregrinación.');
+    } catch {
+      if (mounted.current) toast.error('No pudimos crear tu peregrinación.');
     } finally {
-      setLoading(false);
+      if (mounted.current) setLoading(false);
     }
   };
 

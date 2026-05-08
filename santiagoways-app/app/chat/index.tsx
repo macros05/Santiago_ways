@@ -50,7 +50,7 @@ export default function ChatRoomsScreen() {
             {SAMPLE_PREVIEW.map((r) => (
               <Card key={r.id} style={{ flexDirection: 'row', gap: spacing['3'] }}>
                 <View style={styles.avatar}>
-                  <Ionicons name="chatbubbles" size={18} color="#FFD700" />
+                  <Ionicons name="chatbubbles" size={18} color={colors.gold} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyMedium" color={colors.cream} numberOfLines={1}>
@@ -73,7 +73,7 @@ export default function ChatRoomsScreen() {
             label="Ver plan Compostelero"
             fullWidth
             onPress={() => router.push('/plans')}
-            style={{ backgroundColor: '#FFD700' }}
+            style={{ backgroundColor: colors.gold }}
           />
         </ScrollView>
       </View>
@@ -103,7 +103,7 @@ export default function ChatRoomsScreen() {
             <Pressable key={room.id} onPress={() => router.push(`/chat/${room.id}`)}>
               <Card style={{ flexDirection: 'row', gap: spacing['3'] }}>
                 <View style={styles.avatar}>
-                  <Ionicons name="chatbubbles" size={18} color="#FFD700" />
+                  <Ionicons name="chatbubbles" size={18} color={colors.gold} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyMedium" color={colors.cream} numberOfLines={1}>

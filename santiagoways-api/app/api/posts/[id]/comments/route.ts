@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { getAuth } from '@lib/auth';
 import { created, handleApiError, notFound } from '@lib/http';
+import { checkRate, RATE_WRITE } from '@lib/rateLimit';
 
 const schema = z.object({ content: z.string().min(1).max(500) });
 
@@ -10,6 +11,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   try {
     const params = await ctx.params;
     const auth = await getAuth(req);
+    const limited = checkRate(req, `comment:${auth.sub}`, RATE_WRITE);
+    if (limited) return limited;
     const body = schema.parse(await req.json());
     const post = await prisma.post.findUnique({ where: { id: params.id } });
     if (!post) return notFound('Post not found');

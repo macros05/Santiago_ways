@@ -1,12 +1,15 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { handleApiError, ok } from '@lib/http';
+import { checkRate, RATE_SEARCH } from '@lib/rateLimit';
 
 export async function GET(req: NextRequest) {
   try {
+    const limited = checkRate(req, 'search', RATE_SEARCH);
+    if (limited) return limited;
     const q = req.nextUrl.searchParams.get('q')?.trim();
     const type = req.nextUrl.searchParams.get('type'); // stages | albergues | users | posts
-    if (!q || q.length < 2) return ok({ results: [] });
+    if (!q || q.length < 2 || q.length > 80) return ok({ results: [] });
 
     const results: Record<string, unknown[]> = {};
 

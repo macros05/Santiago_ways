@@ -20,6 +20,9 @@ export const colors = {
   cream: '#FFFBEB',
   cream100: '#FEF3C7',
 
+  // Compostelero accent — used wherever the gold tier needs to stand out.
+  gold: '#FFD700',
+
   success: '#10B981',
   error: '#EF4444',
   warning: '#F59E0B',
@@ -28,6 +31,23 @@ export const colors = {
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
+
+  // ── Semantic tints / overlays ───────────────────────────────────────────────
+  // Amber (Buen Camino) tints — for icon backgrounds, soft highlights, badges.
+  amberTintSoft: 'rgba(251,191,36,0.12)',
+  amberTintMuted: 'rgba(251,191,36,0.18)',
+  amberTintStrong: 'rgba(251,191,36,0.30)',
+
+  // Gold (Compostelero) tints — same scale as amber for the premium tier.
+  goldTintSoft: 'rgba(255,215,0,0.10)',
+  goldTintMuted: 'rgba(255,215,0,0.15)',
+  goldTintStrong: 'rgba(255,215,0,0.30)',
+
+  // Stone overlays — for image scrims and modal dim layers.
+  scrimWeak: 'rgba(12,10,9,0.20)',
+  scrimMedium: 'rgba(12,10,9,0.55)',
+  scrimStrong: 'rgba(12,10,9,0.95)',
+  modalDim: 'rgba(0,0,0,0.40)',
 } as const;
 
 export type ColorToken = keyof typeof colors;

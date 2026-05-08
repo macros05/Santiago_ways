@@ -6,12 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { useQueries } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { Text } from '@design/text';
 import { MapMarker } from '@components/MapMarker';
 import { Badge } from '@components/Badge';
 import { colors, radius, shadows, spacing } from '@design/tokens';
 import { useRoutes, type Route } from '@hooks/usePilgrimage';
 import { api } from '@lib/api';
+import { toast } from '@stores/toast';
 
 type Stage = {
   id: string;
@@ -22,6 +24,7 @@ type RouteWithStages = Route & { stages: Stage[] };
 
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [permission, setPermission] = useState(false);
   const [showAlbergues, setShowAlbergues] = useState(true);
   const [showRoutes, setShowRoutes] = useState(true);
@@ -38,7 +41,13 @@ export default function MapScreen() {
   });
 
   useEffect(() => {
-    Location.requestForegroundPermissionsAsync().then((res) => setPermission(res.granted));
+    let cancelled = false;
+    Location.requestForegroundPermissionsAsync().then((res) => {
+      if (!cancelled) setPermission(res.granted);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const polylines = useMemo(() => {
@@ -124,14 +133,21 @@ export default function MapScreen() {
         ) : null}
       </MapView>
 
-      {/* Top search/filter bar */}
-      <View style={[styles.search, { top: insets.top + spacing['3'] }]}>
+      {/* Top search/filter bar — search is not yet implemented; tap toasts the
+          user instead of presenting a dead TextInput. */}
+      <Pressable
+        onPress={() => toast.info('La búsqueda en el mapa llega pronto.')}
+        style={[styles.search, { top: insets.top + spacing['3'] }]}
+        accessibilityRole="search"
+        accessibilityLabel="Buscar en el mapa"
+        accessibilityHint="Próximamente disponible"
+      >
         <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
         <Ionicons name="search" size={20} color={colors.stone300} />
         <Text variant="body" color={colors.stone300}>
           Busca etapas, albergues, ciudades…
         </Text>
-      </View>
+      </Pressable>
 
       {/* Layer toggles */}
       <View style={[styles.layers, { top: insets.top + 80 }]}>
@@ -164,8 +180,13 @@ export default function MapScreen() {
         </View>
       ) : null}
 
-      {/* Floating tracking button */}
-      <Pressable style={[styles.fab, { bottom: insets.bottom + 100 }]}>
+      {/* Floating tracking button — opens the user's pilgrimage. */}
+      <Pressable
+        onPress={() => router.push('/(tabs)/route')}
+        style={[styles.fab, { bottom: insets.bottom + 100 }]}
+        accessibilityRole="button"
+        accessibilityLabel="Abrir mi peregrinación"
+      >
         <Ionicons name="play" size={22} color={colors.stone950} />
       </Pressable>
 
@@ -194,10 +215,14 @@ function LayerChip({
       style={[
         styles.chip,
         {
+          // Mirror stone900 with ~85% alpha so the chip floats over the map.
           backgroundColor: active ? colors.amber400 : 'rgba(28,25,23,0.85)',
           borderColor: active ? colors.amber400 : colors.stone700,
         },
       ]}
+      accessibilityRole="switch"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: active }}
     >
       <Ionicons name={icon} size={14} color={active ? colors.stone950 : colors.cream} />
       <Text variant="caption" color={active ? colors.stone950 : colors.cream}>

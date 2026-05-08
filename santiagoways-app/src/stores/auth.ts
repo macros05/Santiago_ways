@@ -12,7 +12,9 @@ export type AuthUser = {
   timesCompleted?: number;
   totalKm?: number;
   isOnCamino?: boolean;
-  language?: string;
+  privateAccount?: boolean;
+  shareLocation?: boolean;
+  language?: 'es' | 'en';
   plan?: 'free' | 'buen_camino' | 'compostelero';
 };
 

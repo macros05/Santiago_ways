@@ -93,7 +93,7 @@ export default function AIGuideScreen() {
               label="Ver plan Compostelero"
               variant="primary"
               fullWidth
-              style={{ backgroundColor: '#FFD700' }}
+              style={{ backgroundColor: colors.gold }}
               onPress={() => router.push('/plans')}
             />
           </View>
@@ -125,7 +125,7 @@ export default function AIGuideScreen() {
           <Text variant="small" color={colors.stone300} style={{ marginTop: spacing['2'] }}>
             Combina tu ruta, ritmo, salud y meteo para darte un consejo único.
           </Text>
-          <View style={[styles.badge, { backgroundColor: '#FFD700' }]}>
+          <View style={[styles.badge, { backgroundColor: colors.gold }]}>
             <Text variant="caption" color={colors.stone950}>
               ⭐ Compostelero
             </Text>
@@ -159,7 +159,7 @@ export default function AIGuideScreen() {
                 animate={{ opacity: 1 }}
                 transition={{ loop: true, type: 'timing', duration: 700 }}
               >
-                <Ionicons name="sparkles" size={18} color="#FFD700" />
+                <Ionicons name="sparkles" size={18} color={colors.gold} />
               </MotiView>
               <Text variant="bodyMedium" color={colors.stone300}>
                 Consultando con el peregrino experto…
@@ -209,7 +209,7 @@ function ResultCard({ entry, delay }: { entry: ResultEntry; delay: number }) {
       <Card elevation="raised" style={{ gap: spacing['3'] }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
           <View style={styles.resultIcon}>
-            <Ionicons name="sparkles" size={14} color="#FFD700" />
+            <Ionicons name="sparkles" size={14} color={colors.gold} />
           </View>
           <Text variant="caption" color={colors.amber400}>
             {labelForType(entry.type)}

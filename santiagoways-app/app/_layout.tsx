@@ -8,6 +8,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@lib/queryClient';
 import { useAuth } from '@stores/auth';
 import { useSubscription } from '@stores/subscription';
+import { usePrefs } from '@stores/prefs';
 import { ToastHost } from '@components/Toast';
 import { colors } from '@design/tokens';
 
@@ -19,10 +20,13 @@ export default function RootLayout() {
   const user = useAuth((s) => s.user);
   const initSub = useSubscription((s) => s.initialize);
   const resetSub = useSubscription((s) => s.reset);
+  const hydratePrefs = usePrefs((s) => s.hydrate);
 
   useEffect(() => {
-    bootstrap().finally(() => SplashScreen.hideAsync().catch(() => {}));
-  }, [bootstrap]);
+    Promise.all([bootstrap(), hydratePrefs()]).finally(() =>
+      SplashScreen.hideAsync().catch(() => {}),
+    );
+  }, [bootstrap, hydratePrefs]);
 
   useEffect(() => {
     if (user?.id) {
@@ -55,6 +59,7 @@ export default function RootLayout() {
             <Stack.Screen name="health-dashboard" />
             <Stack.Screen name="chat/index" />
             <Stack.Screen name="chat/[id]" />
+            <Stack.Screen name="settings" />
           </Stack>
           {isReady ? <ToastHost /> : null}
         </QueryClientProvider>

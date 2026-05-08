@@ -9,22 +9,26 @@ export async function GET() {
     const featured = await prisma.featuredAlbergue.findMany({
       where: { startsAt: { lte: now }, endsAt: { gte: now } },
       orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
-      include: {
-        albergue: {
-          include: {
-            reviews: { select: { rating: true } },
-          },
-        },
-      },
+      include: { albergue: true },
     });
+    if (featured.length === 0) return ok([]);
+
+    // Single aggregate query instead of loading every review row per albergue.
+    const albergueIds = featured.map((f) => f.albergueId);
+    const ratings = await prisma.albergueReview.groupBy({
+      by: ['albergueId'],
+      where: { albergueId: { in: albergueIds } },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+    const ratingsById = new Map(ratings.map((r) => [r.albergueId, r]));
+
     const items = featured.map(({ albergue, priority, startsAt, endsAt }) => {
-      const ratings = albergue.reviews.map((r) => r.rating);
-      const avg = ratings.length ? ratings.reduce((s, n) => s + n, 0) / ratings.length : null;
-      const { reviews: _r, ...rest } = albergue;
+      const stat = ratingsById.get(albergue.id);
       return {
-        ...rest,
-        ratingAvg: avg,
-        ratingCount: ratings.length,
+        ...albergue,
+        ratingAvg: stat?._avg.rating ?? null,
+        ratingCount: stat?._count.rating ?? 0,
         sponsored: true,
         priority,
         startsAt,

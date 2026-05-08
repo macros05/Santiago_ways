@@ -21,12 +21,24 @@ const eventSchema = z.object({
 
 function verifySignature(req: NextRequest): boolean {
   const expected = process.env.REVENUECAT_WEBHOOK_SECRET;
-  if (!expected) return true; // dev: allow if not configured
+  if (!expected) {
+    // In production we MUST have a secret configured — refuse to authorize the
+    // webhook otherwise. In dev/preview we still allow it so local testing
+    // works without RevenueCat secrets in the env.
+    if (process.env.NODE_ENV === 'production') return false;
+    return true;
+  }
   const sig =
     req.headers.get('x-revenuecat-signature') ??
     req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ??
     '';
-  return sig === expected;
+  if (!sig || sig.length !== expected.length) return false;
+  // Constant-time compare to avoid leaking the secret via timing.
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i++) {
+    mismatch |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+  return mismatch === 0;
 }
 
 export async function POST(req: NextRequest) {
@@ -39,6 +51,16 @@ export async function POST(req: NextRequest) {
     const userId = event.app_user_id;
     const periodEnd = event.expiration_at_ms ? new Date(event.expiration_at_ms) : null;
     const plan = planFromProductOrEntitlements(event as RcWebhookEvent);
+
+    // Confirm the local user exists before upserting — RevenueCat may forward
+    // events for aliased / anonymous app_user_ids that don't exist locally yet.
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!userExists) {
+      return ok({ received: true, ignored: 'unknown_user' });
+    }
 
     const existing = await prisma.subscription.findUnique({ where: { userId } });
 

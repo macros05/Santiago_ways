@@ -58,7 +58,7 @@ export default function HealthDashboard() {
           <Button
             label="Ver plan Compostelero"
             onPress={() => router.push('/plans')}
-            style={{ backgroundColor: '#FFD700' }}
+            style={{ backgroundColor: colors.gold }}
             fullWidth
           />
         </ScrollView>
@@ -185,7 +185,7 @@ export default function HealthDashboard() {
         </Card>
 
         <View style={styles.aiNote}>
-          <Ionicons name="sparkles" size={16} color="#FFD700" />
+          <Ionicons name="sparkles" size={16} color={colors.gold} />
           <Text variant="caption" color={colors.stone300} style={{ flex: 1 }}>
             Estos datos mejoran tus recomendaciones de IA en tiempo real.
           </Text>

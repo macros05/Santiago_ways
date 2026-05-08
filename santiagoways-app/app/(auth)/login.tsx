@@ -22,13 +22,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email.includes('@') || password.length < 1) {
-      toast.error('Introduce email y contraseña.');
+    const trimmedEmail = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) || password.length < 8) {
+      toast.error('Introduce un email válido y una contraseña de al menos 8 caracteres.');
       return;
     }
     setLoading(true);
     try {
-      await signIn(email.trim().toLowerCase(), password);
+      await signIn(trimmedEmail.toLowerCase(), password);
       router.replace('/(tabs)/explore');
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : 'No pudimos iniciar sesión.';

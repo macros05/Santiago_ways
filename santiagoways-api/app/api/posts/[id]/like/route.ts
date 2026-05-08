@@ -18,6 +18,20 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       await prisma.like.delete({
         where: { userId_postId: { userId: auth.sub, postId: post.id } },
       });
+      // Best-effort cleanup of the matching unread notification on the post owner.
+      if (post.userId !== auth.sub) {
+        await prisma.notification.deleteMany({
+          where: {
+            userId: post.userId,
+            type: 'like',
+            isRead: false,
+            AND: [
+              { data: { path: ['postId'], equals: post.id } },
+              { data: { path: ['fromUserId'], equals: auth.sub } },
+            ],
+          },
+        });
+      }
       return ok({ liked: false });
     }
 

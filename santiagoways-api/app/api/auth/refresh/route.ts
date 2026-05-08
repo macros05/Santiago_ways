@@ -3,11 +3,14 @@ import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { hashRefreshToken, signAccessToken, signRefreshToken, verifyRefreshToken } from '@lib/jwt';
 import { err, handleApiError, ok } from '@lib/http';
+import { checkRate, RATE_AUTH } from '@lib/rateLimit';
 
 const schema = z.object({ refreshToken: z.string().min(1) });
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = checkRate(req, 'refresh', RATE_AUTH);
+    if (limited) return limited;
     const { refreshToken } = schema.parse(await req.json());
     const { sub } = await verifyRefreshToken(refreshToken).catch(() => ({ sub: '' }));
     if (!sub) return err('Invalid refresh token', 401, 'invalid_refresh');

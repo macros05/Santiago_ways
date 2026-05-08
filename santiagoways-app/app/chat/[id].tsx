@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -35,9 +35,13 @@ export default function ChatRoomScreen() {
   const send = useSendChatMessage(id ?? null);
   const { connected } = useChatRealtime(id ?? null);
 
-  const items = messages.data?.pages.flatMap((p) => p.items) ?? [];
-  // server returns newest-first; render oldest-first (top to bottom)
-  const ordered = [...items].reverse();
+  // Server returns newest-first; render oldest-first (top to bottom). Memoize
+  // so the array isn't reallocated on every render — chat re-renders on every
+  // keystroke in the composer.
+  const ordered = useMemo<ChatMessage[]>(() => {
+    const items = messages.data?.pages.flatMap((p) => p.items) ?? [];
+    return items.slice().reverse();
+  }, [messages.data]);
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -82,6 +86,22 @@ export default function ChatRoomScreen() {
             <Skeleton height={48} />
             <Skeleton height={48} width="60%" />
             <Skeleton height={48} />
+          </View>
+        ) : messages.isError ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
+            <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
+            <Text variant="bodyMedium" color={colors.stone300} style={{ marginTop: spacing['3'], textAlign: 'center' }}>
+              No pudimos cargar el chat.
+            </Text>
+            <Pressable
+              onPress={() => messages.refetch()}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Reintentar carga del chat"
+              style={{ marginTop: spacing['4'] }}
+            >
+              <Text variant="bodyMedium" color={colors.amber400}>Reintentar</Text>
+            </Pressable>
           </View>
         ) : (
           <ScrollView
@@ -130,6 +150,9 @@ export default function ChatRoomScreen() {
               styles.sendBtn,
               { backgroundColor: text.trim() ? colors.amber400 : colors.stone800 },
             ]}
+            accessibilityRole="button"
+            accessibilityLabel="Enviar mensaje"
+            accessibilityState={{ disabled: !text.trim() || send.isPending }}
           >
             <Ionicons
               name="send"

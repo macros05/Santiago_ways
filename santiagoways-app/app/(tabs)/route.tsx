@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -157,10 +157,11 @@ export default function RouteScreen() {
                     </View>
                     {i < myQ.data!.stages.length - 1 ? <View style={styles.timelineLine} /> : null}
                   </View>
-                  <Card
-                    style={{ flex: 1, opacity: entry.status === 'pending' ? 0.6 : 1 }}
-                    onTouchEnd={() => router.push(`/stage/${entry.stage.id}`)}
+                  <Pressable
+                    style={{ flex: 1 }}
+                    onPress={() => router.push(`/stage/${entry.stage.id}`)}
                   >
+                    <Card style={{ opacity: entry.status === 'pending' ? 0.6 : 1 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                       <Text variant="bodyMedium" color={colors.cream}>
                         Etapa {entry.stage.number}
@@ -188,7 +189,8 @@ export default function RouteScreen() {
                     <Text variant="small" color={colors.stone400}>
                       {entry.stage.distanceKm.toFixed(1)} km · +{entry.stage.elevationGain} m
                     </Text>
-                  </Card>
+                    </Card>
+                  </Pressable>
                 </View>
               ))}
             </View>

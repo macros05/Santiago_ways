@@ -32,7 +32,7 @@ export function LockedOverlay({
   borderRadius = radius.lg,
 }: Props) {
   const router = useRouter();
-  const accent = requiredPlan === 'compostelero' ? '#FFD700' : colors.amber400;
+  const accent = requiredPlan === 'compostelero' ? colors.gold : colors.amber400;
   return (
     <Pressable
       onPress={onPress ?? (() => router.push('/plans'))}
@@ -59,7 +59,7 @@ export function LockedOverlay({
 
 const styles = StyleSheet.create({
   dim: {
-    backgroundColor: 'rgba(12,10,9,0.55)',
+    backgroundColor: colors.scrimMedium,
   },
   content: {
     flex: 1,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: colors.modalDim,
   },
   cta: {
     marginTop: spacing['2'],

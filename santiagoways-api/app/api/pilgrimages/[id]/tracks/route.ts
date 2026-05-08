@@ -8,15 +8,17 @@ const trackSchema = z.object({
   coordinates: z
     .array(
       z.object({
-        lat: z.number(),
-        lng: z.number(),
+        lat: z.number().min(-90).max(90),
+        lng: z.number().min(-180).max(180),
         timestamp: z.number().int(),
         altitude: z.number().nullable().optional(),
       }),
     )
-    .min(2),
-  distanceKm: z.number().nonnegative(),
-  durationMin: z.number().int().nonnegative(),
+    .min(2)
+    .max(10_000),
+  // A single Camino route is ~1000km, so 1500 caps any plausible single track.
+  distanceKm: z.number().nonnegative().max(1500),
+  durationMin: z.number().int().nonnegative().max(60 * 24 * 7),
 });
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {

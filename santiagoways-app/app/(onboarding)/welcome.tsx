@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Button } from '@components/Button';
@@ -24,6 +25,7 @@ const SCREENS = [
 
 export default function Welcome() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
   const [page, setPage] = useState(0);
 
@@ -32,10 +34,14 @@ export default function Welcome() {
     if (next !== page) setPage(next);
   };
 
+  // Bottom-anchored CTA + dots respect the home indicator / nav bar.
+  const ctaBottom = Math.max(insets.bottom, spacing['6']) + spacing['4'];
+  const dotsBottom = ctaBottom + 132;
+
   return (
     <View style={styles.root}>
       <LinearGradient
-        colors={[colors.stone950, '#1a1108']}
+        colors={[colors.stone950, colors.stone900]}
         style={StyleSheet.absoluteFill}
       />
       <ScrollView
@@ -53,7 +59,7 @@ export default function Welcome() {
         ))}
       </ScrollView>
 
-      <Animated.View entering={FadeInDown.duration(400)} style={styles.dots}>
+      <Animated.View entering={FadeInDown.duration(400)} style={[styles.dots, { bottom: dotsBottom }]}>
         {SCREENS.map((_, i) => (
           <View
             key={i}
@@ -69,7 +75,7 @@ export default function Welcome() {
       </Animated.View>
 
       {page === SCREENS.length - 1 ? (
-        <Animated.View entering={FadeIn.duration(300)} style={styles.cta}>
+        <Animated.View entering={FadeIn.duration(300)} style={[styles.cta, { bottom: ctaBottom }]}>
           <Button
             label="Crear cuenta"
             onPress={() => router.push('/(auth)/register')}
@@ -84,7 +90,7 @@ export default function Welcome() {
           />
         </Animated.View>
       ) : (
-        <View style={styles.cta}>
+        <View style={[styles.cta, { bottom: ctaBottom }]}>
           <Button
             label="Continuar"
             onPress={() =>
@@ -108,12 +114,11 @@ const styles = StyleSheet.create({
   },
   dots: {
     position: 'absolute',
-    bottom: 180,
     left: 0,
     right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
+    gap: spacing['2'],
   },
   dot: {
     height: 8,
@@ -121,7 +126,6 @@ const styles = StyleSheet.create({
   },
   cta: {
     position: 'absolute',
-    bottom: 50,
     left: spacing['5'],
     right: spacing['5'],
   },

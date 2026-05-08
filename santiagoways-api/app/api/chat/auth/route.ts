@@ -1,7 +1,6 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@lib/auth';
 import { err, forbidden, handleApiError } from '@lib/http';
-import { NextResponse } from 'next/server';
 import { prisma } from '@lib/prisma';
 import { canAccessPrivateChat } from '@lib/permissions';
 import { getPusher } from '@lib/pusher';

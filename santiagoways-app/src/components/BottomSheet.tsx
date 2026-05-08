@@ -94,7 +94,7 @@ export function BottomSheet({
 const styles = StyleSheet.create({
   dim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: colors.modalDim,
   },
   sheet: {
     position: 'absolute',

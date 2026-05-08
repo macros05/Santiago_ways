@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { getAuth } from '@lib/auth';
-import { created, handleApiError } from '@lib/http';
+import { created, forbidden, handleApiError, notFound } from '@lib/http';
+import { canAccessAllRoutes, FRANCES_SLUG } from '@lib/permissions';
 
 const schema = z.object({
   routeSlug: z.string().min(1),
@@ -15,7 +16,16 @@ export async function POST(req: NextRequest) {
     const body = schema.parse(await req.json());
     const route = await prisma.route.findUnique({ where: { slug: body.routeSlug } });
     if (!route) {
-      return new Response(JSON.stringify({ error: { message: 'Route not found' } }), { status: 404 });
+      return notFound('Route not found');
+    }
+    if (route.slug !== FRANCES_SLUG) {
+      const user = await prisma.user.findUnique({
+        where: { id: auth.sub },
+        include: { subscription: true },
+      });
+      if (!canAccessAllRoutes(user)) {
+        return forbidden('This route requires Buen Camino plan');
+      }
     }
     const stages = await prisma.stage.findMany({
       where: { routeId: route.id },

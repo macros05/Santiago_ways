@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +29,15 @@ function initials(name?: string): string {
 export function Avatar({ source, name, size = 'md', online, style }: AvatarProps) {
   const dim = sizes[size];
   const dotSize = Math.max(8, dim * 0.22);
+  const [errored, setErrored] = useState(false);
+
+  // Reset error state when the source URL changes — otherwise an avatar that
+  // failed once stays as initials forever even after the parent passes a fresh URL.
+  useEffect(() => {
+    setErrored(false);
+  }, [source]);
+
+  const showImage = !!source && !errored;
 
   return (
     <View
@@ -38,12 +47,13 @@ export function Avatar({ source, name, size = 'md', online, style }: AvatarProps
         style,
       ]}
     >
-      {source ? (
+      {showImage ? (
         <Image
           source={{ uri: source }}
           style={{ width: dim, height: dim, borderRadius: radius.full }}
           contentFit="cover"
           transition={200}
+          onError={() => setErrored(true)}
         />
       ) : (
         <LinearGradient

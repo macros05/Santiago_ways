@@ -17,7 +17,6 @@ type SubResp = {
   status: string;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
-  revenueCatId: string | null;
 };
 
 type SubscriptionState = {

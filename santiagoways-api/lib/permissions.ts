@@ -106,4 +106,4 @@ export function showAds(user: UserLike | null): boolean {
   return getPlan(user) === 'free';
 }
 
-export const FRANCES_SLUG = 'frances';
+export const FRANCES_SLUG = 'camino-frances';

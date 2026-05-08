@@ -10,8 +10,9 @@ import { Input } from '@components/Input';
 import { Text } from '@design/text';
 import { Skeleton } from '@components/Skeleton';
 import { colors, radius, spacing } from '@design/tokens';
-import { api } from '@lib/api';
+import { api, ApiError } from '@lib/api';
 import { timeAgo } from '@lib/format';
+import { toast } from '@stores/toast';
 
 type PostDetail = {
   id: string;
@@ -50,14 +51,43 @@ export default function PostScreen() {
       setDraft('');
       qc.invalidateQueries({ queryKey: ['post', id] });
     },
+    onError: (e) => {
+      const msg = e instanceof ApiError ? e.message : 'No pudimos enviar el comentario.';
+      toast.error(msg);
+    },
   });
 
+  const canSend = draft.trim().length >= 1 && !comment.isPending;
+
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: colors.stone950 }}
+    >
       <Header onBack={() => router.back()} title="Publicación" />
-      <ScrollView contentContainerStyle={{ paddingTop: 64, paddingBottom: 100 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingTop: 64, paddingBottom: spacing['6'] }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ paddingHorizontal: spacing['5'] }}>
-          {post ? (
+          {postQ.isError ? (
+            <View style={{ alignItems: 'center', paddingVertical: spacing['12'] }}>
+              <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
+              <Text variant="bodyMedium" color={colors.stone300} style={{ marginTop: spacing['3'] }}>
+                No pudimos cargar la publicación.
+              </Text>
+              <Pressable
+                onPress={() => postQ.refetch()}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel="Reintentar carga de publicación"
+                style={{ marginTop: spacing['4'] }}
+              >
+                <Text variant="bodyMedium" color={colors.amber400}>Reintentar</Text>
+              </Pressable>
+            </View>
+          ) : post ? (
             <>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
                 <Avatar source={post.user.avatar} name={post.user.name} size="md" />
@@ -82,18 +112,24 @@ export default function PostScreen() {
               ) : null}
               <View style={styles.divider} />
               <Text variant="h2" color={colors.cream}>Comentarios</Text>
-              <View style={{ marginTop: spacing['4'], gap: spacing['4'] }}>
-                {post.comments.map((c) => (
-                  <View key={c.id} style={{ flexDirection: 'row', gap: spacing['3'] }}>
-                    <Avatar source={c.user.avatar} name={c.user.name} size="sm" />
-                    <View style={{ flex: 1 }}>
-                      <Text variant="bodyMedium" color={colors.cream}>{c.user.name}</Text>
-                      <Text variant="body" color={colors.stone200} style={{ marginTop: 2 }}>{c.content}</Text>
-                      <Text variant="caption" color={colors.stone500} style={{ marginTop: 2 }}>{timeAgo(c.createdAt)}</Text>
+              {post.comments.length === 0 ? (
+                <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
+                  Sé el primero en comentar.
+                </Text>
+              ) : (
+                <View style={{ marginTop: spacing['4'], gap: spacing['4'] }}>
+                  {post.comments.map((c) => (
+                    <View key={c.id} style={{ flexDirection: 'row', gap: spacing['3'] }}>
+                      <Avatar source={c.user.avatar} name={c.user.name} size="sm" />
+                      <View style={{ flex: 1 }}>
+                        <Text variant="bodyMedium" color={colors.cream}>{c.user.name}</Text>
+                        <Text variant="body" color={colors.stone200} style={{ marginTop: 2 }}>{c.content}</Text>
+                        <Text variant="caption" color={colors.stone500} style={{ marginTop: 2 }}>{timeAgo(c.createdAt)}</Text>
+                      </View>
                     </View>
-                  </View>
-                ))}
-              </View>
+                  ))}
+                </View>
+              )}
             </>
           ) : (
             <View style={{ gap: spacing['4'] }}>
@@ -113,9 +149,12 @@ export default function PostScreen() {
           containerStyle={{ flex: 1 }}
         />
         <Pressable
-          disabled={!draft.trim() || comment.isPending}
+          disabled={!canSend}
           onPress={() => comment.mutate(draft.trim())}
-          style={[styles.sendBtn, { opacity: !draft.trim() || comment.isPending ? 0.5 : 1 }]}
+          style={[styles.sendBtn, { opacity: canSend ? 1 : 0.5 }]}
+          accessibilityRole="button"
+          accessibilityLabel="Enviar comentario"
+          accessibilityState={{ disabled: !canSend }}
         >
           <Ionicons name="arrow-up" size={20} color={colors.stone950} />
         </Pressable>
@@ -143,10 +182,6 @@ const styles = StyleSheet.create({
     marginVertical: spacing['6'],
   },
   inputBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     padding: spacing['3'],
     gap: spacing['2'],

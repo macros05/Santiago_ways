@@ -30,7 +30,6 @@ export async function GET(req: NextRequest) {
             status: true,
             currentPeriodEnd: true,
             cancelAtPeriodEnd: true,
-            revenueCatId: true,
           },
         },
       },

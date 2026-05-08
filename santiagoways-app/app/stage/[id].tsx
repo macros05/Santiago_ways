@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -93,6 +93,30 @@ export default function StageDetail() {
 
   const stage = stageQ.data;
 
+  if (stageQ.isError) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Header onBack={() => router.back()} />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
+          <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
+          <Text variant="bodyMedium" color={colors.stone300} style={{ marginTop: spacing['3'], textAlign: 'center' }}>
+            No pudimos cargar esta etapa.
+          </Text>
+          <Pressable
+            onPress={() => stageQ.refetch()}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Reintentar carga de etapa"
+            style={{ marginTop: spacing['4'] }}
+          >
+            <Text variant="bodyMedium" color={colors.amber400}>Reintentar</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -152,82 +176,90 @@ export default function StageDetail() {
             <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>
               Puntos de interés
             </Text>
-            <View style={{ marginTop: spacing['4'], gap: spacing['3'] }}>
-              {stage.waypoints.map((w) => (
-                <Card key={w.id} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-                  <View style={styles.wpIcon}>
-                    <Ionicons name={iconFor(w.type)} size={16} color={colors.amber400} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text variant="bodyMedium" color={colors.cream}>{w.name}</Text>
-                    {w.description ? (
-                      <Text variant="small" color={colors.stone400} numberOfLines={2}>
-                        {w.description}
-                      </Text>
-                    ) : null}
-                  </View>
-                </Card>
-              ))}
-            </View>
+            {stage.waypoints.length === 0 ? (
+              <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
+                Esta etapa no tiene puntos de interés registrados.
+              </Text>
+            ) : (
+              <View style={{ marginTop: spacing['4'], gap: spacing['3'] }}>
+                {stage.waypoints.map((w) => (
+                  <Card key={w.id} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
+                    <View style={styles.wpIcon}>
+                      <Ionicons name={iconFor(w.type)} size={16} color={colors.amber400} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text variant="bodyMedium" color={colors.cream}>{w.name}</Text>
+                      {w.description ? (
+                        <Text variant="small" color={colors.stone400} numberOfLines={2}>
+                          {w.description}
+                        </Text>
+                      ) : null}
+                    </View>
+                  </Card>
+                ))}
+              </View>
+            )}
           </View>
         ) : null}
 
         {tab === 'map' && stage ? (
           <View style={styles.section}>
             <View style={styles.mapWrap}>
-              {stage.coordinates ? (
-                <MapView
-                  provider={PROVIDER_DEFAULT}
-                  style={StyleSheet.absoluteFill}
-                  initialRegion={regionFor(stage.coordinates.coordinates)}
-                  scrollEnabled
-                  zoomEnabled
-                >
-                  <Polyline
-                    coordinates={stage.coordinates.coordinates.map(([lng, lat]) => ({
-                      latitude: lat,
-                      longitude: lng,
-                    }))}
-                    strokeColor={stage.route.color}
-                    strokeWidth={4}
-                  />
-                  <Marker
-                    coordinate={{
-                      latitude: stage.coordinates.coordinates[0]![1],
-                      longitude: stage.coordinates.coordinates[0]![0],
-                    }}
-                    title={stage.startPoint}
+              {(() => {
+                const coords = stage.coordinates?.coordinates ?? [];
+                if (coords.length < 2) {
+                  return (
+                    <View style={styles.mapEmpty}>
+                      <Ionicons name="map-outline" size={48} color={colors.stone600} />
+                      <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
+                        Esta etapa no tiene coordenadas
+                      </Text>
+                    </View>
+                  );
+                }
+                const first = coords[0]!;
+                const last = coords[coords.length - 1]!;
+                return (
+                  <MapView
+                    provider={PROVIDER_DEFAULT}
+                    style={StyleSheet.absoluteFill}
+                    initialRegion={regionFor(coords)}
+                    scrollEnabled
+                    zoomEnabled
                   >
-                    <MapMarker type="info" size={28} />
-                  </Marker>
-                  <Marker
-                    coordinate={{
-                      latitude: stage.coordinates.coordinates.at(-1)![1],
-                      longitude: stage.coordinates.coordinates.at(-1)![0],
-                    }}
-                    title={stage.endPoint}
-                  >
-                    <MapMarker type="church" size={28} />
-                  </Marker>
-                  {stage.waypoints.map((w) => (
+                    <Polyline
+                      coordinates={coords.map(([lng, lat]) => ({
+                        latitude: lat,
+                        longitude: lng,
+                      }))}
+                      strokeColor={stage.route.color}
+                      strokeWidth={4}
+                    />
                     <Marker
-                      key={w.id}
-                      coordinate={{ latitude: w.lat, longitude: w.lng }}
-                      title={w.name}
-                      description={w.description ?? undefined}
+                      coordinate={{ latitude: first[1], longitude: first[0] }}
+                      title={stage.startPoint}
                     >
-                      <MapMarker type={waypointType(w.type)} size={22} />
+                      <MapMarker type="info" size={28} />
                     </Marker>
-                  ))}
-                </MapView>
-              ) : (
-                <View style={styles.mapEmpty}>
-                  <Ionicons name="map-outline" size={48} color={colors.stone600} />
-                  <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-                    Esta etapa no tiene coordenadas
-                  </Text>
-                </View>
-              )}
+                    <Marker
+                      coordinate={{ latitude: last[1], longitude: last[0] }}
+                      title={stage.endPoint}
+                    >
+                      <MapMarker type="church" size={28} />
+                    </Marker>
+                    {stage.waypoints.map((w) => (
+                      <Marker
+                        key={w.id}
+                        coordinate={{ latitude: w.lat, longitude: w.lng }}
+                        title={w.name}
+                        description={w.description ?? undefined}
+                      >
+                        <MapMarker type={waypointType(w.type)} size={22} />
+                      </Marker>
+                    ))}
+                  </MapView>
+                );
+              })()}
             </View>
             <Button
               label={canOffline ? 'Descargar para offline' : 'Descarga offline · Premium'}
@@ -388,6 +420,7 @@ function waypointType(t: string): import('@components/MapMarker').MarkerType {
 }
 
 function regionFor(coords: [number, number][]) {
+  // Caller guarantees coords.length >= 2 — see the early-return path above.
   const lats = coords.map((c) => c[1]);
   const lngs = coords.map((c) => c[0]);
   const minLat = Math.min(...lats);
@@ -413,11 +446,15 @@ function Stat({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; la
   );
 }
 
-import { Pressable } from 'react-native';
-
 function Tab({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={[styles.tab, active && styles.tabActive]}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.tab, active && styles.tabActive]}
+      accessibilityRole="tab"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: active }}
+    >
       <Text variant="bodyMedium" color={active ? colors.amber400 : colors.stone400}>
         {label}
       </Text>

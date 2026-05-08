@@ -4,6 +4,7 @@ import { prisma } from '@lib/prisma';
 import { getAuth, getOptionalAuth } from '@lib/auth';
 import { canPostCommunity } from '@lib/permissions';
 import { created, err, handleApiError, ok, paginationParams } from '@lib/http';
+import { checkRate, RATE_WRITE } from '@lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,8 @@ const createSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuth(req);
+    const limited = checkRate(req, `post:${auth.sub}`, RATE_WRITE);
+    if (limited) return limited;
     const user = await prisma.user.findUnique({
       where: { id: auth.sub },
       include: { subscription: true },

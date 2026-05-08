@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { signAccessToken, signRefreshToken } from '@lib/jwt';
-import { err, handleApiError, ok } from '@lib/http';
+import { handleApiError, ok } from '@lib/http';
+import { checkRate, RATE_AUTH } from '@lib/rateLimit';
 
 const schema = z.object({
   idToken: z.string().min(10),
@@ -27,6 +28,8 @@ async function verifyGoogleIdToken(idToken: string): Promise<{
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = checkRate(req, 'oauth-google', RATE_AUTH);
+    if (limited) return limited;
     const { idToken } = schema.parse(await req.json());
     const profile = await verifyGoogleIdToken(idToken);
 
@@ -67,7 +70,14 @@ export async function POST(req: NextRequest) {
       data: { userId: user.id, tokenHash: refresh.hash, expiresAt: refresh.expiresAt },
     });
 
-    return ok({ user, accessToken, refreshToken: refresh.token });
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      avatar: user.avatar,
+    };
+    return ok({ user: safeUser, accessToken, refreshToken: refresh.token });
   } catch (e) {
     return handleApiError(e);
   }

@@ -79,6 +79,8 @@ export default function ExploreScreen() {
           onPress={() => router.push('/plans')}
           hitSlop={8}
           style={styles.bell}
+          accessibilityRole="button"
+          accessibilityLabel="Ver planes premium"
         >
           <Ionicons name="diamond-outline" size={20} color={colors.amber400} />
         </Pressable>
@@ -208,7 +210,7 @@ export default function ExploreScreen() {
                   style={StyleSheet.absoluteFill}
                 />
                 <View style={styles.aiIcon}>
-                  <Ionicons name="sparkles" size={20} color="#FFD700" />
+                  <Ionicons name="sparkles" size={20} color={colors.gold} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyBold" color={colors.cream}>
@@ -226,19 +228,26 @@ export default function ExploreScreen() {
       ) : null}
 
       {/* Albergues destacados (free plan only) */}
-      {showAds && featuredQ.data && featuredQ.data.length > 0 ? (
+      {showAds && (featuredQ.isLoading || (featuredQ.data && featuredQ.data.length > 0)) ? (
         <Section title="Albergues destacados" subtitle="Recomendados por SantiagoWays">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.hScroll}
-          >
-            {featuredQ.data.map((a) => (
-              <View key={a.id} style={{ width: 260 }}>
-                <FeaturedAlbergueCard albergue={a} />
-              </View>
-            ))}
-          </ScrollView>
+          {featuredQ.isLoading ? (
+            <View style={[styles.hScroll, { flexDirection: 'row' }]}>
+              <Skeleton height={180} width={260} borderRadius={radius.lg} />
+              <Skeleton height={180} width={260} borderRadius={radius.lg} />
+            </View>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.hScroll}
+            >
+              {featuredQ.data!.map((a) => (
+                <View key={a.id} style={{ width: 260 }}>
+                  <FeaturedAlbergueCard albergue={a} />
+                </View>
+              ))}
+            </ScrollView>
+          )}
         </Section>
       ) : null}
 

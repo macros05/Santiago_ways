@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { signAccessToken, signRefreshToken } from '@lib/jwt';
 import { created, err, handleApiError } from '@lib/http';
+import { checkRate, RATE_REGISTER } from '@lib/rateLimit';
 
 const schema = z.object({
   email: z.string().email().toLowerCase(),
@@ -19,6 +20,8 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = checkRate(req, 'register', RATE_REGISTER);
+    if (limited) return limited;
     const body = schema.parse(await req.json());
 
     const exists = await prisma.user.findFirst({

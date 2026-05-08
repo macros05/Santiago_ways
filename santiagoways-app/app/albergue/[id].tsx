@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -11,6 +12,7 @@ import { Badge } from '@components/Badge';
 import { Button } from '@components/Button';
 import { Avatar } from '@components/Avatar';
 import { Skeleton } from '@components/Skeleton';
+import { AvailabilitySheet } from '@components/AvailabilitySheet';
 import { colors, radius, spacing } from '@design/tokens';
 import { api } from '@lib/api';
 
@@ -49,12 +51,27 @@ const AMENITY_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
 export default function AlbergueDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const albergueQ = useQuery({
     queryKey: ['albergue', id],
     queryFn: () => api<Albergue>(`/albergues/${id}`),
     enabled: !!id,
   });
   const a = albergueQ.data;
+
+  if (albergueQ.isError) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+        <Header onBack={() => router.back()} />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
+          <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
+          <Text variant="bodyMedium" color={colors.stone300} style={{ marginTop: spacing['3'], textAlign: 'center' }}>
+            No pudimos cargar el albergue.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
@@ -113,8 +130,9 @@ export default function AlbergueDetail() {
           <Button
             label="Comprobar disponibilidad"
             fullWidth
+            disabled={!a}
             style={{ marginTop: spacing['3'] }}
-            onPress={() => null}
+            onPress={() => setAvailabilityOpen(true)}
           />
 
           <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['6'] }}>Opiniones</Text>
@@ -144,6 +162,17 @@ export default function AlbergueDetail() {
           )}
         </View>
       </ScrollView>
+
+      {a ? (
+        <AvailabilitySheet
+          visible={availabilityOpen}
+          onClose={() => setAvailabilityOpen(false)}
+          albergueId={a.id}
+          albergueName={a.name}
+          city={a.city}
+          pricePerNight={a.pricePerNight}
+        />
+      ) : null}
     </View>
   );
 }

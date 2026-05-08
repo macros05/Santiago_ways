@@ -12,7 +12,7 @@ import { Skeleton } from '@components/Skeleton';
 import { Card } from '@components/Card';
 import { UpgradeBottomSheet } from '@components/UpgradeBottomSheet';
 import { colors, layout, radius, shadows, spacing } from '@design/tokens';
-import { type Post, useLikePost, usePostsFeed } from '@hooks/usePosts';
+import { type Post, useBookmarkPost, useLikePost, usePostsFeed } from '@hooks/usePosts';
 import { useCanAccess } from '@hooks/useSubscription';
 import { timeAgo } from '@lib/format';
 
@@ -21,6 +21,7 @@ export default function CommunityScreen() {
   const router = useRouter();
   const feed = usePostsFeed();
   const like = useLikePost();
+  const bookmark = useBookmarkPost();
   const canPost = useCanAccess('community_post');
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -69,6 +70,10 @@ export default function CommunityScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
               like.mutate(item.id);
             }}
+            onBookmark={() => {
+              Haptics.selectionAsync().catch(() => {});
+              bookmark.mutate(item.id);
+            }}
             onPress={() => router.push(`/post/${item.id}`)}
           />
         )}
@@ -86,6 +91,8 @@ export default function CommunityScreen() {
             setUpgradeOpen(true);
           }
         }}
+        accessibilityRole="button"
+        accessibilityLabel={canPost ? 'Crear nueva publicación' : 'Publicar requiere plan Buen Camino'}
       >
         <Ionicons name={canPost ? 'add' : 'lock-closed'} size={canPost ? 28 : 22} color={colors.stone950} />
       </Pressable>
@@ -109,10 +116,12 @@ export default function CommunityScreen() {
 function PostCard({
   post,
   onLike,
+  onBookmark,
   onPress,
 }: {
   post: Post;
   onLike: () => void;
+  onBookmark: () => void;
   onPress: () => void;
 }) {
   return (
@@ -152,7 +161,14 @@ function PostCard({
       </Pressable>
 
       <View style={styles.actions}>
-        <Pressable onPress={onLike} hitSlop={8} style={styles.action}>
+        <Pressable
+          onPress={onLike}
+          hitSlop={8}
+          style={styles.action}
+          accessibilityRole="button"
+          accessibilityLabel={post.likedByMe ? 'Quitar me gusta' : 'Me gusta'}
+          accessibilityState={{ selected: post.likedByMe }}
+        >
           <Ionicons
             name={post.likedByMe ? 'heart' : 'heart-outline'}
             size={22}
@@ -162,13 +178,26 @@ function PostCard({
             {post._count.likes}
           </Text>
         </Pressable>
-        <Pressable onPress={onPress} hitSlop={8} style={styles.action}>
+        <Pressable
+          onPress={onPress}
+          hitSlop={8}
+          style={styles.action}
+          accessibilityRole="button"
+          accessibilityLabel={`Ver ${post._count.comments} comentarios`}
+        >
           <Ionicons name="chatbubble-outline" size={20} color={colors.stone300} />
           <Text variant="small" color={colors.stone300}>
             {post._count.comments}
           </Text>
         </Pressable>
-        <Pressable hitSlop={8} style={styles.action}>
+        <Pressable
+          onPress={onBookmark}
+          hitSlop={8}
+          style={styles.action}
+          accessibilityRole="button"
+          accessibilityLabel={post.bookmarkedByMe ? 'Quitar de guardados' : 'Guardar publicación'}
+          accessibilityState={{ selected: post.bookmarkedByMe }}
+        >
           <Ionicons
             name={post.bookmarkedByMe ? 'bookmark' : 'bookmark-outline'}
             size={20}

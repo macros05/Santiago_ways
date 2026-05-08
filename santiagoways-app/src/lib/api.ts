@@ -62,7 +62,11 @@ async function refreshAccessToken(): Promise<string | null> {
     if (!refresh) return null;
     const res = await fetch(`${baseUrl}/auth/refresh`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        // Skip the ngrok HTML warning page when API is tunneled via ngrok-free.
+        'ngrok-skip-browser-warning': 'true',
+      },
       body: JSON.stringify({ refreshToken: refresh }),
     });
     if (!res.ok) {
@@ -87,7 +91,11 @@ export async function api<T>(path: string, opts: RequestOpts = {}): Promise<T> {
   }
 
   const send = async (token: string | null): Promise<Response> => {
-    const headers: Record<string, string> = { 'content-type': 'application/json' };
+    const headers: Record<string, string> = {
+      'content-type': 'application/json',
+      // Skip the ngrok HTML warning page when API is tunneled via ngrok-free.
+      'ngrok-skip-browser-warning': 'true',
+    };
     if (token) headers.authorization = `Bearer ${token}`;
     return fetch(url.toString(), {
       method: opts.method ?? 'GET',

@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
       status: sub?.status ?? 'inactive',
       currentPeriodEnd: sub?.currentPeriodEnd ?? null,
       cancelAtPeriodEnd: sub?.cancelAtPeriodEnd ?? false,
-      revenueCatId: sub?.revenueCatId ?? null,
     });
   } catch (e) {
     return handleApiError(e);

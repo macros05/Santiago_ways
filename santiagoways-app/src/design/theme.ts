@@ -1,6 +1,9 @@
 import { colors } from './tokens';
 
-export type ThemeMode = 'dark' | 'light';
+// SantiagoWays only ships a dark theme today. This Surface map is the single
+// source of truth for any future themed component — no light variant exists
+// yet because the entire app hardcodes dark surfaces; add `light` here only
+// when at least one consumer wires up a theme switch.
 
 type Surface = {
   background: string;
@@ -15,31 +18,15 @@ type Surface = {
   onAccent: string;
 };
 
-export const themes: Record<ThemeMode, Surface> = {
-  dark: {
-    background: colors.stone950,
-    surface: colors.stone900,
-    surfaceElevated: colors.stone800,
-    border: colors.stone700,
-    text: colors.cream,
-    textMuted: colors.stone300,
-    textSubtle: colors.stone500,
-    accent: colors.amber400,
-    accentMuted: colors.amber500,
-    onAccent: colors.stone950,
-  },
-  light: {
-    background: colors.cream,
-    surface: colors.white,
-    surfaceElevated: colors.cream100,
-    border: colors.stone200,
-    text: colors.stone950,
-    textMuted: colors.stone700,
-    textSubtle: colors.stone500,
-    accent: colors.amber500,
-    accentMuted: colors.amber400,
-    onAccent: colors.white,
-  },
+export const theme: Surface = {
+  background: colors.stone950,
+  surface: colors.stone900,
+  surfaceElevated: colors.stone800,
+  border: colors.stone700,
+  text: colors.cream,
+  textMuted: colors.stone300,
+  textSubtle: colors.stone500,
+  accent: colors.amber400,
+  accentMuted: colors.amber500,
+  onAccent: colors.stone950,
 };
-
-export const defaultTheme: ThemeMode = 'dark';

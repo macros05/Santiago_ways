@@ -31,7 +31,7 @@ export function UpgradeBottomSheet({
   bullets,
 }: Props) {
   const router = useRouter();
-  const accent = requiredPlan === 'compostelero' ? '#FFD700' : colors.amber400;
+  const accent = requiredPlan === 'compostelero' ? colors.gold : colors.amber400;
 
   return (
     <BottomSheet visible={visible} onClose={onClose} snapPoints={[480]}>
@@ -67,7 +67,7 @@ export function UpgradeBottomSheet({
             onClose();
             setTimeout(() => router.push('/plans'), 200);
           }}
-          style={requiredPlan === 'compostelero' ? { backgroundColor: '#FFD700' } : undefined}
+          style={requiredPlan === 'compostelero' ? { backgroundColor: colors.gold } : undefined}
         />
         <Pressable
           style={{ alignItems: 'center', paddingVertical: spacing['3'] }}
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: colors.modalDim,
   },
   bullet: {
     flexDirection: 'row',

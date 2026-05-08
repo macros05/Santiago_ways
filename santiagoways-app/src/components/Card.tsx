@@ -1,13 +1,13 @@
 import React from 'react';
-import { StyleSheet, View, ViewProps, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewProps, ViewStyle } from 'react-native';
 import { colors, radius, shadows, spacing } from '@design/tokens';
 
 type Elevation = 'flat' | 'raised' | 'floating';
 
-type CardProps = ViewProps & {
+type CardProps = Omit<ViewProps, 'style'> & {
   elevation?: Elevation;
   padding?: keyof typeof spacing | 0;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 const elevationStyle: Record<Elevation, ViewStyle> = {

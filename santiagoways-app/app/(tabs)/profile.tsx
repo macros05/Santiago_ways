@@ -42,6 +42,7 @@ export default function ProfileScreen() {
   const isCompostelero = plan === 'compostelero';
   const isBuenCamino = plan === 'buen_camino';
   const isPaid = isBuenCamino || isCompostelero;
+  const unlockedCount = ACHIEVEMENTS.filter((a) => a.unlocked).length;
 
   return (
     <ScrollView
@@ -59,10 +60,15 @@ export default function ProfileScreen() {
           </Text>
           <Text variant="small" color={colors.stone400}>@{user?.username}</Text>
           <View style={{ marginTop: spacing['3'], flexDirection: 'row', gap: spacing['2'] }}>
-            <Badge label="🇪🇸 ES" variant="neutral" />
+            {user?.nationality ? (
+              <Badge
+                label={`${flag(user.nationality)} ${user.nationality.toUpperCase()}`}
+                variant="neutral"
+              />
+            ) : null}
             {isCompostelero ? (
-              <View style={[styles.planBadge, { borderColor: '#FFD700', backgroundColor: 'rgba(255,215,0,0.15)' }]}>
-                <Text variant="caption" color="#FFD700">🐚 Compostelero</Text>
+              <View style={[styles.planBadge, { borderColor: colors.gold, backgroundColor: 'rgba(255,215,0,0.15)' }]}>
+                <Text variant="caption" color={colors.gold}>🐚 Compostelero</Text>
               </View>
             ) : isBuenCamino ? (
               <View style={[styles.planBadge, { borderColor: colors.amber400, backgroundColor: 'rgba(251,191,36,0.15)' }]}>
@@ -75,7 +81,7 @@ export default function ProfileScreen() {
         <View style={styles.statsRow}>
           <Stat value={(user?.totalKm ?? 0).toFixed(0)} label="km" />
           <Stat value={String(user?.timesCompleted ?? 0)} label="completados" />
-          <Stat value="3" label="logros" />
+          <Stat value={String(unlockedCount)} label="logros" />
         </View>
 
         {/* Mi Suscripción */}
@@ -135,7 +141,7 @@ export default function ProfileScreen() {
             <Pressable onPress={() => router.push('/ai-guide')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
                 <View style={[styles.qIcon, { backgroundColor: 'rgba(255,215,0,0.12)' }]}>
-                  <Ionicons name="sparkles" size={18} color="#FFD700" />
+                  <Ionicons name="sparkles" size={18} color={colors.gold} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
                   Guía IA
@@ -157,7 +163,7 @@ export default function ProfileScreen() {
             <Pressable onPress={() => router.push('/chat')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
                 <View style={[styles.qIcon, { backgroundColor: 'rgba(255,215,0,0.12)' }]}>
-                  <Ionicons name="chatbubbles" size={18} color="#FFD700" />
+                  <Ionicons name="chatbubbles" size={18} color={colors.gold} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
                   Chat Compostelero
@@ -260,12 +266,12 @@ export default function ProfileScreen() {
           Ajustes
         </Text>
         <Card style={{ marginTop: spacing['3'], padding: 0 }}>
-          <SettingsRow icon="person-outline" label="Editar perfil" onPress={() => toast.info('Pendiente.')} />
-          <SettingsRow icon="lock-closed-outline" label="Privacidad" onPress={() => toast.info('Pendiente.')} />
-          <SettingsRow icon="notifications-outline" label="Notificaciones" onPress={() => toast.info('Pendiente.')} />
-          <SettingsRow icon="map-outline" label="Mapa & unidades" onPress={() => toast.info('Pendiente.')} />
-          <SettingsRow icon="cloud-download-outline" label="Descargas offline" onPress={() => toast.info('Pendiente.')} />
-          <SettingsRow icon="language-outline" label="Idioma" onPress={() => toast.info('Pendiente.')} last />
+          <SettingsRow icon="person-outline" label="Editar perfil" onPress={() => router.push('/settings/profile')} />
+          <SettingsRow icon="lock-closed-outline" label="Privacidad" onPress={() => router.push('/settings/privacy')} />
+          <SettingsRow icon="notifications-outline" label="Notificaciones" onPress={() => router.push('/settings/notifications')} />
+          <SettingsRow icon="map-outline" label="Mapa & unidades" onPress={() => router.push('/settings/map')} />
+          <SettingsRow icon="cloud-download-outline" label="Descargas offline" onPress={() => router.push('/settings/downloads')} />
+          <SettingsRow icon="language-outline" label="Idioma" onPress={() => router.push('/settings/language')} last />
         </Card>
 
         <Button
@@ -281,6 +287,15 @@ export default function ProfileScreen() {
       </View>
     </ScrollView>
   );
+}
+
+function flag(iso: string): string {
+  if (!iso || iso.length !== 2) return '🌍';
+  const codePoints = iso
+    .toUpperCase()
+    .split('')
+    .map((c) => 127397 + c.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
 }
 
 function Stat({ value, label }: { value: string; label: string }) {

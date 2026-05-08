@@ -41,6 +41,11 @@ export async function POST(
         where: { id: pilgrimage.id },
         data: { status: 'completed', endDate: new Date() },
       });
+      // Final stage completed → bump the user's lifetime camino counter.
+      await prisma.user.update({
+        where: { id: auth.sub },
+        data: { timesCompleted: { increment: 1 } },
+      });
     }
 
     // Update user totals
