@@ -10,6 +10,7 @@ import { colors, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
 import { toast } from '@stores/toast';
 import { ApiError } from '@lib/api';
+import { t } from '@lib/i18n';
 
 export default function Register() {
   const router = useRouter();
@@ -28,27 +29,27 @@ export default function Register() {
     const trimmedEmail = email.trim();
     const trimmedUsername = username.trim();
     if (trimmedName.length < 1) {
-      toast.error('Introduce tu nombre.');
+      toast.error(t('auth.name'));
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      toast.error('Introduce un email válido.');
+      toast.error(t('auth.invalidEmail'));
       return;
     }
     if (trimmedUsername.length < 3 || trimmedUsername.length > 24) {
-      toast.error('El usuario debe tener entre 3 y 24 caracteres.');
+      toast.error(t('auth.usernameLength'));
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
-      toast.error('El usuario solo puede contener letras, números y guiones bajos.');
+      toast.error(t('auth.invalidUsername'));
       return;
     }
     if (password.length < 8) {
-      toast.error('La contraseña debe tener al menos 8 caracteres.');
+      toast.error(t('auth.passwordTooShort'));
       return;
     }
     if (!/^[A-Z]{2}$/.test(nationality)) {
-      toast.error('Introduce un código de nacionalidad válido (2 letras).');
+      toast.error(t('auth.invalidNationality'));
       return;
     }
     setLoading(true);
@@ -62,7 +63,7 @@ export default function Register() {
       });
       router.replace('/(auth)/profile-setup');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'Error en el registro.';
+      const msg = e instanceof ApiError ? e.message : t('auth.registerFailed');
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -80,41 +81,47 @@ export default function Register() {
         </Pressable>
 
         <Text variant="display" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-          Crear cuenta
+          {t('auth.register')}
         </Text>
         <Text variant="body" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-          Únete a la comunidad de peregrinos.
+          {t('auth.registerSubtitle')}
         </Text>
 
         <View style={{ gap: spacing['4'], marginTop: spacing['8'] }}>
-          <Input label="Nombre" value={name} onChangeText={setName} autoCapitalize="words" />
+          <Input label={t('auth.name')} value={name} onChangeText={setName} autoCapitalize="words" />
           <Input
-            label="Email"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
           />
           <Input
-            label="Usuario"
+            label={t('auth.username')}
             value={username}
             onChangeText={setUsername}
             autoCapitalize="none"
             maxLength={24}
-            helperText="Letras, números y _ — entre 3 y 24 caracteres."
+            helperText={t('auth.usernameHint')}
           />
-          <Input label="Contraseña" value={password} onChangeText={setPassword} secure helperText="Mínimo 8 caracteres." />
           <Input
-            label="Nacionalidad (ISO)"
+            label={t('auth.password')}
+            value={password}
+            onChangeText={setPassword}
+            secure
+            helperText={t('auth.passwordHint')}
+          />
+          <Input
+            label={t('auth.nationality')}
             value={nationality}
             onChangeText={(v) => setNationality(v.toUpperCase().slice(0, 2))}
             autoCapitalize="characters"
-            helperText="Ej. ES, FR, DE, JP"
+            helperText={t('auth.nationalityHint')}
           />
         </View>
 
         <Button
-          label="Continuar"
+          label={t('common.continue')}
           onPress={handleSubmit}
           loading={loading}
           fullWidth
@@ -122,9 +129,9 @@ export default function Register() {
         />
 
         <View style={styles.bottom}>
-          <Text variant="small" color={colors.stone400}>¿Ya tienes cuenta? </Text>
+          <Text variant="small" color={colors.stone400}>{t('auth.haveAccount')} </Text>
           <Pressable onPress={() => router.replace('/(auth)/login')}>
-            <Text variant="bodyMedium" color={colors.amber400}>Inicia sesión</Text>
+            <Text variant="bodyMedium" color={colors.amber400}>{t('auth.login')}</Text>
           </Pressable>
         </View>
       </ScrollView>

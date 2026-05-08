@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
+import { HeroOverlay } from '@components/HeroOverlay';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '@components/Header';
@@ -59,10 +60,7 @@ export default function RouteDetail() {
           ) : (
             <LinearGradient colors={[colors.stone800, colors.stone900]} style={StyleSheet.absoluteFill} />
           )}
-          <LinearGradient
-            colors={['rgba(12,10,9,0.2)', 'rgba(12,10,9,0.95)']}
-            style={StyleSheet.absoluteFill}
-          />
+          <HeroOverlay variant="subtle" />
           <View style={styles.heroFooter}>
             {r ? (
               <>

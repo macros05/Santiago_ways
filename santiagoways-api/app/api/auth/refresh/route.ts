@@ -9,7 +9,7 @@ const schema = z.object({ refreshToken: z.string().min(1) });
 
 export async function POST(req: NextRequest) {
   try {
-    const limited = checkRate(req, 'refresh', RATE_AUTH);
+    const limited = await checkRate(req, 'refresh', RATE_AUTH);
     if (limited) return limited;
     const { refreshToken } = schema.parse(await req.json());
     const { sub } = await verifyRefreshToken(refreshToken).catch(() => ({ sub: '' }));

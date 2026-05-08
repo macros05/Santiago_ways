@@ -1,37 +1,72 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { OAuth2Client } from 'google-auth-library';
 import { prisma } from '@lib/prisma';
 import { signAccessToken, signRefreshToken } from '@lib/jwt';
-import { handleApiError, ok } from '@lib/http';
+import { handleApiError, ok, err } from '@lib/http';
 import { checkRate, RATE_AUTH } from '@lib/rateLimit';
 
 const schema = z.object({
   idToken: z.string().min(10),
 });
 
-// Validates a Google ID token via the public tokeninfo endpoint.
-// In production, switch to the google-auth-library JWT verification.
+let _client: OAuth2Client | null = null;
+function getClient(): OAuth2Client {
+  if (_client) return _client;
+  _client = new OAuth2Client();
+  return _client;
+}
+
+// Validates a Google ID token cryptographically against Google's public keys
+// (cached internally by google-auth-library) and checks the audience claim.
 async function verifyGoogleIdToken(idToken: string): Promise<{
   sub: string;
   email: string;
+  emailVerified: boolean;
   name?: string;
   picture?: string;
 }> {
-  const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
-  if (!res.ok) throw new Error('Invalid Google id_token');
-  const data = (await res.json()) as { sub: string; email: string; name?: string; picture?: string; aud?: string };
-  if (process.env.GOOGLE_CLIENT_ID && data.aud && data.aud !== process.env.GOOGLE_CLIENT_ID) {
-    throw new Error('Token audience mismatch');
+  const expectedAud = process.env.GOOGLE_CLIENT_ID;
+  if (!expectedAud) {
+    throw new Error('GOOGLE_CLIENT_ID is not configured');
   }
-  return data;
+  // GOOGLE_CLIENT_ID may be a comma-separated list when ios/android/web each
+  // have their own client id but share the same backend.
+  const audiences = expectedAud.split(',').map((s) => s.trim()).filter(Boolean);
+
+  const ticket = await getClient().verifyIdToken({
+    idToken,
+    audience: audiences.length === 1 ? audiences[0] : audiences,
+  });
+  const payload = ticket.getPayload();
+  if (!payload || !payload.sub || !payload.email) {
+    throw new Error('Google token missing required claims');
+  }
+  return {
+    sub: payload.sub,
+    email: payload.email.toLowerCase(),
+    emailVerified: payload.email_verified === true,
+    name: payload.name,
+    picture: payload.picture,
+  };
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const limited = checkRate(req, 'oauth-google', RATE_AUTH);
+    const limited = await checkRate(req, 'oauth-google', RATE_AUTH);
     if (limited) return limited;
     const { idToken } = schema.parse(await req.json());
-    const profile = await verifyGoogleIdToken(idToken);
+
+    let profile: Awaited<ReturnType<typeof verifyGoogleIdToken>>;
+    try {
+      profile = await verifyGoogleIdToken(idToken);
+    } catch (e) {
+      const reason = e instanceof Error ? e.message : 'verification failed';
+      return err(`Invalid Google id_token (${reason})`, 401, 'invalid_google_token');
+    }
+    if (!profile.emailVerified) {
+      return err('Google email is not verified', 401, 'email_not_verified');
+    }
 
     const existing = await prisma.oAuthAccount.findUnique({
       where: { provider_providerId: { provider: 'google', providerId: profile.sub } },

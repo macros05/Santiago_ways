@@ -15,6 +15,7 @@ import { colors, layout, radius, shadows, spacing } from '@design/tokens';
 import { type Post, useBookmarkPost, useLikePost, usePostsFeed } from '@hooks/usePosts';
 import { useCanAccess } from '@hooks/useSubscription';
 import { timeAgo } from '@lib/format';
+import { t } from '@lib/i18n';
 
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
@@ -34,7 +35,7 @@ export default function CommunityScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing['3'] }]}>
-        <Text variant="display" color={colors.cream}>Comunidad</Text>
+        <Text variant="display" color={colors.cream}>{t('community.title')}</Text>
       </View>
 
       <FlashList<Post>
@@ -55,10 +56,10 @@ export default function CommunityScreen() {
             <View style={{ alignItems: 'center', marginTop: 80 }}>
               <Ionicons name="leaf-outline" size={56} color={colors.stone600} />
               <Text variant="bodyMedium" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-                Aún no hay publicaciones.
+                {t('community.emptyTitle')}
               </Text>
               <Text variant="small" color={colors.stone500} style={{ marginTop: 4 }}>
-                Sé el primer peregrino en compartir.
+                {t('community.emptyBody')}
               </Text>
             </View>
           )
@@ -102,12 +103,8 @@ export default function CommunityScreen() {
         onClose={() => setUpgradeOpen(false)}
         requiredPlan="buen_camino"
         iconName="chatbubbles"
-        title="Comparte tu experiencia"
-        bullets={[
-          'Publica fotos y vivencias del Camino',
-          'Comenta y conecta con otros peregrinos',
-          'Tu voz en la comunidad SantiagoWays',
-        ]}
+        title={t('community.shareCta')}
+        bullets={t('community.bullets') as unknown as string[]}
       />
     </View>
   );

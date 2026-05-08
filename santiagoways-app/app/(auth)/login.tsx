@@ -11,12 +11,15 @@ import { useAuth } from '@stores/auth';
 import { toast } from '@stores/toast';
 import { ApiError } from '@lib/api';
 import { useGoogleAuth } from '@hooks/useGoogleAuth';
+import { useAppleAuth } from '@hooks/useAppleAuth';
+import { t } from '@lib/i18n';
 
 export default function Login() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const signIn = useAuth((s) => s.signIn);
   const google = useGoogleAuth();
+  const apple = useAppleAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,7 +27,7 @@ export default function Login() {
   const handleSubmit = async () => {
     const trimmedEmail = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) || password.length < 8) {
-      toast.error('Introduce un email válido y una contraseña de al menos 8 caracteres.');
+      toast.error(t('auth.invalidLogin'));
       return;
     }
     setLoading(true);
@@ -32,7 +35,7 @@ export default function Login() {
       await signIn(trimmedEmail.toLowerCase(), password);
       router.replace('/(tabs)/explore');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'No pudimos iniciar sesión.';
+      const msg = e instanceof ApiError ? e.message : t('auth.loginFailed');
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -53,15 +56,15 @@ export default function Login() {
         </Pressable>
 
         <Text variant="display" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-          Bienvenido{'\n'}de vuelta
+          {t('auth.welcomeBack')}
         </Text>
         <Text variant="body" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-          Inicia sesión para continuar tu Camino.
+          {t('auth.loginSubtitle')}
         </Text>
 
         <View style={{ gap: spacing['4'], marginTop: spacing['10'] }}>
           <Input
-            label="Email"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -69,7 +72,7 @@ export default function Login() {
             autoComplete="email"
           />
           <Input
-            label="Contraseña"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
             secure
@@ -79,12 +82,12 @@ export default function Login() {
 
         <Pressable onPress={() => router.push('/(auth)/forgot-password')} style={{ marginTop: spacing['4'] }}>
           <Text variant="small" color={colors.amber400}>
-            ¿Olvidaste tu contraseña?
+            {t('auth.forgotPassword')}
           </Text>
         </Pressable>
 
         <Button
-          label="Iniciar sesión"
+          label={t('auth.login')}
           onPress={handleSubmit}
           loading={loading}
           fullWidth
@@ -93,31 +96,35 @@ export default function Login() {
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text variant="small" color={colors.stone500}>o continúa con</Text>
+          <Text variant="small" color={colors.stone500}>{t('auth.orContinueWith')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
         <Button
-          label="Continuar con Google"
+          label={t('auth.signInGoogle')}
           variant="secondary"
           fullWidth
           disabled={!google.ready}
           iconLeft={<Ionicons name="logo-google" size={18} color={colors.cream} />}
           onPress={() => google.promptAsync()}
         />
-        <Button
-          label="Continuar con Apple"
-          variant="secondary"
-          fullWidth
-          style={{ marginTop: spacing['3'] }}
-          iconLeft={<Ionicons name="logo-apple" size={18} color={colors.cream} />}
-          onPress={() => toast.info('Apple Sign In pendiente de configuración.')}
-        />
+        {apple.available ? (
+          <Button
+            label={t('auth.signInApple')}
+            variant="secondary"
+            fullWidth
+            disabled={apple.busy}
+            loading={apple.busy}
+            style={{ marginTop: spacing['3'] }}
+            iconLeft={<Ionicons name="logo-apple" size={18} color={colors.cream} />}
+            onPress={() => apple.signIn()}
+          />
+        ) : null}
 
         <View style={styles.bottom}>
-          <Text variant="small" color={colors.stone400}>¿Aún no tienes cuenta? </Text>
+          <Text variant="small" color={colors.stone400}>{t('auth.noAccount')} </Text>
           <Pressable onPress={() => router.replace('/(auth)/register')}>
-            <Text variant="bodyMedium" color={colors.amber400}>Crear cuenta</Text>
+            <Text variant="bodyMedium" color={colors.amber400}>{t('auth.register')}</Text>
           </Pressable>
         </View>
       </ScrollView>

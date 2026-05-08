@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   try {
     const params = await ctx.params;
     const auth = await getAuth(req);
-    const limited = checkRate(req, `comment:${auth.sub}`, RATE_WRITE);
+    const limited = await checkRate(req, `comment:${auth.sub}`, RATE_WRITE);
     if (limited) return limited;
     const body = schema.parse(await req.json());
     const post = await prisma.post.findUnique({ where: { id: params.id } });

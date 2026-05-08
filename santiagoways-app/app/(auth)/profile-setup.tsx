@@ -13,6 +13,8 @@ import { colors, radius, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
 import { toast } from '@stores/toast';
 import { api } from '@lib/api';
+import { uploadImage } from '@lib/uploads';
+import { t } from '@lib/i18n';
 import { isLockedRoute, useRoutes } from '@hooks/usePilgrimage';
 import { Skeleton } from '@components/Skeleton';
 
@@ -35,7 +37,7 @@ export default function ProfileSetup() {
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      toast.error('Activa el acceso a fotos para elegir un avatar.');
+      toast.error(t('profileSetup.photoPermission'));
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
@@ -52,21 +54,38 @@ export default function ProfileSetup() {
 
   const finish = async () => {
     if (!routeSlug) {
-      toast.error('Elige una ruta para empezar.');
+      toast.error(t('profileSetup.chooseRoute'));
       return;
     }
     setLoading(true);
     try {
-      if (bio) await api('/users/me', { method: 'PATCH', body: { bio } });
+      let remoteAvatar: string | null = null;
+      if (avatar && avatar.startsWith('file:')) {
+        try {
+          remoteAvatar = await uploadImage(avatar, 'avatars');
+        } catch {
+          if (mounted.current) toast.error(t('profileSetup.uploadFailed'));
+        }
+      } else if (avatar) {
+        remoteAvatar = avatar;
+      }
+
+      const patch: Record<string, string> = {};
+      if (bio) patch.bio = bio;
+      if (remoteAvatar) patch.avatar = remoteAvatar;
+      if (Object.keys(patch).length > 0) {
+        await api('/users/me', { method: 'PATCH', body: patch });
+      }
+
       await api('/pilgrimages', {
         method: 'POST',
         body: { routeSlug, startDate: new Date().toISOString() },
       });
       if (!mounted.current) return;
-      if (user) setUser({ ...user, avatar });
+      if (user) setUser({ ...user, avatar: remoteAvatar ?? user.avatar });
       router.replace('/(tabs)/explore');
     } catch {
-      if (mounted.current) toast.error('No pudimos crear tu peregrinación.');
+      if (mounted.current) toast.error(t('profileSetup.pilgrimageFailed'));
     } finally {
       if (mounted.current) setLoading(false);
     }
@@ -96,10 +115,10 @@ export default function ProfileSetup() {
         {step === 1 ? (
           <View style={{ marginTop: spacing['8'], alignItems: 'center' }}>
             <Text variant="display" color={colors.cream} align="center">
-              Tu foto
+              {t('profileSetup.photoTitle')}
             </Text>
             <Text variant="body" color={colors.stone400} align="center" style={{ marginTop: spacing['3'] }}>
-              Una imagen vale más que mil pasos.
+              {t('profileSetup.photoSubtitle')}
             </Text>
             <Pressable onPress={pickImage} style={{ marginTop: spacing['10'] }}>
               <Avatar source={avatar} name={user?.name} size="xl" />
@@ -108,23 +127,23 @@ export default function ProfileSetup() {
               </View>
             </Pressable>
             <Button
-              label="Continuar"
+              label={t('common.continue')}
               onPress={() => setStep(2)}
               fullWidth
               style={{ marginTop: spacing['12'] }}
             />
-            <Button label="Saltar" variant="ghost" onPress={() => setStep(2)} fullWidth />
+            <Button label={t('profileSetup.skip')} variant="ghost" onPress={() => setStep(2)} fullWidth />
           </View>
         ) : null}
 
         {step === 2 ? (
           <View style={{ marginTop: spacing['8'] }}>
-            <Text variant="display" color={colors.cream}>Cuéntanos algo</Text>
+            <Text variant="display" color={colors.cream}>{t('profileSetup.bioTitle')}</Text>
             <Text variant="body" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-              Una frase para presentarte ante la comunidad.
+              {t('profileSetup.bioSubtitle')}
             </Text>
             <Input
-              label="Bio"
+              label={t('profileSetup.bioPlaceholder')}
               value={bio}
               onChangeText={setBio}
               multiline
@@ -132,15 +151,15 @@ export default function ProfileSetup() {
               maxLength={280}
               containerStyle={{ marginTop: spacing['8'] }}
             />
-            <Button label="Continuar" onPress={() => setStep(3)} fullWidth style={{ marginTop: spacing['8'] }} />
+            <Button label={t('common.continue')} onPress={() => setStep(3)} fullWidth style={{ marginTop: spacing['8'] }} />
           </View>
         ) : null}
 
         {step === 3 ? (
           <View style={{ marginTop: spacing['8'] }}>
-            <Text variant="display" color={colors.cream}>Tu ruta</Text>
+            <Text variant="display" color={colors.cream}>{t('profileSetup.routeTitle')}</Text>
             <Text variant="body" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-              ¿Qué Camino vas a empezar?
+              {t('profileSetup.routeSubtitle')}
             </Text>
             <View style={{ gap: spacing['3'], marginTop: spacing['8'] }}>
               {routesQ.isLoading
@@ -191,7 +210,7 @@ export default function ProfileSetup() {
                             </Text>
                             {locked ? (
                               <Text variant="caption" color={colors.amber400} style={{ marginTop: 2 }}>
-                                Disponible con plan Buen Camino
+                                {t('profileSetup.requiresBuenCamino')}
                               </Text>
                             ) : null}
                           </View>
@@ -215,7 +234,7 @@ export default function ProfileSetup() {
                   })}
             </View>
             <Button
-              label="Empezar mi Camino"
+              label={t('profileSetup.startCamino')}
               onPress={finish}
               loading={loading}
               fullWidth

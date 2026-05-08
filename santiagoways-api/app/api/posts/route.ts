@@ -5,6 +5,7 @@ import { getAuth, getOptionalAuth } from '@lib/auth';
 import { canPostCommunity } from '@lib/permissions';
 import { created, err, handleApiError, ok, paginationParams } from '@lib/http';
 import { checkRate, RATE_WRITE } from '@lib/rateLimit';
+import { isOwnCloudinaryUrl } from '@lib/cloudinary';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,7 @@ const createSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuth(req);
-    const limited = checkRate(req, `post:${auth.sub}`, RATE_WRITE);
+    const limited = await checkRate(req, `post:${auth.sub}`, RATE_WRITE);
     if (limited) return limited;
     const user = await prisma.user.findUnique({
       where: { id: auth.sub },
@@ -68,6 +69,11 @@ export async function POST(req: NextRequest) {
       );
     }
     const body = createSchema.parse(await req.json());
+    for (const url of body.images) {
+      if (!isOwnCloudinaryUrl(url)) {
+        return err('post images must be uploaded via /uploads/sign', 422, 'invalid_image_url');
+      }
+    }
     const post = await prisma.post.create({
       data: { ...body, userId: auth.sub },
       include: {

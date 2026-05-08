@@ -7,6 +7,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Button } from '@components/Button';
 import { Text } from '@design/text';
 import { colors, spacing } from '@design/tokens';
+import { t } from '@lib/i18n';
 import { Hero } from '@features/onboarding/Hero';
 import { Routes } from '@features/onboarding/Routes';
 import { Community } from '@features/onboarding/Community';
@@ -77,12 +78,12 @@ export default function Welcome() {
       {page === SCREENS.length - 1 ? (
         <Animated.View entering={FadeIn.duration(300)} style={[styles.cta, { bottom: ctaBottom }]}>
           <Button
-            label="Crear cuenta"
+            label={t('auth.register')}
             onPress={() => router.push('/(auth)/register')}
             fullWidth
           />
           <Button
-            label="Ya tengo cuenta"
+            label={t('onboarding.haveAccount')}
             variant="ghost"
             onPress={() => router.push('/(auth)/login')}
             fullWidth
@@ -92,14 +93,14 @@ export default function Welcome() {
       ) : (
         <View style={[styles.cta, { bottom: ctaBottom }]}>
           <Button
-            label="Continuar"
+            label={t('common.continue')}
             onPress={() =>
               scrollRef.current?.scrollTo({ x: width * (page + 1), animated: true })
             }
             fullWidth
           />
           <Text variant="caption" color={colors.stone400} align="center" style={{ marginTop: spacing['3'] }}>
-            Desliza para continuar
+            {t('onboarding.swipe')}
           </Text>
         </View>
       )}

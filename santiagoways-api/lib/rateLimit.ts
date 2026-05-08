@@ -1,16 +1,36 @@
 import { NextRequest } from 'next/server';
+import { Redis } from '@upstash/redis';
 import { err } from './http';
 
-// Lightweight in-memory token bucket. Sufficient for single-instance deploys
-// (Render free tier, Fly single-machine) and abuse mitigation. For multi-region
-// or horizontal scale, swap this implementation for Redis/Upstash without
-// changing the call sites.
+// Two-tier rate limiter:
+//   1. If UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN are set, requests
+//      are counted in Upstash so multiple serverless instances share state.
+//   2. Otherwise we fall back to a per-process token bucket (good enough for
+//      single-instance dev / preview).
+//
+// Production deployments MUST configure Upstash — otherwise an attacker can
+// rotate across cold serverless instances and never hit the limit.
 
+let _redis: Redis | null = null;
+function redis(): Redis | null {
+  if (_redis) return _redis;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  _redis = new Redis({ url, token });
+  return _redis;
+}
+
+export function isDistributedRateLimiterEnabled(): boolean {
+  return Boolean(
+    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
+  );
+}
+
+// ── Memory bucket (fallback) ───────────────────────────────────────────────
 type Bucket = { count: number; resetAt: number };
-
 const buckets = new Map<string, Bucket>();
 let lastSweep = 0;
-
 function sweep(now: number) {
   if (now - lastSweep < 60_000) return;
   lastSweep = now;
@@ -26,32 +46,67 @@ export function clientKey(req: NextRequest, suffix: string): string {
 }
 
 export type RateLimitOpts = {
-  // Maximum number of allowed requests within `windowMs`.
+  /** Maximum number of allowed requests within `windowMs`. */
   limit: number;
-  // Sliding window length in milliseconds.
+  /** Window length in milliseconds. */
   windowMs: number;
 };
 
-/** Returns null when allowed, or a NextResponse 429 when blocked. */
-export function checkRate(req: NextRequest, suffix: string, opts: RateLimitOpts) {
+function tooManyResponse(retryAfterSeconds: number) {
+  const res = err(
+    'Too many requests, please slow down.',
+    429,
+    'rate_limited',
+    { retryAfter: retryAfterSeconds },
+  );
+  res.headers.set('Retry-After', String(retryAfterSeconds));
+  return res;
+}
+
+/**
+ * Returns null when allowed, or a NextResponse 429 when blocked.
+ *
+ * Note: this is async only because Upstash uses HTTP. The in-memory fallback
+ * resolves synchronously — but call sites should always `await` so the
+ * implementation can switch without breaking them.
+ */
+export async function checkRate(
+  req: NextRequest,
+  suffix: string,
+  opts: RateLimitOpts,
+) {
+  const key = clientKey(req, suffix);
+  const r = redis();
+
+  if (r) {
+    try {
+      const windowSec = Math.max(1, Math.ceil(opts.windowMs / 1000));
+      // INCR + EXPIRE if first hit. Atomic enough for our needs without Lua.
+      const count = await r.incr(`rl:${key}`);
+      if (count === 1) {
+        await r.expire(`rl:${key}`, windowSec);
+      }
+      if (count > opts.limit) {
+        const ttl = await r.ttl(`rl:${key}`);
+        return tooManyResponse(Math.max(1, ttl));
+      }
+      return null;
+    } catch (e) {
+      // Network blip on Upstash — fall back to in-memory rather than failing
+      // open with no limit at all.
+      console.error('[rateLimit] redis failed, falling back to memory', e);
+    }
+  }
+
   const now = Date.now();
   sweep(now);
-  const key = clientKey(req, suffix);
   const existing = buckets.get(key);
   if (!existing || existing.resetAt <= now) {
     buckets.set(key, { count: 1, resetAt: now + opts.windowMs });
     return null;
   }
   if (existing.count >= opts.limit) {
-    const retryAfter = Math.max(1, Math.ceil((existing.resetAt - now) / 1000));
-    const res = err(
-      'Too many requests, please slow down.',
-      429,
-      'rate_limited',
-      { retryAfter },
-    );
-    res.headers.set('Retry-After', String(retryAfter));
-    return res;
+    return tooManyResponse(Math.max(1, Math.ceil((existing.resetAt - now) / 1000)));
   }
   existing.count += 1;
   return null;

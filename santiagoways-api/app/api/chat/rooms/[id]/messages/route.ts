@@ -47,7 +47,7 @@ const sendSchema = z.object({ content: z.string().min(1).max(1000) });
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getAuth(req);
-    const limited = checkRate(req, `chat:${auth.sub}`, RATE_WRITE);
+    const limited = await checkRate(req, `chat:${auth.sub}`, RATE_WRITE);
     if (limited) return limited;
     const user = await prisma.user.findUnique({
       where: { id: auth.sub },

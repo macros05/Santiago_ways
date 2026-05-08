@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { handleApiError, err, ok } from '@lib/http';
 import { prisma } from '@lib/prisma';
 import { planFromProductOrEntitlements, type RcWebhookEvent } from '@lib/revenuecat';
+import { assertProductionEnv } from '@lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,7 @@ function verifySignature(req: NextRequest): boolean {
 
 export async function POST(req: NextRequest) {
   try {
+    assertProductionEnv();
     if (!verifySignature(req)) {
       return err('Invalid webhook signature', 401, 'invalid_signature');
     }

@@ -8,21 +8,37 @@ import { Input } from '@components/Input';
 import { Text } from '@design/text';
 import { colors, spacing } from '@design/tokens';
 import { toast } from '@stores/toast';
+import { api } from '@lib/api';
+import { t } from '@lib/i18n';
 
 export default function ForgotPassword() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      toast.error('Introduce un email válido.');
+    const trimmed = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error(t('auth.invalidEmail'));
       return;
     }
-    // The backend endpoint is not wired yet — show the user a truthful state
-    // instead of falsely claiming an email was sent.
-    setSent(true);
+    setSubmitting(true);
+    try {
+      await api('/auth/forgot-password', {
+        method: 'POST',
+        body: { email: trimmed },
+        auth: false,
+      });
+      setSent(true);
+    } catch {
+      // The endpoint always returns 200 on a happy path — only network
+      // failures or rate limits land here.
+      toast.error(t('auth.resetFailed'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -38,7 +54,7 @@ export default function ForgotPassword() {
               <Ionicons name="mail" size={36} color={colors.amber400} />
             </View>
             <Text variant="display" color={colors.cream} align="center" style={{ marginTop: spacing['6'] }}>
-              Próximamente
+              {t('auth.resetSent')}
             </Text>
             <Text
               variant="body"
@@ -46,10 +62,10 @@ export default function ForgotPassword() {
               align="center"
               style={{ marginTop: spacing['3'], paddingHorizontal: spacing['6'] }}
             >
-              El restablecimiento por email todavía no está habilitado en este entorno. Escríbenos a soporte y te ayudaremos a recuperar el acceso a {email}.
+              {t('auth.resetSentBody', { email })}
             </Text>
             <Button
-              label="Volver al inicio"
+              label={t('auth.backToLogin')}
               variant="secondary"
               onPress={() => router.replace('/(auth)/login')}
               fullWidth
@@ -59,20 +75,27 @@ export default function ForgotPassword() {
         ) : (
           <>
             <Text variant="display" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-              Recuperar{'\n'}contraseña
+              {t('auth.forgotPasswordTitle')}
             </Text>
             <Text variant="body" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-              Te enviaremos un enlace para restablecerla.
+              {t('auth.forgotPasswordSubtitle')}
             </Text>
             <Input
-              label="Email"
+              label={t('auth.email')}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
               containerStyle={{ marginTop: spacing['8'] }}
             />
-            <Button label="Enviar enlace" onPress={handleSubmit} fullWidth style={{ marginTop: spacing['6'] }} />
+            <Button
+              label={t('auth.sendResetLink')}
+              onPress={handleSubmit}
+              loading={submitting}
+              disabled={submitting}
+              fullWidth
+              style={{ marginTop: spacing['6'] }}
+            />
           </>
         )}
       </View>

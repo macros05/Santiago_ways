@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,10 +14,17 @@ import { Skeleton } from '@components/Skeleton';
 import { Button } from '@components/Button';
 import { MapMarker } from '@components/MapMarker';
 import { UpgradeBottomSheet } from '@components/UpgradeBottomSheet';
+import { HeroOverlay } from '@components/HeroOverlay';
 import { colors, radius, spacing } from '@design/tokens';
 import { api } from '@lib/api';
 import { formatElevation, formatKm } from '@lib/format';
 import { useCanAccess } from '@hooks/useSubscription';
+import {
+  deleteStageOffline,
+  downloadStageOffline,
+  isStageDownloaded,
+} from '@lib/offline';
+import { toast } from '@stores/toast';
 
 type Stage = {
   id: string;
@@ -78,6 +85,52 @@ export default function StageDetail() {
   const [tab, setTab] = useState<Tab>('overview');
   const [offlineUpgrade, setOfflineUpgrade] = useState(false);
   const canOffline = useCanAccess('offline_maps');
+  const [downloaded, setDownloaded] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadPct, setDownloadPct] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (id) {
+      isStageDownloaded(id)
+        .then((v) => { if (!cancelled) setDownloaded(v); })
+        .catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [id]);
+
+  const handleOfflineToggle = async () => {
+    if (!id) return;
+    if (downloaded) {
+      try {
+        await deleteStageOffline(id);
+        setDownloaded(false);
+        toast.success('Mapas eliminados.');
+      } catch {
+        toast.error('No pudimos borrar los mapas.');
+      }
+      return;
+    }
+    setDownloading(true);
+    setDownloadPct(0);
+    try {
+      await downloadStageOffline(id, ({ received, total }) => {
+        if (total > 0) setDownloadPct(Math.min(99, Math.round((received / total) * 100)));
+      });
+      setDownloaded(true);
+      setDownloadPct(100);
+      toast.success('Etapa disponible offline.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      if (msg === 'MBTILES_BASE_URL_NOT_SET') {
+        toast.info('Mapas offline llegan próximamente para esta ruta.');
+      } else {
+        toast.error('No pudimos completar la descarga.');
+      }
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const stageQ = useQuery({
     queryKey: ['stage', id],
@@ -132,10 +185,7 @@ export default function StageDetail() {
               style={StyleSheet.absoluteFill}
             />
           )}
-          <LinearGradient
-            colors={['rgba(12,10,9,0.2)', 'rgba(12,10,9,0.95)']}
-            style={StyleSheet.absoluteFill}
-          />
+          <HeroOverlay variant="subtle" />
           <View style={styles.heroFooter}>
             {stage ? (
               <>
@@ -262,22 +312,38 @@ export default function StageDetail() {
               })()}
             </View>
             <Button
-              label={canOffline ? 'Descargar para offline' : 'Descarga offline · Premium'}
+              label={
+                !canOffline
+                  ? 'Descarga offline · Premium'
+                  : downloading
+                  ? `Descargando… ${downloadPct}%`
+                  : downloaded
+                  ? 'Eliminar mapas offline'
+                  : 'Descargar para offline'
+              }
               variant="secondary"
               fullWidth
+              loading={downloading}
+              disabled={downloading}
               iconLeft={
                 <Ionicons
-                  name={canOffline ? 'cloud-download-outline' : 'lock-closed'}
+                  name={
+                    !canOffline
+                      ? 'lock-closed'
+                      : downloaded
+                      ? 'checkmark-circle'
+                      : 'cloud-download-outline'
+                  }
                   size={18}
-                  color={canOffline ? colors.cream : colors.amber400}
+                  color={!canOffline ? colors.amber400 : downloaded ? colors.success : colors.cream}
                 />
               }
               style={{ marginTop: spacing['4'] }}
               onPress={() => {
-                if (canOffline) {
-                  // TODO: trigger MBTiles download
-                } else {
+                if (!canOffline) {
                   setOfflineUpgrade(true);
+                } else {
+                  handleOfflineToggle();
                 }
               }}
             />

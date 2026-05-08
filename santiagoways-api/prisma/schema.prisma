@@ -48,6 +48,7 @@ model User {
   notifications   Notification[]
   oauthAccounts   OAuthAccount[]
   refreshTokens   RefreshToken[]
+  passwordResets  PasswordResetToken[]
   subscription    Subscription?
   healthSnapshots HealthSnapshot[]
   chatMessages    ChatMessage[]
@@ -78,6 +79,19 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

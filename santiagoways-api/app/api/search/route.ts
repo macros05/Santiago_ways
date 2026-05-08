@@ -5,7 +5,7 @@ import { checkRate, RATE_SEARCH } from '@lib/rateLimit';
 
 export async function GET(req: NextRequest) {
   try {
-    const limited = checkRate(req, 'search', RATE_SEARCH);
+    const limited = await checkRate(req, 'search', RATE_SEARCH);
     if (limited) return limited;
     const q = req.nextUrl.searchParams.get('q')?.trim();
     const type = req.nextUrl.searchParams.get('type'); // stages | albergues | users | posts

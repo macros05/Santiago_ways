@@ -31,6 +31,7 @@ type AuthState = {
     nationality?: string;
   }) => Promise<void>;
   signInWithGoogle: (idToken: string) => Promise<void>;
+  signInWithApple: (input: { identityToken: string; name?: string; email?: string }) => Promise<void>;
   signOut: () => Promise<void>;
   setUser: (user: AuthUser) => void;
 };
@@ -74,6 +75,18 @@ export const useAuth = create<AuthState>((set) => ({
       accessToken: string;
       refreshToken: string;
     }>('/auth/google', { method: 'POST', body: { idToken }, auth: false });
+    await setTokens(data.accessToken, data.refreshToken);
+    set({ user: data.user });
+  },
+
+  signInWithApple: async ({ identityToken, name, email }) => {
+    const body: Record<string, unknown> = { identityToken };
+    if (name || email) body.user = { ...(name ? { name } : {}), ...(email ? { email } : {}) };
+    const data = await api<{
+      user: AuthUser;
+      accessToken: string;
+      refreshToken: string;
+    }>('/auth/apple', { method: 'POST', body: body as never, auth: false });
     await setTokens(data.accessToken, data.refreshToken);
     set({ user: data.user });
   },

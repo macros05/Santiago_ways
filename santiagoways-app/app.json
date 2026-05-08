@@ -31,7 +31,8 @@
       },
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.santiagoways.app",
@@ -74,7 +75,8 @@
         }
       ],
       "react-native-health",
-      "react-native-health-connect"
+      "react-native-health-connect",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true

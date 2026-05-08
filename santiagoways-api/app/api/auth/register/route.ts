@@ -20,7 +20,7 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const limited = checkRate(req, 'register', RATE_REGISTER);
+    const limited = await checkRate(req, 'register', RATE_REGISTER);
     if (limited) return limited;
     const body = schema.parse(await req.json());
 

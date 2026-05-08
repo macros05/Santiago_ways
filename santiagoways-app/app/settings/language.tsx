@@ -9,7 +9,7 @@ import { Text } from '@design/text';
 import { colors, layout, radius, spacing } from '@design/tokens';
 import { api, ApiError } from '@lib/api';
 import { useAuth, type AuthUser } from '@stores/auth';
-import { setLocale } from '@lib/i18n';
+import { usePrefs } from '@stores/prefs';
 import { toast } from '@stores/toast';
 
 const LANGS: Array<{ value: 'es' | 'en'; label: string; native: string; flag: string }> = [
@@ -22,23 +22,32 @@ export default function LanguageSettings() {
   const insets = useSafeAreaInsets();
   const user = useAuth((s) => s.user);
   const setUser = useAuth((s) => s.setUser);
+  const localePref = usePrefs((s) => s.locale);
+  const setLocalePref = usePrefs((s) => s.setLocale);
   const [pending, setPending] = useState<'es' | 'en' | null>(null);
 
-  const current = user?.language ?? 'es';
+  // The user-profile language is the source of truth when authenticated; we
+  // mirror it into the local prefs store (which also drives the i18n locale)
+  // for guests and offline boots.
+  const current = user?.language ?? localePref;
 
   const change = async (lang: 'es' | 'en') => {
     if (lang === current || pending) return;
     setPending(lang);
+    // Apply the change locally first so the UI flips even if the network call
+    // is slow or fails.
+    await setLocalePref(lang);
     try {
-      const updated = await api<AuthUser>('/users/me', {
-        method: 'PATCH',
-        body: { language: lang },
-      });
-      if (user) setUser({ ...user, ...updated });
-      setLocale(lang);
+      if (user) {
+        const updated = await api<AuthUser>('/users/me', {
+          method: 'PATCH',
+          body: { language: lang },
+        });
+        setUser({ ...user, ...updated });
+      }
       toast.success(lang === 'es' ? 'Idioma cambiado a Español.' : 'Language switched to English.');
     } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : 'No pudimos cambiar el idioma.');
+      toast.error(e instanceof ApiError ? e.message : 'No pudimos sincronizar con el servidor.');
     } finally {
       setPending(null);
     }

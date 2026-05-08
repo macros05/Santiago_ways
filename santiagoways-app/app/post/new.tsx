@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,7 +11,8 @@ import { Button } from '@components/Button';
 import { Input } from '@components/Input';
 import { Text } from '@design/text';
 import { colors, radius, spacing } from '@design/tokens';
-import { api } from '@lib/api';
+import { api, ApiError } from '@lib/api';
+import { uploadImages } from '@lib/uploads';
 import { toast } from '@stores/toast';
 
 export default function NewPost() {
@@ -22,30 +23,40 @@ export default function NewPost() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [location, setLocation] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const createPost = useMutation({
-    mutationFn: () =>
-      api('/posts', {
-        method: 'POST',
-        body: {
-          content,
-          // TODO: upload images to Cloudinary first, then pass secure URLs.
-          images: [],
-          locationName: location || undefined,
-        },
-      }),
+    mutationFn: async () => {
+      setUploading(true);
+      try {
+        const remoteUrls = images.length > 0 ? await uploadImages(images, 'posts') : [];
+        return api('/posts', {
+          method: 'POST',
+          body: {
+            content,
+            images: remoteUrls,
+            locationName: location || undefined,
+          },
+        });
+      } finally {
+        setUploading(false);
+      }
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['posts'] });
       toast.success('Publicación enviada.');
       router.back();
     },
-    onError: () => toast.error('No pudimos publicar.'),
+    onError: (e) => {
+      const msg = e instanceof ApiError ? e.message : 'No pudimos publicar.';
+      toast.error(msg);
+    },
   });
 
   const pickImages = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Permiso requerido', 'Activa el acceso a tus fotos.');
+      toast.error('Activa el acceso a tus fotos para añadir imágenes.');
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
@@ -119,10 +130,10 @@ export default function NewPost() {
         />
 
         <Button
-          label="Publicar"
+          label={uploading ? 'Subiendo…' : 'Publicar'}
           fullWidth
           loading={createPost.isPending}
-          disabled={!content.trim()}
+          disabled={!content.trim() || createPost.isPending}
           style={{ marginTop: spacing['8'] }}
           onPress={() => createPost.mutate()}
         />
