@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { api, clearTokens, setTokens } from '@lib/api';
 
@@ -18,9 +19,13 @@ export type AuthUser = {
   plan?: 'free' | 'buen_camino' | 'compostelero';
 };
 
+const GUEST_KEY = 'sw_guest_mode_v1';
+
 type AuthState = {
   user: AuthUser | null;
   isReady: boolean;
+  /** True when the user opted to "explore without account" — read-only access. */
+  isGuest: boolean;
   bootstrap: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   register: (input: {
@@ -34,19 +39,21 @@ type AuthState = {
   signInWithApple: (input: { identityToken: string; name?: string; email?: string }) => Promise<void>;
   signOut: () => Promise<void>;
   setUser: (user: AuthUser) => void;
+  enterGuestMode: () => Promise<void>;
+  exitGuestMode: () => Promise<void>;
 };
 
 export const useAuth = create<AuthState>((set) => ({
   user: null,
   isReady: false,
+  isGuest: false,
 
   bootstrap: async () => {
-    try {
-      const me = await api<AuthUser>('/auth/me');
-      set({ user: me, isReady: true });
-    } catch {
-      set({ user: null, isReady: true });
-    }
+    const [me, guest] = await Promise.all([
+      api<AuthUser>('/auth/me').catch(() => null),
+      AsyncStorage.getItem(GUEST_KEY).catch(() => null),
+    ]);
+    set({ user: me, isGuest: !me && guest === '1', isReady: true });
   },
 
   signIn: async (email, password) => {
@@ -98,8 +105,19 @@ export const useAuth = create<AuthState>((set) => ({
       // ignore
     }
     await clearTokens();
-    set({ user: null });
+    await AsyncStorage.removeItem(GUEST_KEY).catch(() => {});
+    set({ user: null, isGuest: false });
   },
 
   setUser: (user) => set({ user }),
+
+  enterGuestMode: async () => {
+    await AsyncStorage.setItem(GUEST_KEY, '1').catch(() => {});
+    set({ isGuest: true });
+  },
+
+  exitGuestMode: async () => {
+    await AsyncStorage.removeItem(GUEST_KEY).catch(() => {});
+    set({ isGuest: false });
+  },
 }));

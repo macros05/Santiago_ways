@@ -52,6 +52,10 @@ model User {
   subscription    Subscription?
   healthSnapshots HealthSnapshot[]
   chatMessages    ChatMessage[]
+  diaryEntries    DiaryEntry[]
+  credentialStamps CredentialStamp[]
+  albergueFavorites AlbergueFavorite[]
+  analyticsEvents AnalyticsEvent[]
 
   @@index([username])
   @@index([isOnCamino])
@@ -435,4 +439,84 @@ model ChatMessage {
 
   @@index([roomId, createdAt])
   @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pilgrim diary, digital credential, favorites, GPS, analytics
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DiaryEntry {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stageId     String?
+  pilgrimageId String?
+  date        DateTime
+  title       String
+  body        String
+  images      String[]
+  mood        String?   // happy | tired | inspired | grateful | challenged
+  weather     String?
+  isPrivate   Boolean   @default(true)
+  shareToken  String?   @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, date])
+  @@index([pilgrimageId])
+  @@index([stageId])
+}
+
+model CredentialStamp {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pilgrimageId String?
+  // Logical id of the place (slug) — covers QR points or known waypoints.
+  placeSlug    String
+  placeName    String
+  city         String?
+  lat          Float
+  lng          Float
+  method       String   // qr | gps | manual
+  stampedAt    DateTime @default(now())
+
+  @@unique([userId, pilgrimageId, placeSlug])
+  @@index([userId])
+  @@index([pilgrimageId])
+}
+
+model AlbergueFavorite {
+  userId     String
+  albergueId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([userId, albergueId])
+  @@index([albergueId])
+}
+
+model GpsPoint {
+  id           String   @id @default(cuid())
+  pilgrimageId String
+  recordedAt   DateTime
+  lat          Float
+  lng          Float
+  altitude     Float?
+  speed        Float?
+  accuracy     Float?
+
+  @@index([pilgrimageId, recordedAt])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  props     Json?
+  ts        DateTime @default(now())
+
+  @@index([name, ts])
+  @@index([userId, ts])
 }

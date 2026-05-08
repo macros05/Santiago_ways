@@ -21,7 +21,7 @@ type CloudinaryResponse = {
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB hard cap on the client.
 
-export type UploadFolder = 'avatars' | 'posts';
+export type UploadFolder = 'avatars' | 'posts' | 'diary';
 
 export async function uploadImage(localUri: string, folder: UploadFolder): Promise<string> {
   const signed = await api<SignedUpload>('/uploads/sign', {

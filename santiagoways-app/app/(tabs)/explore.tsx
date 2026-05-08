@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,8 +25,13 @@ import {
 } from '@hooks/usePilgrimage';
 import { useFeaturedAlbergues } from '@hooks/useFeaturedAlbergues';
 import { useShowAds, usePlan } from '@hooks/useSubscription';
+import { useWeather } from '@hooks/useWeather';
 import { greeting } from '@lib/format';
 import { t } from '@lib/i18n';
+import { dailyQuote } from '@lib/dailyQuote';
+import { Analytics } from '@lib/analytics';
+import { useTracking } from '@lib/tracking';
+import { usePrefs } from '@stores/prefs';
 
 const TIPS = [
   { title: 'Hidratación en la Meseta', body: 'Lleva 2L de agua. La sombra escasea entre las 11 y las 16h.' },
@@ -39,17 +45,34 @@ export default function ExploreScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const user = useAuth((s) => s.user);
+  const isGuest = useAuth((s) => s.isGuest);
   const myQ = useMyPilgrimage();
   const routesQ = useRoutes();
   const featuredQ = useFeaturedAlbergues();
   const showAds = useShowAds();
   const plan = usePlan();
+  const locale = usePrefs((s) => s.locale);
   const tip = TIPS[new Date().getDate() % TIPS.length]!;
+  const quote = dailyQuote(locale);
 
   const stats = pilgrimageStats(myQ.data);
   const upcoming = myQ.data?.stages
     .filter((s) => s.status === 'active' || s.status === 'pending')
     .slice(0, 5);
+
+  // Weather follows the user's last known position when on Camino;
+  // falls back to Santiago de Compostela for inspiration.
+  const weatherLat = user?.isOnCamino ? null : 42.881;
+  const weatherLng = user?.isOnCamino ? null : -8.545;
+  const weatherQ = useWeather(weatherLat, weatherLng);
+
+  // Live tracking — surface off-route warning at the top.
+  const isTracking = useTracking((s) => s.isTracking);
+  const isOffRoute = useTracking((s) => s.offRoute);
+
+  useEffect(() => {
+    Analytics.homeView();
+  }, []);
 
   return (
     <ScrollView
@@ -66,7 +89,7 @@ export default function ExploreScreen() {
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
             <Text variant="display" color={colors.cream} numberOfLines={1} style={{ flexShrink: 1 }}>
-              {user?.name?.split(' ')[0] ?? 'Pilgrim'}
+              {user?.name?.split(' ')[0] ?? (isGuest ? 'Invitado' : 'Pilgrim')}
             </Text>
             {plan === 'compostelero' ? (
               <Text style={{ fontSize: 22 }}>🐚</Text>
@@ -85,6 +108,30 @@ export default function ExploreScreen() {
           <Ionicons name="diamond-outline" size={20} color={colors.amber400} />
         </Pressable>
       </View>
+
+      {isGuest ? (
+        <Pressable
+          onPress={() => router.push('/(auth)/register')}
+          style={styles.guestBanner}
+          accessibilityRole="button"
+        >
+          <Ionicons name="person-circle-outline" size={20} color={colors.amber400} />
+          <View style={{ flex: 1 }}>
+            <Text variant="caption" color={colors.cream}>{t('guest.banner')}</Text>
+            <Text variant="caption" color={colors.amber400}>{t('guest.bannerCta')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.amber400} />
+        </Pressable>
+      ) : null}
+
+      {isTracking && isOffRoute ? (
+        <View style={styles.offRoute}>
+          <Ionicons name="warning" size={18} color={colors.stone950} />
+          <Text variant="caption" color={colors.stone950} style={{ flex: 1 }}>
+            {t('home.offRoute')}
+          </Text>
+        </View>
+      ) : null}
 
       {myQ.isLoading ? (
         <View style={{ paddingHorizontal: spacing['5'] }}>
@@ -158,6 +205,49 @@ export default function ExploreScreen() {
           </View>
         </Card>
       )}
+
+      {/* Quick actions — surface the new diary, credential, practical, community shortcuts. */}
+      <View style={styles.quickActions}>
+        <QuickAction icon="walk-outline" label={t('home.qaTrack')} onPress={() => router.push('/(tabs)/route')} />
+        <QuickAction icon="book-outline" label={t('home.qaDiary')} onPress={() => router.push('/diary')} />
+        <QuickAction icon="ribbon-outline" label={t('home.qaCredential')} onPress={() => router.push('/credential')} />
+        <QuickAction icon="information-circle-outline" label={t('home.qaPractical')} onPress={() => router.push('/practical')} />
+        <QuickAction icon="people-outline" label={t('home.qaCommunity')} onPress={() => router.push('/(tabs)/community')} />
+      </View>
+
+      {/* Daily quote */}
+      <View style={{ paddingHorizontal: spacing['5'], marginTop: spacing['6'] }}>
+        <Card padding="4" style={{ borderColor: 'rgba(251,191,36,0.3)', borderWidth: 1 }}>
+          <View style={{ flexDirection: 'row', gap: spacing['2'] }}>
+            <Ionicons name="sparkles" size={16} color={colors.amber400} />
+            <Text variant="small" color={colors.stone200} style={{ flex: 1, fontStyle: 'italic' }}>
+              {quote}
+            </Text>
+          </View>
+        </Card>
+      </View>
+
+      {/* Weather widget */}
+      {weatherQ.data ? (
+        <View style={{ paddingHorizontal: spacing['5'], marginTop: spacing['4'] }}>
+          <Card padding="4">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
+              <Ionicons name="partly-sunny" size={28} color={colors.amber400} />
+              <View style={{ flex: 1 }}>
+                <Text variant="caption" color={colors.stone400}>{t('home.weather')}</Text>
+                <Text variant="bodyBold" color={colors.cream}>
+                  {locale === 'en' ? weatherQ.data.description_en : weatherQ.data.description}
+                  {' · '}
+                  {weatherQ.data.temperatureC.toFixed(0)}°C
+                </Text>
+                <Text variant="caption" color={colors.stone400}>
+                  Sensación {weatherQ.data.feelsLikeC.toFixed(0)}°C · Viento {weatherQ.data.windKmh.toFixed(0)} km/h
+                </Text>
+              </View>
+            </View>
+          </Card>
+        </View>
+      ) : null}
 
       {showAds ? (
         <View style={{ marginTop: spacing['6'] }}>
@@ -311,6 +401,27 @@ export default function ExploreScreen() {
   );
 }
 
+function QuickAction({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={styles.qa}>
+      <View style={styles.qaIcon}>
+        <Ionicons name={icon} size={20} color={colors.amber400} />
+      </View>
+      <Text variant="caption" color={colors.cream} numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 function LockedRouteRow({
   route,
   onPress,
@@ -443,6 +554,51 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: 'rgba(255,215,0,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['3'],
+    marginHorizontal: spacing['5'],
+    marginBottom: spacing['4'],
+    paddingVertical: spacing['3'],
+    paddingHorizontal: spacing['4'],
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(251,191,36,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(251,191,36,0.3)',
+  },
+  offRoute: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['2'],
+    backgroundColor: colors.amber400,
+    marginHorizontal: spacing['5'],
+    marginBottom: spacing['4'],
+    paddingVertical: spacing['3'],
+    paddingHorizontal: spacing['4'],
+    borderRadius: radius.md,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing['5'],
+    marginTop: spacing['6'],
+    gap: spacing['2'],
+  },
+  qa: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+  },
+  qaIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.stone900,
+    borderWidth: 1,
+    borderColor: colors.stone800,
     alignItems: 'center',
     justifyContent: 'center',
   },

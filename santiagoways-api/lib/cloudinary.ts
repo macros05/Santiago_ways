@@ -29,7 +29,7 @@ export type SignedUpload = {
 // Returns parameters the client uses to PUT/POST the file directly to
 // Cloudinary's upload API. The signature is short-lived (timestamp +/- ~1h)
 // and bound to the folder so signed credentials cannot upload elsewhere.
-export function signUpload(opts: { folder: 'avatars' | 'posts'; userId: string }): SignedUpload {
+export function signUpload(opts: { folder: 'avatars' | 'posts' | 'diary'; userId: string }): SignedUpload {
   configure();
   const timestamp = Math.floor(Date.now() / 1000);
   const folder = `santiagoways/${opts.folder}/${opts.userId}`;

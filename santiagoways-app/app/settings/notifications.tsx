@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
@@ -10,6 +10,13 @@ import { Text } from '@design/text';
 import { Button } from '@components/Button';
 import { colors, layout, spacing } from '@design/tokens';
 import { usePrefs } from '@stores/prefs';
+import {
+  scheduleDepartureReminder,
+  scheduleWeeklyRecap,
+  cancelAllScheduled,
+} from '@lib/notifications';
+import { toast } from '@stores/toast';
+import { t } from '@lib/i18n';
 
 type Status = 'unknown' | 'granted' | 'denied' | 'undetermined';
 
@@ -65,6 +72,60 @@ export default function NotificationsSettings() {
           />
         </Card>
 
+        {/* Smart notification slots — opt-in, individual schedules. */}
+        {pushEnabled && status === 'granted' ? (
+          <View style={{ gap: spacing['3'] }}>
+            <Text variant="caption" color={colors.stone400} style={{ marginTop: spacing['2'] }}>
+              Avisos inteligentes
+            </Text>
+            <Pressable
+              onPress={async () => {
+                const r = await scheduleDepartureReminder({ hour: 6, minute: 30 });
+                toast.success(r ? 'Recordatorio diario a las 6:30 ✓' : 'Permiso necesario.');
+              }}
+            >
+              <Card style={styles.smartRow}>
+                <Ionicons name="alarm-outline" size={20} color={colors.amber400} />
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyMedium" color={colors.cream}>
+                    {t('notifications.departureReminder')}
+                  </Text>
+                  <Text variant="caption" color={colors.stone400}>06:30 todos los días</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.stone500} />
+              </Card>
+            </Pressable>
+            <Pressable
+              onPress={async () => {
+                const r = await scheduleWeeklyRecap();
+                toast.success(r ? 'Resumen semanal activado ✓' : 'Permiso necesario.');
+              }}
+            >
+              <Card style={styles.smartRow}>
+                <Ionicons name="bar-chart-outline" size={20} color={colors.amber400} />
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyMedium" color={colors.cream}>
+                    {t('notifications.weeklyRecap')}
+                  </Text>
+                  <Text variant="caption" color={colors.stone400}>Domingos a las 19:00</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.stone500} />
+              </Card>
+            </Pressable>
+            <Pressable
+              onPress={async () => {
+                await cancelAllScheduled();
+                toast.success('Avisos programados borrados.');
+              }}
+            >
+              <Card style={styles.smartRow}>
+                <Ionicons name="close-circle-outline" size={20} color={colors.stone400} />
+                <Text variant="bodyMedium" color={colors.stone300}>Cancelar todos</Text>
+              </Card>
+            </Pressable>
+          </View>
+        ) : null}
+
         {status === 'denied' ? (
           <Card style={{ gap: spacing['3'] }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
@@ -97,6 +158,11 @@ export default function NotificationsSettings() {
 
 const styles = StyleSheet.create({
   row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['3'],
+  },
+  smartRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3'],

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -16,6 +16,13 @@ import { Skeleton } from '@components/Skeleton';
 import { AvailabilitySheet } from '@components/AvailabilitySheet';
 import { colors, radius, spacing } from '@design/tokens';
 import { api } from '@lib/api';
+import {
+  useAlbergueFavorites,
+  useToggleAlbergueFavorite,
+} from '@hooks/useAlbergueFavorites';
+import { scheduleAlbergueClosingAlert } from '@lib/notifications';
+import { Analytics } from '@lib/analytics';
+import { toast } from '@stores/toast';
 
 type Albergue = {
   id: string;
@@ -60,6 +67,33 @@ export default function AlbergueDetail() {
   });
   const a = albergueQ.data;
 
+  const favoritesQ = useAlbergueFavorites();
+  const toggleFav = useToggleAlbergueFavorite();
+  const isFavorite = useMemo(
+    () => (favoritesQ.data ?? []).some((f) => f.id === id),
+    [favoritesQ.data, id],
+  );
+
+  useEffect(() => {
+    if (id) Analytics.albergueView(id);
+  }, [id]);
+
+  const handleToggleFav = async () => {
+    if (!id) return;
+    await toggleFav.mutateAsync({ id, on: !isFavorite });
+    Analytics.albergueFavorite(id, !isFavorite);
+  };
+
+  const handleClosingAlert = async () => {
+    if (!a) return;
+    const r = await scheduleAlbergueClosingAlert(a.name);
+    if (r) {
+      toast.success('Alerta a las 21:30 programada.');
+    } else {
+      toast.info('Activa las notificaciones para recibir alertas.');
+    }
+  };
+
   if (albergueQ.isError) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
@@ -76,7 +110,21 @@ export default function AlbergueDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
-      <Header onBack={() => router.back()} title={a?.name} />
+      <Header
+        onBack={() => router.back()}
+        title={a?.name}
+        rightAction={
+          a ? (
+            <Pressable onPress={handleToggleFav} hitSlop={12} accessibilityLabel="Favorito">
+              <Ionicons
+                name={isFavorite ? 'heart' : 'heart-outline'}
+                size={24}
+                color={isFavorite ? colors.amber400 : colors.cream}
+              />
+            </Pressable>
+          ) : null
+        }
+      />
       <ScrollView contentContainerStyle={{ paddingBottom: spacing['16'] }}>
         <View style={styles.hero}>
           {a?.imageUrl ? (
@@ -131,6 +179,13 @@ export default function AlbergueDetail() {
             disabled={!a}
             style={{ marginTop: spacing['3'] }}
             onPress={() => setAvailabilityOpen(true)}
+          />
+          <Button
+            label="Avísame antes del cierre (21:30)"
+            variant="ghost"
+            fullWidth
+            disabled={!a}
+            onPress={handleClosingAlert}
           />
 
           <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['6'] }}>Opiniones</Text>

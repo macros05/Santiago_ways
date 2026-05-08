@@ -25,6 +25,10 @@ import {
   isStageDownloaded,
 } from '@lib/offline';
 import { toast } from '@stores/toast';
+import { ElevationProfile } from '@components/ElevationProfile';
+import { useTracking } from '@lib/tracking';
+import { useMyPilgrimage } from '@hooks/usePilgrimage';
+import { Analytics } from '@lib/analytics';
 
 type Stage = {
   id: string;
@@ -146,6 +150,42 @@ export default function StageDetail() {
 
   const stage = stageQ.data;
 
+  // ── Tracking integration ───────────────────────────────────────────────
+  const myQ = useMyPilgrimage();
+  const isTracking = useTracking((s) => s.isTracking);
+  const trackingPilgrimage = useTracking((s) => s.pilgrimageId);
+  const distanceMeters = useTracking((s) => s.distanceMeters);
+  const startTracking = useTracking((s) => s.start);
+  const stopTracking = useTracking((s) => s.stop);
+
+  const startTrack = async () => {
+    if (!stage || !myQ.data) {
+      toast.info('Necesitas tener una peregrinación activa.');
+      return;
+    }
+    const polyline = (stage.coordinates?.coordinates ?? []).map(([lng, lat]) => ({ lat, lng }));
+    try {
+      await startTracking(myQ.data.id, polyline);
+      Analytics.trackingStarted();
+      toast.success('Tracking iniciado.');
+    } catch {
+      toast.error('Necesitamos permiso de ubicación.');
+    }
+  };
+
+  const stopTrack = async () => {
+    const result = await stopTracking();
+    if (result) {
+      Analytics.trackingStopped(result.distanceMeters / 1000, result.durationMin);
+      Analytics.stageCompleted(stage?.id ?? '', 'gps');
+      toast.success(`Etapa registrada · ${(result.distanceMeters / 1000).toFixed(1)} km`);
+    }
+  };
+
+  useEffect(() => {
+    if (id) Analytics.stageView(id);
+  }, [id]);
+
   if (stageQ.isError) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
@@ -220,7 +260,67 @@ export default function StageDetail() {
 
         {tab === 'overview' && stage ? (
           <View style={styles.section}>
-            <Text variant="body" color={colors.stone200}>
+            {/* Elevation profile */}
+            <ElevationProfile
+              totalKm={stage.distanceKm}
+              elevationGain={stage.elevationGain}
+              elevationLoss={stage.elevationLoss}
+            />
+
+            {/* Live tracking controls */}
+            <Card style={{ marginTop: spacing['4'] }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: 'rgba(251,191,36,0.12)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Ionicons
+                    name={isTracking && trackingPilgrimage === myQ.data?.id ? 'radio' : 'play'}
+                    size={20}
+                    color={colors.amber400}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyBold" color={colors.cream}>
+                    {isTracking ? 'Tracking activo' : 'Track esta etapa'}
+                  </Text>
+                  <Text variant="caption" color={colors.stone400}>
+                    {isTracking
+                      ? `${(distanceMeters / 1000).toFixed(2)} km registrados`
+                      : 'GPS preciso, GPX al final, validación de etapa'}
+                  </Text>
+                </View>
+                <Button
+                  label={isTracking ? 'Parar' : 'Empezar'}
+                  size="sm"
+                  onPress={isTracking ? stopTrack : startTrack}
+                />
+              </View>
+            </Card>
+
+            {/* Diary + credential shortcuts */}
+            <View style={{ flexDirection: 'row', gap: spacing['3'], marginTop: spacing['4'] }}>
+              <Pressable style={{ flex: 1 }} onPress={() => router.push(`/diary/new?stageId=${stage.id}${myQ.data?.id ? `&pilgrimageId=${myQ.data.id}` : ''}`)}>
+                <Card padding="3" style={{ alignItems: 'center', gap: 6 }}>
+                  <Ionicons name="book-outline" size={20} color={colors.amber400} />
+                  <Text variant="caption" color={colors.cream}>Anotar en diario</Text>
+                </Card>
+              </Pressable>
+              <Pressable style={{ flex: 1 }} onPress={() => router.push('/credential/add')}>
+                <Card padding="3" style={{ alignItems: 'center', gap: 6 }}>
+                  <Ionicons name="ribbon-outline" size={20} color={colors.amber400} />
+                  <Text variant="caption" color={colors.cream}>Sellar credencial</Text>
+                </Card>
+              </Pressable>
+            </View>
+
+            <Text variant="body" color={colors.stone200} style={{ marginTop: spacing['8'] }}>
               {stage.description}
             </Text>
             <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>

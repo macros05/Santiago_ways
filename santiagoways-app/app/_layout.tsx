@@ -11,6 +11,7 @@ import { useSubscription } from '@stores/subscription';
 import { usePrefs } from '@stores/prefs';
 import { ToastHost } from '@components/Toast';
 import { colors } from '@design/tokens';
+import { startAnalytics, stopAnalytics, flush as flushAnalytics } from '@lib/analytics';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -26,6 +27,12 @@ export default function RootLayout() {
     Promise.all([bootstrap(), hydratePrefs()]).finally(() =>
       SplashScreen.hideAsync().catch(() => {}),
     );
+    startAnalytics();
+    return () => {
+      // Best-effort flush on unmount.
+      void flushAnalytics();
+      stopAnalytics();
+    };
   }, [bootstrap, hydratePrefs]);
 
   useEffect(() => {
@@ -60,6 +67,12 @@ export default function RootLayout() {
             <Stack.Screen name="chat/index" />
             <Stack.Screen name="chat/[id]" />
             <Stack.Screen name="settings" />
+            <Stack.Screen name="diary/index" />
+            <Stack.Screen name="diary/new" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+            <Stack.Screen name="diary/[id]" />
+            <Stack.Screen name="credential/index" />
+            <Stack.Screen name="credential/add" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+            <Stack.Screen name="practical/index" />
           </Stack>
           {isReady ? <ToastHost /> : null}
         </QueryClientProvider>

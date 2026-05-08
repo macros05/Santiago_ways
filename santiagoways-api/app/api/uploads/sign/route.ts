@@ -8,7 +8,7 @@ import { checkRate, RATE_WRITE } from '@lib/rateLimit';
 export const dynamic = 'force-dynamic';
 
 const schema = z.object({
-  folder: z.enum(['avatars', 'posts']),
+  folder: z.enum(['avatars', 'posts', 'diary']),
 });
 
 export async function POST(req: NextRequest) {

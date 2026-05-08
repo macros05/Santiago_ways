@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,34 +11,78 @@ import { colors, spacing } from '@design/tokens';
 import { t } from '@lib/i18n';
 import { Hero } from '@features/onboarding/Hero';
 import { Routes } from '@features/onboarding/Routes';
-import { Community } from '@features/onboarding/Community';
-import { Features } from '@features/onboarding/Features';
 import { Cta } from '@features/onboarding/Cta';
+import { Analytics } from '@lib/analytics';
+import { useAuth } from '@stores/auth';
 
 const { width } = Dimensions.get('window');
+const PROGRESS_KEY = 'sw_onboarding_progress_v1';
 
 const SCREENS = [
   { key: 'hero', component: Hero },
   { key: 'routes', component: Routes },
-  { key: 'community', component: Community },
-  { key: 'features', component: Features },
   { key: 'cta', component: Cta },
 ] as const;
 
 export default function Welcome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const enterGuest = useAuth((s) => s.enterGuestMode);
   const scrollRef = useRef<ScrollView>(null);
   const [page, setPage] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
+  const startedAt = useRef(Date.now());
+
+  useEffect(() => {
+    AsyncStorage.getItem(PROGRESS_KEY)
+      .then((raw) => {
+        if (raw) {
+          const n = Math.max(0, Math.min(SCREENS.length - 1, Number(raw)));
+          if (n > 0) {
+            setPage(n);
+            requestAnimationFrame(() => {
+              scrollRef.current?.scrollTo({ x: width * n, animated: false });
+            });
+          }
+        }
+      })
+      .finally(() => setHydrated(true));
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    AsyncStorage.setItem(PROGRESS_KEY, String(page)).catch(() => {});
+    const slot = SCREENS[page]?.key;
+    if (slot) Analytics.onboardingStep(slot);
+  }, [page, hydrated]);
 
   const onScroll = (e: { nativeEvent: { contentOffset: { x: number } } }) => {
     const next = Math.round(e.nativeEvent.contentOffset.x / width);
     if (next !== page) setPage(next);
   };
 
-  // Bottom-anchored CTA + dots respect the home indicator / nav bar.
+  const skipToEnd = () => {
+    Analytics.onboardingSkipped(SCREENS[page]?.key ?? 'unknown');
+    scrollRef.current?.scrollTo({ x: width * (SCREENS.length - 1), animated: true });
+    setPage(SCREENS.length - 1);
+  };
+
+  const goRegister = () => {
+    Analytics.onboardingCompleted(Date.now() - startedAt.current);
+    AsyncStorage.removeItem(PROGRESS_KEY).catch(() => {});
+    router.push('/(auth)/register');
+  };
+
+  const exploreWithoutAccount = async () => {
+    Analytics.onboardingExploreWithoutAccount();
+    AsyncStorage.removeItem(PROGRESS_KEY).catch(() => {});
+    await enterGuest();
+    router.replace('/(tabs)/explore');
+  };
+
   const ctaBottom = Math.max(insets.bottom, spacing['6']) + spacing['4'];
-  const dotsBottom = ctaBottom + 132;
+  const dotsBottom = ctaBottom + 156;
+  const skipTop = insets.top + spacing['3'];
 
   return (
     <View style={styles.root}>
@@ -60,6 +105,21 @@ export default function Welcome() {
         ))}
       </ScrollView>
 
+      {/* Skip — top-right, only visible on non-final steps. */}
+      {page < SCREENS.length - 1 ? (
+        <Pressable
+          onPress={skipToEnd}
+          hitSlop={12}
+          style={[styles.skip, { top: skipTop }]}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.skip')}
+        >
+          <Text variant="small" color={colors.stone300}>
+            {t('common.skip')}
+          </Text>
+        </Pressable>
+      ) : null}
+
       <Animated.View entering={FadeInDown.duration(400)} style={[styles.dots, { bottom: dotsBottom }]}>
         {SCREENS.map((_, i) => (
           <View
@@ -77,17 +137,19 @@ export default function Welcome() {
 
       {page === SCREENS.length - 1 ? (
         <Animated.View entering={FadeIn.duration(300)} style={[styles.cta, { bottom: ctaBottom }]}>
+          <Button label={t('auth.register')} onPress={goRegister} fullWidth />
           <Button
-            label={t('auth.register')}
-            onPress={() => router.push('/(auth)/register')}
+            label={t('onboarding.exploreWithoutAccount')}
+            variant="ghost"
+            onPress={exploreWithoutAccount}
             fullWidth
+            style={{ marginTop: spacing['3'] }}
           />
           <Button
             label={t('onboarding.haveAccount')}
             variant="ghost"
             onPress={() => router.push('/(auth)/login')}
             fullWidth
-            style={{ marginTop: spacing['3'] }}
           />
         </Animated.View>
       ) : (
@@ -112,6 +174,12 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.stone950,
+  },
+  skip: {
+    position: 'absolute',
+    right: spacing['5'],
+    paddingVertical: spacing['2'],
+    paddingHorizontal: spacing['3'],
   },
   dots: {
     position: 'absolute',
