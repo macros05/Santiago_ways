@@ -12,6 +12,9 @@ import { usePrefs } from '@stores/prefs';
 import { ToastHost } from '@components/Toast';
 import { colors } from '@design/tokens';
 import { startAnalytics, stopAnalytics, flush as flushAnalytics } from '@lib/analytics';
+// Side-effect import: registers TaskManager.defineTask at the top level so
+// the background GPS task is available as soon as the JS bundle loads.
+import '@lib/backgroundTask';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 

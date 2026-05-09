@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import * as SQLite from 'expo-sqlite';
 import { create } from 'zustand';
 import { api } from './api';
+import { startBackgroundTracking, stopBackgroundTracking } from './backgroundTask';
 import { distanceToPolylineMeters, haversineMeters, type LatLng } from './geo';
 
 export type TrackPoint = {
@@ -154,11 +155,15 @@ export const useTracking = create<TrackingState>((set, get) => ({
       routePolyline: polyline,
       _watch: sub,
     });
+    startBackgroundTracking(pilgrimageId).catch((e) =>
+      console.warn('[tracking] background start failed', e),
+    );
   },
 
   stop: async () => {
     const state = get();
     state._watch?.remove();
+    await stopBackgroundTracking().catch(() => {});
     if (!state.pilgrimageId || !state.startedAt) {
       set({ isTracking: false, _watch: null });
       return null;
