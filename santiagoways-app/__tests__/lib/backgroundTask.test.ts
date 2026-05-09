@@ -1,4 +1,11 @@
-import { decideRegime, REGIME_HIGH, REGIME_BALANCED, type GpsSample } from '@lib/backgroundTask';
+import * as TaskManager from 'expo-task-manager';
+import {
+  BACKGROUND_LOCATION_TASK,
+  decideRegime,
+  REGIME_HIGH,
+  REGIME_BALANCED,
+  type GpsSample,
+} from '@lib/backgroundTask';
 
 const mkSample = (offsetSec: number, lat: number, lng: number): GpsSample => ({
   lat,
@@ -51,5 +58,15 @@ describe('decideRegime', () => {
   it('keeps current regime when fewer than 2 samples', () => {
     expect(decideRegime([], REGIME_HIGH)).toEqual(REGIME_HIGH);
     expect(decideRegime([mkSample(0, 42, -8)], REGIME_BALANCED)).toEqual(REGIME_BALANCED);
+  });
+});
+
+describe('background task registration', () => {
+  it('registers BACKGROUND_LOCATION_TASK at module load', () => {
+    expect(BACKGROUND_LOCATION_TASK).toBe('sw-background-location');
+    expect(TaskManager.defineTask).toHaveBeenCalledWith(
+      BACKGROUND_LOCATION_TASK,
+      expect.any(Function),
+    );
   });
 });
