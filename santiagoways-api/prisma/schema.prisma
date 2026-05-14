@@ -56,6 +56,8 @@ model User {
   credentialStamps CredentialStamp[]
   albergueFavorites AlbergueFavorite[]
   analyticsEvents AnalyticsEvent[]
+  groupsOwned       PilgrimageGroup[]       @relation("groupOwner")
+  groupMemberships  PilgrimageGroupMember[]
 
   @@index([username])
   @@index([isOnCamino])
@@ -118,6 +120,7 @@ model Route {
 
   stages      Stage[]
   pilgrimages Pilgrimage[]
+  groups      PilgrimageGroup[]
 }
 
 model Stage {
@@ -507,6 +510,39 @@ model GpsPoint {
   accuracy     Float?
 
   @@index([pilgrimageId, recordedAt])
+}
+
+model PilgrimageGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  routeId     String
+  route       Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  year        Int
+  ownerId     String
+  owner       User     @relation("groupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  isPublic    Boolean  @default(true)
+  coverImage  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     PilgrimageGroupMember[]
+
+  @@index([routeId, year])
+  @@index([ownerId])
+  @@index([isPublic, year])
+}
+
+model PilgrimageGroupMember {
+  groupId   String
+  userId    String
+  group     PilgrimageGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String          @default("member") // owner | admin | member
+  joinedAt  DateTime        @default(now())
+
+  @@id([groupId, userId])
+  @@index([userId])
 }
 
 model AnalyticsEvent {
