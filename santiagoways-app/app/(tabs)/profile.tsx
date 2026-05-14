@@ -14,6 +14,7 @@ import { useSubscription } from '@stores/subscription';
 import { useSubscriptionStatus } from '@hooks/useSubscription';
 import { toast } from '@stores/toast';
 import { useHealthPermission } from '@hooks/useHealth';
+import { t } from '@lib/i18n';
 
 const ACHIEVEMENTS = [
   { name: 'Primeros pasos', icon: 'footsteps' as const, unlocked: true },
@@ -266,6 +267,11 @@ export default function ProfileScreen() {
           Ajustes
         </Text>
         <Card style={{ marginTop: spacing['3'], padding: 0 }}>
+          <SettingsRow
+            icon="stats-chart-outline"
+            label={t('profile.stats.rowLabel')}
+            onPress={() => router.push('/profile/stats')}
+          />
           <SettingsRow icon="person-outline" label="Editar perfil" onPress={() => router.push('/settings/profile')} />
           <SettingsRow icon="lock-closed-outline" label="Privacidad" onPress={() => router.push('/settings/privacy')} />
           <SettingsRow icon="notifications-outline" label="Notificaciones" onPress={() => router.push('/settings/notifications')} />
