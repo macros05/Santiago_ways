@@ -21,11 +21,13 @@ export type Post = {
 
 type Page = { items: Post[]; nextCursor: string | null };
 
-export function usePostsFeed() {
+export function usePostsFeed(stageId?: string) {
   return useInfiniteQuery<Page>({
-    queryKey: ['posts'],
+    queryKey: ['posts', stageId ?? 'all'],
     queryFn: ({ pageParam }) =>
-      api<Page>('/posts', { query: { cursor: pageParam as string | undefined } }),
+      api<Page>('/posts', {
+        query: { cursor: pageParam as string | undefined, stageId },
+      }),
     initialPageParam: undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });

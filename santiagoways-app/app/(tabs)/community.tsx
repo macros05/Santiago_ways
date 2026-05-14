@@ -13,6 +13,7 @@ import { Card } from '@components/Card';
 import { UpgradeBottomSheet } from '@components/UpgradeBottomSheet';
 import { colors, layout, radius, shadows, spacing } from '@design/tokens';
 import { type Post, useBookmarkPost, useLikePost, usePostsFeed } from '@hooks/usePosts';
+import { useMyPilgrimage } from '@hooks/usePilgrimage';
 import { useCanAccess } from '@hooks/useSubscription';
 import { timeAgo } from '@lib/format';
 import { t } from '@lib/i18n';
@@ -20,7 +21,13 @@ import { t } from '@lib/i18n';
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const feed = usePostsFeed();
+  const myQ = useMyPilgrimage();
+  const activeStage =
+    myQ.data?.stages.find((s) => s.status === 'active') ??
+    myQ.data?.stages.find((s) => s.status === 'pending');
+  const activeStageId = activeStage?.stage.id ?? null;
+  const [filterByStage, setFilterByStage] = useState(false);
+  const feed = usePostsFeed(filterByStage && activeStageId ? activeStageId : undefined);
   const like = useLikePost();
   const bookmark = useBookmarkPost();
   const canPost = useCanAccess('community_post');
@@ -49,6 +56,37 @@ export default function CommunityScreen() {
           </Text>
         </Pressable>
       </View>
+
+      {activeStageId ? (
+        <View style={styles.filterRow}>
+          <Pressable
+            onPress={() => setFilterByStage((v) => !v)}
+            style={[
+              styles.filterChip,
+              {
+                backgroundColor: filterByStage ? colors.amber400 : colors.stone900,
+                borderColor: filterByStage ? colors.amber400 : colors.stone700,
+              },
+            ]}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: filterByStage }}
+          >
+            <Ionicons
+              name="footsteps"
+              size={14}
+              color={filterByStage ? colors.stone950 : colors.cream}
+            />
+            <Text
+              variant="caption"
+              color={filterByStage ? colors.stone950 : colors.cream}
+              numberOfLines={1}
+            >
+              {t('community.filterMyStage')}
+              {activeStage ? ` · ${activeStage.stage.name}` : ''}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       <FlashList<Post>
         data={items}
@@ -246,6 +284,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.amber400,
     marginBottom: spacing['1'],
+  },
+  filterRow: {
+    paddingHorizontal: spacing['5'],
+    paddingBottom: spacing['3'],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['2'],
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: spacing['3'],
+    paddingVertical: spacing['2'],
+    borderRadius: radius.full,
+    borderWidth: 1,
+    maxWidth: '90%',
   },
   image: {
     width: '100%',

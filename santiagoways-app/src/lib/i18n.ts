@@ -139,6 +139,7 @@ const translations = {
       saved: 'Save post',
       unsave: 'Remove from saved',
       nearbyCta: 'Pilgrims nearby',
+      filterMyStage: 'My stage',
       nearby: {
         title: 'Pilgrims nearby',
         toggleShare: 'Share my location',
@@ -450,6 +451,7 @@ const translations = {
       saved: 'Guardar publicación',
       unsave: 'Quitar de guardados',
       nearbyCta: 'Peregrinos cerca',
+      filterMyStage: 'Mi etapa',
       nearby: {
         title: 'Peregrinos cerca',
         toggleShare: 'Compartir mi ubicación',
