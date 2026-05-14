@@ -138,6 +138,18 @@ const translations = {
       noComments: 'Be the first to comment.',
       saved: 'Save post',
       unsave: 'Remove from saved',
+      nearbyCta: 'Pilgrims nearby',
+      nearby: {
+        title: 'Pilgrims nearby',
+        toggleShare: 'Share my location',
+        toggleSubtitle: 'Other pilgrims sharing location can see you within 25 km.',
+        empty: {
+          title: 'Enable location sharing',
+          body: 'To see fellow pilgrims around you and let them spot you, share your location.',
+          cta: 'Share my location',
+        },
+        none: 'No pilgrims nearby right now.',
+      },
     },
     map: {
       searchPlaceholder: 'Search stages, albergues, cities…',
@@ -437,6 +449,18 @@ const translations = {
       noComments: 'Sé el primero en comentar.',
       saved: 'Guardar publicación',
       unsave: 'Quitar de guardados',
+      nearbyCta: 'Peregrinos cerca',
+      nearby: {
+        title: 'Peregrinos cerca',
+        toggleShare: 'Compartir mi ubicación',
+        toggleSubtitle: 'Otros peregrinos que comparten ubicación te verán a menos de 25 km.',
+        empty: {
+          title: 'Activa compartir ubicación',
+          body: 'Para ver peregrinos a tu alrededor y dejar que te vean, comparte tu ubicación.',
+          cta: 'Compartir ubicación',
+        },
+        none: 'No hay peregrinos cerca ahora mismo.',
+      },
     },
     map: {
       searchPlaceholder: 'Busca etapas, albergues, ciudades…',

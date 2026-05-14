@@ -11,6 +11,9 @@ export type Companion = {
   currentLng: number | null;
   distanceKm: number;
   lastLocationAt: string | null;
+  // TODO(api): backend doesn't surface currentStage yet — include when
+  // /api/companions/nearby returns it so the nearby list can show it.
+  currentStageName?: string | null;
 };
 
 export function useNearbyCompanions(enabled: boolean) {

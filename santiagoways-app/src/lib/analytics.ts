@@ -93,6 +93,7 @@ export const Analytics = {
   diaryEntryCreated: (stageId?: string) => track('diary_entry_created', { stageId }),
   credentialStamp: (placeSlug: string, method: 'qr' | 'gps' | 'manual') =>
     track('credential_stamp', { placeSlug, method }),
+  communityNearbyView: () => track('community_nearby_view'),
   paywallShown: (feature: string) => track('paywall_shown', { feature }),
   paywallUpgrade: (feature: string, plan: string) =>
     track('paywall_upgrade', { feature, plan }),

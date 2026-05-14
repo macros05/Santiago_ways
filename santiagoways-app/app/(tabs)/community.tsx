@@ -36,6 +36,18 @@ export default function CommunityScreen() {
     <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing['3'] }]}>
         <Text variant="display" color={colors.cream}>{t('community.title')}</Text>
+        <Pressable
+          onPress={() => router.push('/community/nearby')}
+          style={styles.nearbyBtn}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('community.nearbyCta')}
+        >
+          <Ionicons name="people" size={18} color={colors.amber400} />
+          <Text variant="caption" color={colors.amber400}>
+            {t('community.nearbyCta')}
+          </Text>
+        </Pressable>
       </View>
 
       <FlashList<Post>
@@ -219,6 +231,21 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: spacing['5'],
     paddingBottom: spacing['3'],
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: spacing['3'],
+  },
+  nearbyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['1'],
+    paddingHorizontal: spacing['3'],
+    paddingVertical: spacing['2'],
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.amber400,
+    marginBottom: spacing['1'],
   },
   image: {
     width: '100%',
