@@ -79,7 +79,8 @@
       ],
       "react-native-health",
       "react-native-health-connect",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true
