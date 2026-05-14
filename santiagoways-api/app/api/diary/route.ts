@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { getAuth } from '@lib/auth';
 import { handleApiError, ok, created } from '@lib/http';
+import { evaluateAchievements } from '@lib/achievements';
 
 const CreateSchema = z.object({
   pilgrimageId: z.string().optional(),
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
         isPrivate: data.isPrivate,
       },
     });
+    evaluateAchievements(auth.sub, 'diary_entry_created').catch(() => {});
     return created(entry);
   } catch (e) {
     return handleApiError(e);

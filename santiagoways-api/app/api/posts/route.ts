@@ -6,6 +6,7 @@ import { canPostCommunity } from '@lib/permissions';
 import { created, err, handleApiError, ok, paginationParams } from '@lib/http';
 import { checkRate, RATE_WRITE } from '@lib/rateLimit';
 import { isOwnCloudinaryUrl } from '@lib/cloudinary';
+import { evaluateAchievements } from '@lib/achievements';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
         user: { select: { id: true, name: true, username: true, avatar: true } },
       },
     });
+    evaluateAchievements(auth.sub, 'post_created').catch(() => {});
     return created(post);
   } catch (e) {
     return handleApiError(e);

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { getAuth } from '@lib/auth';
 import { forbidden, handleApiError, ok } from '@lib/http';
+import { checkRate, RATE_GPS } from '@lib/rateLimit';
 
 const PointSchema = z.object({
   recordedAt: z.string().datetime(),
@@ -20,6 +21,8 @@ const BatchSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = await checkRate(req, 'gps-track', RATE_GPS);
+    if (limited) return limited;
     const auth = await getAuth(req);
     const body = BatchSchema.parse(await req.json());
     const pilgrimage = await prisma.pilgrimage.findUnique({

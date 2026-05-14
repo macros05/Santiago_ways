@@ -4,6 +4,7 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@lib/prisma';
 import { getOptionalAuth } from '@lib/auth';
 import { handleApiError, ok } from '@lib/http';
+import { checkRate, RATE_ANALYTICS } from '@lib/rateLimit';
 
 const EventSchema = z.object({
   name: z.string().min(1).max(80),
@@ -20,6 +21,8 @@ const BatchSchema = z.object({
 // payload is invalid — we drop and respond 200 to avoid client retries.
 export async function POST(req: NextRequest) {
   try {
+    const limited = await checkRate(req, 'analytics-event', RATE_ANALYTICS);
+    if (limited) return limited;
     const auth = await getOptionalAuth(req);
     const json = await req.json().catch(() => ({}));
     const parsed = BatchSchema.safeParse(json);

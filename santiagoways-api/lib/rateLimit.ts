@@ -116,3 +116,8 @@ export const RATE_AUTH = { limit: 8, windowMs: 60_000 } as const;
 export const RATE_REGISTER = { limit: 5, windowMs: 60_000 } as const;
 export const RATE_WRITE = { limit: 30, windowMs: 60_000 } as const;
 export const RATE_SEARCH = { limit: 60, windowMs: 60_000 } as const;
+// GPS batches arrive every ~30s with up to 500 points each. Cap at 6 batches
+// per minute per IP — plenty for legitimate clients, blocks flood.
+export const RATE_GPS = { limit: 6, windowMs: 60_000 } as const;
+// Analytics events are best-effort; cap at 12 batches/min per IP.
+export const RATE_ANALYTICS = { limit: 12, windowMs: 60_000 } as const;

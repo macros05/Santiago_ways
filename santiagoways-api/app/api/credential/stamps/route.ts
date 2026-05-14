@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@lib/prisma';
 import { getAuth } from '@lib/auth';
 import { created, err, handleApiError } from '@lib/http';
+import { evaluateAchievements } from '@lib/achievements';
 
 const CreateSchema = z.object({
   pilgrimageId: z.string().optional(),
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
             method: body.method,
           },
         });
+    evaluateAchievements(auth.sub, 'credential_stamp_added').catch(() => {});
     return created(stamp);
   } catch (e) {
     return handleApiError(e);
