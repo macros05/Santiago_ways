@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -21,6 +21,39 @@ type Stage = {
   coordinates: { type: 'LineString'; coordinates: [number, number][] };
 };
 type RouteWithStages = Route & { stages: Stage[] };
+
+// Memoized markers prevent re-rendering each pin every time map state
+// (filters, regions) changes. With ~10-20 route endpoints today the win
+// is modest; clustering becomes worthwhile once we cross ~50 markers,
+// at which point switching to react-native-map-clustering or grouping
+// markers by a ~10 km grid is the right move.
+type EndpointInput = {
+  id: string;
+  lat: number;
+  lng: number;
+  label: string;
+  color: string;
+};
+
+const EndpointMarker = memo(function EndpointMarker({ p }: { p: EndpointInput }) {
+  return (
+    <Marker coordinate={{ latitude: p.lat, longitude: p.lng }} title={p.label}>
+      <View style={[styles.endMarker, { borderColor: p.color }]}>
+        <View style={[styles.endMarkerInner, { backgroundColor: p.color }]} />
+      </View>
+    </Marker>
+  );
+});
+
+const RouteLine = memo(function RouteLine({
+  coords,
+  color,
+}: {
+  coords: { latitude: number; longitude: number }[];
+  color: string;
+}) {
+  return <Polyline coordinates={coords} strokeColor={color} strokeWidth={3.5} />;
+});
 
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
@@ -101,28 +134,11 @@ export default function MapScreen() {
         }}
       >
         {showRoutes
-          ? polylines.map((p) => (
-              <Polyline
-                key={p.id}
-                coordinates={p.coords}
-                strokeColor={p.color}
-                strokeWidth={3.5}
-              />
-            ))
+          ? polylines.map((p) => <RouteLine key={p.id} coords={p.coords} color={p.color} />)
           : null}
 
         {showRoutes
-          ? endpoints.map((e) => (
-              <Marker
-                key={e.id}
-                coordinate={{ latitude: e.lat, longitude: e.lng }}
-                title={e.label}
-              >
-                <View style={[styles.endMarker, { borderColor: e.color }]}>
-                  <View style={[styles.endMarkerInner, { backgroundColor: e.color }]} />
-                </View>
-              </Marker>
-            ))
+          ? endpoints.map((e) => <EndpointMarker key={e.id} p={e} />)
           : null}
 
         {/* Santiago — la meta */}
