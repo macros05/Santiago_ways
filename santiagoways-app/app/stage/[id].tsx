@@ -24,6 +24,8 @@ import {
   downloadStageOffline,
   isStageDownloaded,
 } from '@lib/offline';
+import { OfflineStageMap } from '@components/OfflineStageMap';
+import { useOfflineMap } from '@hooks/useOfflineMap';
 import { toast } from '@stores/toast';
 import { ElevationProfile } from '@components/ElevationProfile';
 import { useTracking } from '@lib/tracking';
@@ -92,6 +94,7 @@ export default function StageDetail() {
   const [downloaded, setDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadPct, setDownloadPct] = useState(0);
+  const offline = useOfflineMap(id ?? null);
 
   useEffect(() => {
     let cancelled = false;
@@ -370,44 +373,46 @@ export default function StageDetail() {
                 const first = coords[0]!;
                 const last = coords[coords.length - 1]!;
                 return (
-                  <MapView
-                    provider={PROVIDER_DEFAULT}
-                    style={StyleSheet.absoluteFill}
-                    initialRegion={regionFor(coords)}
-                    scrollEnabled
-                    zoomEnabled
-                  >
-                    <Polyline
-                      coordinates={coords.map(([lng, lat]) => ({
-                        latitude: lat,
-                        longitude: lng,
-                      }))}
-                      strokeColor={stage.route.color}
-                      strokeWidth={4}
-                    />
-                    <Marker
-                      coordinate={{ latitude: first[1], longitude: first[0] }}
-                      title={stage.startPoint}
+                  <OfflineStageMap offlinePath={offline.path}>
+                    <MapView
+                      provider={PROVIDER_DEFAULT}
+                      style={StyleSheet.absoluteFill}
+                      initialRegion={regionFor(coords)}
+                      scrollEnabled
+                      zoomEnabled
                     >
-                      <MapMarker type="info" size={28} />
-                    </Marker>
-                    <Marker
-                      coordinate={{ latitude: last[1], longitude: last[0] }}
-                      title={stage.endPoint}
-                    >
-                      <MapMarker type="church" size={28} />
-                    </Marker>
-                    {stage.waypoints.map((w) => (
+                      <Polyline
+                        coordinates={coords.map(([lng, lat]) => ({
+                          latitude: lat,
+                          longitude: lng,
+                        }))}
+                        strokeColor={stage.route.color}
+                        strokeWidth={4}
+                      />
                       <Marker
-                        key={w.id}
-                        coordinate={{ latitude: w.lat, longitude: w.lng }}
-                        title={w.name}
-                        description={w.description ?? undefined}
+                        coordinate={{ latitude: first[1], longitude: first[0] }}
+                        title={stage.startPoint}
                       >
-                        <MapMarker type={waypointType(w.type)} size={22} />
+                        <MapMarker type="info" size={28} />
                       </Marker>
-                    ))}
-                  </MapView>
+                      <Marker
+                        coordinate={{ latitude: last[1], longitude: last[0] }}
+                        title={stage.endPoint}
+                      >
+                        <MapMarker type="church" size={28} />
+                      </Marker>
+                      {stage.waypoints.map((w) => (
+                        <Marker
+                          key={w.id}
+                          coordinate={{ latitude: w.lat, longitude: w.lng }}
+                          title={w.name}
+                          description={w.description ?? undefined}
+                        >
+                          <MapMarker type={waypointType(w.type)} size={22} />
+                        </Marker>
+                      ))}
+                    </MapView>
+                  </OfflineStageMap>
                 );
               })()}
             </View>
