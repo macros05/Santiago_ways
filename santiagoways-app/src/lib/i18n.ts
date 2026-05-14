@@ -238,6 +238,14 @@ const translations = {
       method_gps: 'GPS',
       method_manual: 'Manual',
       shareCompostela: 'Share my Compostela',
+      add: {
+        qr: {
+          button: 'Scan QR',
+          scanning: 'Point at a SantiagoWays stamp QR',
+          invalid: 'This QR is not a valid SantiagoWays stamp.',
+          permission: 'Enable camera access to scan QRs.',
+        },
+      },
     },
     practical: {
       title: 'Practical info',
@@ -529,6 +537,14 @@ const translations = {
       method_gps: 'GPS',
       method_manual: 'Manual',
       shareCompostela: 'Compartir mi Compostela',
+      add: {
+        qr: {
+          button: 'Escanear QR',
+          scanning: 'Apunta al QR del sello SantiagoWays',
+          invalid: 'Este QR no es un sello válido de SantiagoWays.',
+          permission: 'Activa el acceso a la cámara para escanear QRs.',
+        },
+      },
     },
     practical: {
       title: 'Información práctica',
