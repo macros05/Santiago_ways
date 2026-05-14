@@ -4,6 +4,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import { Header } from '@components/Header';
 import { Card } from '@components/Card';
 import { Button } from '@components/Button';
@@ -11,7 +13,11 @@ import { Skeleton } from '@components/Skeleton';
 import { Text } from '@design/text';
 import { colors, radius, spacing } from '@design/tokens';
 import { useDiaryEntry, useDeleteDiaryEntry, useShareDiaryEntry } from '@hooks/useDiary';
+import { useCredential } from '@hooks/useCredential';
+import { useMyPilgrimage } from '@hooks/usePilgrimage';
+import { generateCompostelaHTML } from '@lib/compostela';
 import { toast } from '@stores/toast';
+import { useAuth } from '@stores/auth';
 import { t } from '@lib/i18n';
 
 const PUBLIC_BASE = process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api', '') ?? 'https://santiagoways.app';
@@ -21,6 +27,9 @@ export default function DiaryEntryDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const q = useDiaryEntry(id ?? null);
+  const myQ = useMyPilgrimage();
+  const credentialQ = useCredential();
+  const { user } = useAuth();
   const del = useDeleteDiaryEntry();
   const share = useShareDiaryEntry();
   const [busy, setBusy] = useState(false);
@@ -37,6 +46,38 @@ export default function DiaryEntryDetail() {
       toast.success(t('diary.shared'));
     } catch {
       toast.error(t('common.error'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onExportPdf = async () => {
+    if (!entry) return;
+    setBusy(true);
+    try {
+      const publicUrl = entry.shareToken ? `${PUBLIC_BASE}/diary/${entry.shareToken}` : null;
+      const html = generateCompostelaHTML({
+        entry,
+        user,
+        stamps: credentialQ.data?.stamps ?? [],
+        routeName: myQ.data?.route?.name ?? null,
+        startDate: myQ.data?.startDate ?? null,
+        publicUrl,
+      });
+      const { uri } = await Print.printToFileAsync({ html, base64: false });
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'application/pdf',
+          dialogTitle: t('diary.share.pdf.dialogTitle'),
+          UTI: 'com.adobe.pdf',
+        });
+      } else {
+        toast.info(t('diary.share.pdf.saved'));
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : t('common.error');
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -137,11 +178,21 @@ export default function DiaryEntryDetail() {
             </Card>
 
             <Button
+              label={t('diary.share.pdf.cta')}
+              variant="secondary"
+              onPress={onExportPdf}
+              loading={busy}
+              iconLeft={<Ionicons name="document-text-outline" size={18} color={colors.cream} />}
+              fullWidth
+              style={{ marginTop: spacing['6'] }}
+            />
+
+            <Button
               label={t('common.delete')}
               variant="ghost"
               onPress={onDelete}
               fullWidth
-              style={{ marginTop: spacing['8'] }}
+              style={{ marginTop: spacing['4'] }}
             />
           </>
         )}

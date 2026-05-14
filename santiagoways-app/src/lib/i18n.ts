@@ -234,6 +234,13 @@ const translations = {
       saved: 'Entry saved',
       deleted: 'Entry deleted',
       shareSubtitle: 'Public link · anyone with it can read.',
+      share: {
+        pdf: {
+          cta: 'Export Compostela (PDF)',
+          dialogTitle: 'Share Compostela',
+          saved: 'PDF saved on device',
+        },
+      },
     },
     credential: {
       title: 'Pilgrim credential',
@@ -546,6 +553,13 @@ const translations = {
       saved: 'Entrada guardada',
       deleted: 'Entrada eliminada',
       shareSubtitle: 'Enlace público · cualquiera con él puede leer.',
+      share: {
+        pdf: {
+          cta: 'Exportar Compostela (PDF)',
+          dialogTitle: 'Compartir Compostela',
+          saved: 'PDF guardado en el dispositivo',
+        },
+      },
     },
     credential: {
       title: 'Credencial del peregrino',
