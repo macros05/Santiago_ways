@@ -62,7 +62,7 @@ export default function PostScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: colors.stone950 }}
+      style={{ flex: 1, backgroundColor: colors.ink }}
     >
       <Header onBack={() => router.back()} title="Publicación" />
       <ScrollView
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: spacing['3'],
     gap: spacing['2'],
-    backgroundColor: colors.stone950,
+    backgroundColor: colors.ink,
     borderTopWidth: 1,
     borderColor: colors.stone800,
   },

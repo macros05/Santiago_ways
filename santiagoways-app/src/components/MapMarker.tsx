@@ -89,7 +89,7 @@ export function MapMarker({ type, size = 36, pulse }: Props) {
             width: size,
             height: size,
             borderRadius: size / 2,
-            backgroundColor: colors.stone950,
+            backgroundColor: colors.ink,
             borderColor: tint,
           },
         ]}

@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Button } from '@components/Button';
 import { Text } from '@design/text';
-import { colors, spacing } from '@design/tokens';
+import { colors, gradients, spacing } from '@design/tokens';
 import { t } from '@lib/i18n';
 import { Hero } from '@features/onboarding/Hero';
 import { Routes } from '@features/onboarding/Routes';
@@ -86,10 +86,7 @@ export default function Welcome() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={[colors.stone950, colors.stone900]}
-        style={StyleSheet.absoluteFill}
-      />
+      <LinearGradient colors={gradients.dawn} style={StyleSheet.absoluteFill} />
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -127,8 +124,8 @@ export default function Welcome() {
             style={[
               styles.dot,
               {
-                backgroundColor: i === page ? colors.amber400 : colors.stone700,
-                width: i === page ? 24 : 8,
+                backgroundColor: i === page ? colors.amber300 : 'rgba(255,255,255,0.25)',
+                width: i === page ? 26 : 8,
               },
             ]}
           />
@@ -173,7 +170,7 @@ export default function Welcome() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.stone950,
+    backgroundColor: colors.ink,
   },
   skip: {
     position: 'absolute',

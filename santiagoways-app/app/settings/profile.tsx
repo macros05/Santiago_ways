@@ -68,7 +68,7 @@ export default function EditProfile() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: colors.stone950 }}
+      style={{ flex: 1, backgroundColor: colors.ink }}
     >
       <Header title="Editar perfil" onBack={() => router.back()} />
       <ScrollView

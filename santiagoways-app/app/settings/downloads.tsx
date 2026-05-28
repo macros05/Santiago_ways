@@ -15,7 +15,7 @@ export default function DownloadsSettings() {
   const canOffline = useCanAccess('offline_maps');
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title="Descargas offline" onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@design/text';
 import { colors, spacing } from '@design/tokens';
+import { AuroraBackground } from '@components/AuroraBackground';
 import { PlanCard, type PlanFeature } from '@features/plans/PlanCard';
 import { PriceToggle, type Period } from '@features/plans/PriceToggle';
 import { useSubscription } from '@stores/subscription';
@@ -85,7 +86,8 @@ export default function PlansScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
+      <AuroraBackground bloom={0.58} />
       <View style={[styles.topBar, { paddingTop: insets.top + spacing['2'] }]}>
         <Pressable
           onPress={() => router.back()}
@@ -247,12 +249,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.stone900,
-    borderWidth: 1,
-    borderColor: colors.stone700,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.glassFill,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.glassBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },

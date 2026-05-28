@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@components/Button';
 import { Input } from '@components/Input';
+import { AuroraBackground } from '@components/AuroraBackground';
 import { Text } from '@design/text';
 import { colors, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
@@ -45,8 +46,9 @@ export default function Login() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: colors.ink }}
     >
+      <AuroraBackground bloom={0.72} />
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing['12'] }]}
         keyboardShouldPersistTaps="handled"
@@ -146,8 +148,8 @@ const styles = StyleSheet.create({
   },
   dividerLine: {
     flex: 1,
-    height: 1,
-    backgroundColor: colors.stone800,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.glassBorder,
   },
   bottom: {
     flexDirection: 'row',

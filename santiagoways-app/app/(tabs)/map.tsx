@@ -121,7 +121,7 @@ export default function MapScreen() {
   }, [polylines]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <MapView
         provider={PROVIDER_DEFAULT}
         style={StyleSheet.absoluteFill}
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 3,
-    backgroundColor: colors.stone950,
+    backgroundColor: colors.ink,
     alignItems: 'center',
     justifyContent: 'center',
   },

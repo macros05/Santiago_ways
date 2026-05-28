@@ -1,9 +1,8 @@
 import { colors } from './tokens';
 
-// SantiagoWays only ships a dark theme today. This Surface map is the single
-// source of truth for any future themed component — no light variant exists
-// yet because the entire app hardcodes dark surfaces; add `light` here only
-// when at least one consumer wires up a theme switch.
+// SantiagoWays ships a single, deeply atmospheric dark theme — "Liquid Dawn".
+// This Surface map is the single source of truth for themed components. Add a
+// `light` variant here only when a consumer wires up a theme switch.
 
 type Surface = {
   background: string;
@@ -16,10 +15,15 @@ type Surface = {
   accent: string;
   accentMuted: string;
   onAccent: string;
+  // Liquid-glass tokens for frosted, translucent surfaces.
+  glass: string;
+  glassStrong: string;
+  glassBorder: string;
+  glassHighlight: string;
 };
 
 export const theme: Surface = {
-  background: colors.stone950,
+  background: colors.ink,
   surface: colors.stone900,
   surfaceElevated: colors.stone800,
   border: colors.stone700,
@@ -29,4 +33,8 @@ export const theme: Surface = {
   accent: colors.amber400,
   accentMuted: colors.amber500,
   onAccent: colors.stone950,
+  glass: colors.glassFill,
+  glassStrong: colors.glassFillStrong,
+  glassBorder: colors.glassBorder,
+  glassHighlight: colors.glassHighlight,
 };

@@ -20,7 +20,7 @@ export default function RouteScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.stone950 }}
+      style={{ flex: 1, backgroundColor: colors.ink }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing['4'],
         paddingBottom: layout.tabBarHeight + insets.bottom + spacing['8'],
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.stone950,
+    backgroundColor: colors.ink,
   },
   emptyIcon: {
     width: 64,

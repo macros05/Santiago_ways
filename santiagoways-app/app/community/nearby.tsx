@@ -112,7 +112,7 @@ export default function NearbyScreen() {
   }, [companions]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={t('community.nearby.title')} onBack={() => router.back()} />
 
       <View style={[styles.toggleRow, { paddingTop: insets.top + 72 }]}>
@@ -267,6 +267,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.amber400,
     padding: 2,
-    backgroundColor: colors.stone950,
+    backgroundColor: colors.ink,
   },
 });

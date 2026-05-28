@@ -23,10 +23,23 @@ export const colors = {
   // Compostelero accent — used wherever the gold tier needs to stand out.
   gold: '#FFD700',
 
-  success: '#10B981',
-  error: '#EF4444',
-  warning: '#F59E0B',
-  info: '#3B82F6',
+  success: '#34D399',
+  error: '#FB7185',
+  warning: '#FBBF24',
+  info: '#60A5FA',
+
+  // ── Aurora / Liquid Dawn palette ────────────────────────────────────────────
+  // The futuristic "pre-dawn → sunrise" spectrum that gives the app its depth.
+  // Cool night blues bleed into warm ember and gold as the horizon wakes.
+  ink: '#08070B', // deepest base, below stone950 — the void behind glass
+  night: '#0B1026', // cool pre-dawn navy
+  twilight: '#1A1340', // indigo twilight
+  violet: '#3B2A6B', // soft aurora violet
+  ember: '#7C3A12', // warm horizon ember
+  horizon: '#F0A92B', // sunrise gold-amber
+  aurora1: '#5B8DEF', // luminous sky blue (cool accent)
+  aurora2: '#A78BFA', // electric lavender
+  aurora3: '#34D399', // mint shimmer
 
   white: '#FFFFFF',
   black: '#000000',
@@ -44,21 +57,81 @@ export const colors = {
   goldTintStrong: 'rgba(255,215,0,0.30)',
 
   // Stone overlays — for image scrims and modal dim layers.
-  scrimWeak: 'rgba(12,10,9,0.20)',
-  scrimMedium: 'rgba(12,10,9,0.55)',
-  scrimStrong: 'rgba(12,10,9,0.95)',
-  modalDim: 'rgba(0,0,0,0.40)',
+  scrimWeak: 'rgba(8,7,11,0.20)',
+  scrimMedium: 'rgba(8,7,11,0.55)',
+  scrimStrong: 'rgba(8,7,11,0.96)',
+  modalDim: 'rgba(0,0,0,0.55)',
+
+  // ── Liquid glass surfaces ───────────────────────────────────────────────────
+  // Translucent fills that sit on top of a BlurView. Kept low-alpha so the
+  // frosted backdrop reads through them. Borders catch light along the top edge.
+  glassFill: 'rgba(255,255,255,0.055)',
+  glassFillStrong: 'rgba(255,255,255,0.085)',
+  glassFillAmber: 'rgba(251,191,36,0.10)',
+  glassBorder: 'rgba(255,255,255,0.14)',
+  glassBorderStrong: 'rgba(255,255,255,0.22)',
+  glassHighlight: 'rgba(255,255,255,0.55)', // top hairline sheen
+  glassShadowInk: 'rgba(0,0,0,0.45)',
 } as const;
 
 export type ColorToken = keyof typeof colors;
 
+// ── Gradients ─────────────────────────────────────────────────────────────────
+// Tuples consumed by expo-linear-gradient. The "dawn" set is the signature
+// atmosphere; "glass" sheens give surfaces their liquid, light-catching feel.
+export const gradients = {
+  // Full-screen ambient backdrop: night → twilight → ember whisper.
+  dawn: ['#08070B', '#0E0B1F', '#1A1340', '#2A1A2E', '#0C0A09'] as const,
+  // Hero overlay scrim from transparent to deep ink (bottom-anchored).
+  heroScrim: ['rgba(8,7,11,0)', 'rgba(8,7,11,0.35)', 'rgba(8,7,11,0.96)'] as const,
+  // Signature amber → gold sunrise, for primary CTAs and emblems.
+  sunrise: ['#FCD34D', '#FBBF24', '#F0A92B', '#D97706'] as const,
+  // Cool aurora ribbon for accents and progress.
+  aurora: ['#5B8DEF', '#A78BFA', '#FBBF24'] as const,
+  // Premium / Compostelero gold sheen.
+  gold: ['#FDE68A', '#FFD700', '#D97706'] as const,
+  // Subtle glass sheen (top-left highlight to transparent).
+  glassSheen: ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0)'] as const,
+  // Card base tint that lets blur show through.
+  glassCard: ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)'] as const,
+} as const;
+
+export type GradientToken = keyof typeof gradients;
+
+// Type system: Fraunces (a soulful, editorial high-contrast serif) carries the
+// display voice; the platform UI font (SF Pro on iOS, Roboto on Android) carries
+// body/UI for an authentic, crisp Apple-grade feel. Body families resolve to
+// `undefined` so React Native uses the system font and `fontWeight` controls
+// weight — this also removes the previous broken custom-font references.
 export const typography = {
-  display: 'PlayfairDisplay-Bold',
-  displayItalic: 'PlayfairDisplay-Italic',
-  body: 'DMSans-Regular',
-  bodyMedium: 'DMSans-Medium',
-  bodyBold: 'DMSans-Bold',
-  mono: 'DMSans-Mono',
+  display: 'Fraunces_700Bold',
+  displaySemibold: 'Fraunces_600SemiBold',
+  displayMedium: 'Fraunces_500Medium',
+  displayItalic: 'Fraunces_600SemiBold_Italic',
+  displayLight: 'Fraunces_300Light',
+  body: undefined as string | undefined,
+  bodyMedium: undefined as string | undefined,
+  bodyBold: undefined as string | undefined,
+  mono: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
+} as const;
+
+// System UI font weights, applied alongside the (undefined) system family.
+export const weight = {
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
+  heavy: '800',
+} as const;
+
+// Apple-grade optical tracking. Large display text tightens; small caps widen.
+export const tracking = {
+  tighter: -1.1,
+  tight: -0.5,
+  normal: 0,
+  wide: 0.3,
+  wider: 0.8,
+  widest: 1.6,
 } as const;
 
 export const fontSize = {
@@ -168,6 +241,23 @@ const android: ShadowSet = {
 export const shadows: ShadowSet =
   Platform.OS === 'android' ? android : ios;
 
+// Colored "glow" shadows for emblems and primary actions. iOS renders the soft
+// colored halo; Android falls back to elevation (no tinted shadow API).
+export const glow = {
+  amber:
+    Platform.OS === 'android'
+      ? { elevation: 10 }
+      : { shadowColor: '#FBBF24', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.55, shadowRadius: 22 },
+  gold:
+    Platform.OS === 'android'
+      ? { elevation: 12 }
+      : { shadowColor: '#FFD700', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 26 },
+  aurora:
+    Platform.OS === 'android'
+      ? { elevation: 10 }
+      : { shadowColor: '#7C7BFF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 24 },
+} as const;
+
 export const layout = {
   tabBarHeight: 64,
   headerHeight: 56,
@@ -191,7 +281,10 @@ export const z = {
 
 export type Tokens = {
   colors: typeof colors;
+  gradients: typeof gradients;
   typography: typeof typography;
+  weight: typeof weight;
+  tracking: typeof tracking;
   fontSize: typeof fontSize;
   lineHeight: typeof lineHeight;
   spacing: typeof spacing;
@@ -199,6 +292,7 @@ export type Tokens = {
   animation: typeof animation;
   duration: typeof duration;
   shadows: typeof shadows;
+  glow: typeof glow;
   layout: typeof layout;
   opacity: typeof opacity;
   z: typeof z;
@@ -206,7 +300,10 @@ export type Tokens = {
 
 export const tokens: Tokens = {
   colors,
+  gradients,
   typography,
+  weight,
+  tracking,
   fontSize,
   lineHeight,
   spacing,
@@ -214,6 +311,7 @@ export const tokens: Tokens = {
   animation,
   duration,
   shadows,
+  glow,
   layout,
   opacity,
   z,

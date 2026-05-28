@@ -30,7 +30,7 @@ export default function HealthDashboard() {
 
   if (!isCompostelero) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
         <Header title="Salud en el Camino" onBack={() => router.back()} />
         <ScrollView contentContainerStyle={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'], gap: spacing['5'] }}>
@@ -68,7 +68,7 @@ export default function HealthDashboard() {
 
   if (!perm.available) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
         <Header title="Salud en el Camino" onBack={() => router.back()} />
         <View style={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'] }}>
@@ -86,7 +86,7 @@ export default function HealthDashboard() {
 
   if (perm.granted === false) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
         <Header title="Salud en el Camino" onBack={() => router.back()} />
         <ScrollView contentContainerStyle={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'], gap: spacing['5'] }}>
@@ -121,7 +121,7 @@ export default function HealthDashboard() {
   const fatigue = computeFatigue(today, avgSteps);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
       <Header title="Tu Salud en el Camino" onBack={() => router.back()} />
       <ScrollView

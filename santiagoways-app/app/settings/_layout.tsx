@@ -6,7 +6,7 @@ export default function SettingsLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.stone950 },
+        contentStyle: { backgroundColor: colors.ink },
         animation: 'slide_from_right',
       }}
     />

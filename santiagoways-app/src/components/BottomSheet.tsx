@@ -83,6 +83,8 @@ export function BottomSheet({
 
       <GestureDetector gesture={pan}>
         <Animated.View style={[styles.sheet, { height: sheetHeight }, sheetStyle, style]}>
+          <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={[StyleSheet.absoluteFill, styles.sheetTint]} />
           <View style={styles.handle} />
           <View style={styles.content}>{children}</View>
         </Animated.View>
@@ -100,19 +102,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    backgroundColor: colors.stone900,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderTopWidth: 1,
-    borderColor: colors.stone700,
+    backgroundColor: 'rgba(12,10,9,0.6)',
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.glassBorderStrong,
     paddingTop: spacing['3'],
+    overflow: 'hidden',
+  },
+  sheetTint: {
+    backgroundColor: colors.glassFill,
   },
   handle: {
     alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.stone600,
+    width: 44,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: colors.glassBorderStrong,
     marginBottom: spacing['3'],
   },
   content: {

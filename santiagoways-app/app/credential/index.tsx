@@ -31,7 +31,7 @@ export default function CredentialScreen() {
   }, [credQ.data]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={t('credential.title')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

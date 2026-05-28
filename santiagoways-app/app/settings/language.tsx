@@ -54,7 +54,7 @@ export default function LanguageSettings() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title="Idioma" onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

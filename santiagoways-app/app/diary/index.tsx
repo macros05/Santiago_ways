@@ -21,7 +21,7 @@ export default function DiaryListScreen() {
   const data = useMemo(() => q.data ?? [], [q.data]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={t('diary.title')} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingTop: insets.top + 56 }}>
         {q.isLoading ? (

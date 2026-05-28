@@ -75,7 +75,7 @@ export default function ProfileStatsScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={t('profile.stats.title')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
@@ -185,7 +185,7 @@ export default function ProfileStatsScreen() {
 
 const styles = StyleSheet.create({
   captureZone: {
-    backgroundColor: colors.stone950,
+    backgroundColor: colors.ink,
   },
   grid: {
     flexDirection: 'row',

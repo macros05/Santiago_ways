@@ -66,7 +66,7 @@ export default function ChatRoomScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
       <Header
         title="Compostelero"
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     gap: spacing['2'],
     borderTopWidth: 1,
     borderColor: colors.stone800,
-    backgroundColor: colors.stone950,
+    backgroundColor: colors.ink,
   },
   input: {
     flex: 1,

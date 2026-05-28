@@ -71,7 +71,7 @@ export default function NewPost() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header
         onBack={() => router.back()}
         title="Nueva publicación"

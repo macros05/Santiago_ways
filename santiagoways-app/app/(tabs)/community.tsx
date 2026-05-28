@@ -40,7 +40,7 @@ export default function CommunityScreen() {
   const items = feed.data?.pages.flatMap((p) => p.items) ?? [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing['3'] }]}>
         <Text variant="display" color={colors.cream}>{t('community.title')}</Text>
         <Pressable

@@ -95,7 +95,7 @@ export default function NewDiaryEntry() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Header title={t('diary.newEntry')} onBack={() => router.back()} />
         <ScrollView
           contentContainerStyle={{

@@ -1,71 +1,49 @@
-import { useEffect } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  useAnimatedProps,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Text } from '@design/text';
-import { colors, spacing } from '@design/tokens';
+import { colors, gradients, spacing } from '@design/tokens';
+import { media } from '@/media';
 
 const { width, height } = Dimensions.get('window');
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-
-// A simplified Camino path SVG (Saint-Jean → Santiago, west).
-const PATH = 'M30 80 C70 90, 110 60, 150 70 S230 100, 280 80 S340 50, 380 70';
-const PATH_LENGTH = 600; // approximation for stroke-dasharray
 
 export function Hero() {
-  const progress = useSharedValue(0);
-
-  useEffect(() => {
-    progress.value = withDelay(
-      300,
-      withTiming(1, { duration: 2200, easing: Easing.out(Easing.cubic) }),
-    );
-  }, [progress]);
-
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: PATH_LENGTH * (1 - progress.value),
-  }));
-
   return (
     <View style={styles.root}>
-      <View style={styles.glow} />
-      <Animated.View entering={FadeIn.delay(100).duration(700)} style={styles.title}>
-        <Text variant="displayLg" color={colors.cream} align="center">
-          Santiago
-          {'\n'}
-          <Text variant="displayLg" color={colors.amber400} italic>
-            Ways
+      <Image source={media.onboardingHero} style={[StyleSheet.absoluteFill, { width, height }]} contentFit="cover" />
+      <LinearGradient
+        colors={['rgba(8,7,11,0.15)', 'rgba(8,7,11,0.45)', 'rgba(8,7,11,0.96)']}
+        locations={[0, 0.45, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={styles.content}>
+        <Animated.View entering={FadeIn.delay(120).duration(700)} style={styles.eyebrow}>
+          <Text variant="overline" color={colors.amber300}>
+            Camino de Santiago
           </Text>
-        </Text>
-        <Text
-          variant="bodyMedium"
-          color={colors.stone300}
-          align="center"
-          style={{ marginTop: spacing['4'], paddingHorizontal: spacing['6'] }}
-        >
-          Tu compañero definitivo{'\n'}del Camino de Santiago
-        </Text>
-      </Animated.View>
-      <View style={styles.svgWrap}>
-        <Svg width={width - 40} height={120} viewBox="0 0 400 120">
-          <AnimatedPath
-            d={PATH}
-            stroke={colors.amber400}
-            strokeWidth={3}
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={`${PATH_LENGTH} ${PATH_LENGTH}`}
-            animatedProps={animatedProps}
-          />
-        </Svg>
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(220).duration(700)}>
+          <Text variant="displayLg" color={colors.cream} align="center" style={styles.title}>
+            Santiago{'\n'}
+            <Text variant="displayLg" color={colors.amber300} italic>
+              Ways
+            </Text>
+          </Text>
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(380).duration(700)}>
+          <Text variant="body" color={colors.stone200} align="center" style={styles.subtitle}>
+            Tu compañero definitivo del Camino —{'\n'}rutas, albergues, diario y comunidad.
+          </Text>
+        </Animated.View>
       </View>
+      {/* Bottom amber hairline echoing the horizon */}
+      <LinearGradient
+        colors={gradients.sunrise}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.horizonLine}
+      />
     </View>
   );
 }
@@ -73,24 +51,33 @@ export function Hero() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    paddingTop: height * 0.15,
-    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  glow: {
-    position: 'absolute',
-    top: height * 0.18,
-    width: 360,
-    height: 360,
-    borderRadius: 360,
-    backgroundColor: 'rgba(251,191,36,0.18)',
-    transform: [{ scale: 1.3 }],
+  content: {
+    alignItems: 'center',
+    paddingBottom: height * 0.3,
+    paddingHorizontal: spacing['6'],
+  },
+  eyebrow: {
+    marginBottom: spacing['4'],
   },
   title: {
-    alignItems: 'center',
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 24,
   },
-  svgWrap: {
+  subtitle: {
+    marginTop: spacing['5'],
+    paddingHorizontal: spacing['4'],
+    opacity: 0.95,
+  },
+  horizonLine: {
     position: 'absolute',
-    bottom: height * 0.32,
-    alignItems: 'center',
+    bottom: height * 0.27,
+    left: '22%',
+    right: '22%',
+    height: 2,
+    borderRadius: 1,
+    opacity: 0.8,
   },
 });

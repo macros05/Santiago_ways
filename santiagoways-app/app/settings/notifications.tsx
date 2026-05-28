@@ -47,7 +47,7 @@ export default function NotificationsSettings() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title="Notificaciones" onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

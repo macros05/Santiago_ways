@@ -52,7 +52,7 @@ export default function AIGuideScreen() {
 
   if (!isCompostelero) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
         <Header title="Tu Guía IA" onBack={() => router.back()} />
         <ScrollView contentContainerStyle={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'] }}>
@@ -103,7 +103,7 @@ export default function AIGuideScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
       <Header title="Tu Guía IA" onBack={() => router.back()} />
       <ScrollView

@@ -35,7 +35,7 @@ export default function PrivacySettings() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title="Privacidad" onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

@@ -41,6 +41,20 @@ android/app/build/
 santiagoways-app/ios/
 santiagoways-app/android/
 
+# Stray root-level prebuild artifacts — the real native projects and Expo
+# config live inside santiagoways-app/. These are throwaway output from running
+# `expo prebuild`/`expo run` at the monorepo root (namespaced com.anonymous.*).
+/android/
+/ios/
+/app.json
+.expo/prebuild/
+
+# Aider tool artifacts
+.aider*
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
 # Prisma local generated client
 node_modules/.prisma/
 

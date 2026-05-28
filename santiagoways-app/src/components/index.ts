@@ -1,8 +1,10 @@
 export { Avatar } from './Avatar';
+export { AuroraBackground } from './AuroraBackground';
 export { Badge } from './Badge';
 export { BottomSheet } from './BottomSheet';
 export { Button } from './Button';
 export { Card } from './Card';
+export { Glass } from './Glass';
 export { Header } from './Header';
 export { Input } from './Input';
 export { KmCounter } from './KmCounter';

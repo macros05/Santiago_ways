@@ -34,9 +34,9 @@ export function Header({
   return (
     <View style={[styles.wrapper, { paddingTop: insets.top }, style]}>
       {blur ? (
-        <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
       ) : (
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.stone950 }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.ink }]} />
       )}
       <View style={[styles.bar, { height: layout.headerHeight }]}>
         <View style={styles.side}>
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
     overflow: 'hidden',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.stone800,
+    borderColor: colors.glassBorder,
   },
   bar: {
     flexDirection: 'row',

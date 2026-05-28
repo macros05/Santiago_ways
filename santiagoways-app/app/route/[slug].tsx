@@ -51,7 +51,7 @@ export default function RouteDetail() {
   const r = routeQ.data;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={r?.name} onBack={() => router.back()} blur />
       <ScrollView contentContainerStyle={{ paddingBottom: spacing['16'] }}>
         <View style={styles.hero}>

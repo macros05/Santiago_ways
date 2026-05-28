@@ -9,8 +9,9 @@ import { Card } from '@components/Card';
 import { Skeleton } from '@components/Skeleton';
 import { colors, radius, spacing } from '@design/tokens';
 import { isLockedRoute, useRoutes } from '@hooks/usePilgrimage';
+import { media } from '@/media';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const CARD_W = width * 0.72;
 
 const FALLBACK = 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800';
@@ -27,16 +28,24 @@ export function Routes() {
 
   return (
     <View style={styles.root}>
+      <Image source={media.auroraBg} style={[StyleSheet.absoluteFill, { width, height }]} contentFit="cover" />
+      <LinearGradient
+        colors={['rgba(8,7,11,0.72)', 'rgba(8,7,11,0.86)', 'rgba(8,7,11,0.96)']}
+        style={StyleSheet.absoluteFill}
+      />
+      <Text variant="overline" color={colors.amber300} align="center" style={{ marginBottom: spacing['3'] }}>
+        {items.length || '...'} rutas legendarias
+      </Text>
       <Text variant="display" color={colors.cream} align="center">
         Elige tu Camino
       </Text>
       <Text
         variant="body"
-        color={colors.stone400}
+        color={colors.stone300}
         align="center"
         style={{ marginTop: spacing['3'], paddingHorizontal: spacing['8'] }}
       >
-        {items.length || '...'} rutas legendarias hacia Santiago.
+        Cada sendero cuenta su propia historia hacia Santiago.
       </Text>
 
       <ScrollView

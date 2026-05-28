@@ -173,7 +173,7 @@ export default function AddStampScreen() {
 
   if (scannerOpen) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <CameraView
           style={StyleSheet.absoluteFill}
           facing="back"
@@ -212,7 +212,7 @@ export default function AddStampScreen() {
   const methodChips: StampMethod[] = ['gps', 'manual', 'qr'];
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={t('credential.addStamp')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

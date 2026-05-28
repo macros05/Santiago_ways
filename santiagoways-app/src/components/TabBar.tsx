@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -12,7 +13,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { animation, colors, layout, spacing } from '@design/tokens';
+import { animation, colors, gradients, layout, spacing } from '@design/tokens';
 import { Text } from '@design/text';
 
 const ICONS: Record<string, { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap }> = {
@@ -47,7 +48,16 @@ export function TabBar({ state, descriptors, navigation, hidden }: TabBarProps) 
         wrapperStyle,
       ]}
     >
-      <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
+      <View style={[StyleSheet.absoluteFill, styles.tint]} />
+      {/* Top light-catching hairline */}
+      <LinearGradient
+        colors={[colors.glassHighlight, 'rgba(255,255,255,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.topHairline}
+        pointerEvents="none"
+      />
       <View style={styles.row}>
         {state.routes.map((route, idx) => {
           const { options } = descriptors[route.key]!;
@@ -91,11 +101,12 @@ type TabItemProps = {
 function TabItem({ focused, label, iconName, onPress }: TabItemProps) {
   const scale = useSharedValue(focused ? 1.05 : 1);
   useEffect(() => {
-    scale.value = withSpring(focused ? 1.08 : 1, animation.bouncy);
+    scale.value = withSpring(focused ? 1.06 : 1, animation.bouncy);
   }, [focused, scale]);
 
-  const indicatorStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(focused ? 1 : 0, { duration: 200 }),
+  const pillStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(focused ? 1 : 0, { duration: 220 }),
+    transform: [{ scale: withSpring(focused ? 1 : 0.6, animation.gentle) }],
   }));
 
   const itemStyle = useAnimatedStyle(() => ({
@@ -105,19 +116,28 @@ function TabItem({ focused, label, iconName, onPress }: TabItemProps) {
   return (
     <Pressable onPress={onPress} style={styles.item} hitSlop={8}>
       <Animated.View style={[styles.itemInner, itemStyle]}>
-        <Ionicons
-          name={iconName}
-          size={22}
-          color={focused ? colors.amber400 : colors.stone400}
-        />
+        <View style={styles.iconWrap}>
+          <Animated.View style={[styles.pill, pillStyle]}>
+            <LinearGradient
+              colors={gradients.sunrise}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
+          <Ionicons
+            name={iconName}
+            size={22}
+            color={focused ? colors.stone950 : colors.stone400}
+          />
+        </View>
         <Text
           variant="caption"
-          color={focused ? colors.amber400 : colors.stone400}
-          style={{ marginTop: 2 }}
+          color={focused ? colors.amber300 : colors.stone500}
+          style={{ marginTop: 3 }}
         >
           {label}
         </Text>
-        <Animated.View style={[styles.indicator, indicatorStyle]} />
       </Animated.View>
     </Pressable>
   );
@@ -131,8 +151,18 @@ const styles = StyleSheet.create({
     bottom: 0,
     overflow: 'hidden',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.stone800,
-    backgroundColor: 'rgba(12,10,9,0.6)',
+    borderColor: colors.glassBorder,
+  },
+  tint: {
+    backgroundColor: 'rgba(8,7,11,0.55)',
+  },
+  topHairline: {
+    position: 'absolute',
+    top: 0,
+    left: '6%',
+    right: '6%',
+    height: 1.5,
+    opacity: 0.6,
   },
   row: {
     flex: 1,
@@ -149,11 +179,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: spacing['2'],
   },
-  indicator: {
-    marginTop: 4,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.amber400,
+  iconWrap: {
+    width: 46,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pill: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
 });

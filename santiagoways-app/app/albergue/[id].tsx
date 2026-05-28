@@ -96,7 +96,7 @@ export default function AlbergueDetail() {
 
   if (albergueQ.isError) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Header onBack={() => router.back()} />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
           <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
@@ -109,7 +109,7 @@ export default function AlbergueDetail() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header
         onBack={() => router.back()}
         title={a?.name}

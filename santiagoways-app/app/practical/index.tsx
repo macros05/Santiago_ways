@@ -32,7 +32,7 @@ export default function PracticalScreen() {
   const [tab, setTab] = useState<Tab>('phrases');
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={t('practical.title')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

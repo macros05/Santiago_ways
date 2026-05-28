@@ -107,7 +107,7 @@ export default function DiaryEntryDetail() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title={t('diary.title')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

@@ -35,19 +35,19 @@ const TIER_THEME: Record<
   { bg: ViewStyle; border: string; badgeBg: string; badgeColor: string }
 > = {
   free: {
-    bg: { backgroundColor: colors.stone900 },
-    border: colors.stone700,
-    badgeBg: colors.stone800,
+    bg: { backgroundColor: 'rgba(28,25,23,0.55)' },
+    border: colors.glassBorder,
+    badgeBg: colors.glassFill,
     badgeColor: colors.stone300,
   },
   buen_camino: {
-    bg: { backgroundColor: colors.stone800 },
+    bg: { backgroundColor: 'rgba(41,37,36,0.62)' },
     border: colors.amber400,
     badgeBg: colors.amber400,
     badgeColor: colors.stone950,
   },
   compostelero: {
-    bg: { backgroundColor: colors.stone900 },
+    bg: { backgroundColor: 'rgba(28,25,23,0.5)' },
     border: colors.gold,
     badgeBg: colors.gold,
     badgeColor: colors.stone950,

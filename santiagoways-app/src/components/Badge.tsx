@@ -13,13 +13,13 @@ type BadgeProps = {
   style?: ViewStyle;
 };
 
-const palette: Record<Variant, { bg: string; fg: string }> = {
-  success: { bg: 'rgba(16,185,129,0.15)', fg: colors.success },
-  warning: { bg: 'rgba(245,158,11,0.15)', fg: colors.warning },
-  error: { bg: 'rgba(239,68,68,0.15)', fg: colors.error },
-  info: { bg: 'rgba(59,130,246,0.15)', fg: colors.info },
-  gold: { bg: 'rgba(251,191,36,0.18)', fg: colors.amber400 },
-  neutral: { bg: colors.stone800, fg: colors.stone300 },
+const palette: Record<Variant, { bg: string; fg: string; border: string }> = {
+  success: { bg: 'rgba(52,211,153,0.14)', fg: colors.success, border: 'rgba(52,211,153,0.30)' },
+  warning: { bg: 'rgba(251,191,36,0.14)', fg: colors.warning, border: 'rgba(251,191,36,0.30)' },
+  error: { bg: 'rgba(251,113,133,0.14)', fg: colors.error, border: 'rgba(251,113,133,0.30)' },
+  info: { bg: 'rgba(96,165,250,0.14)', fg: colors.info, border: 'rgba(96,165,250,0.30)' },
+  gold: { bg: colors.glassFillAmber, fg: colors.amber300, border: colors.amberTintStrong },
+  neutral: { bg: colors.glassFill, fg: colors.stone300, border: colors.glassBorder },
 };
 
 const dims: Record<Size, { padX: number; padY: number; font: 'caption' | 'small' }> = {
@@ -34,7 +34,13 @@ export function Badge({ label, variant = 'neutral', size = 'sm', style }: BadgeP
     <View
       style={[
         styles.base,
-        { backgroundColor: c.bg, paddingHorizontal: d.padX, paddingVertical: d.padY },
+        {
+          backgroundColor: c.bg,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: c.border,
+          paddingHorizontal: d.padX,
+          paddingVertical: d.padY,
+        },
         style,
       ]}
     >

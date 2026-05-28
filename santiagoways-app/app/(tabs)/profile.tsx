@@ -47,7 +47,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.stone950 }}
+      style={{ flex: 1, backgroundColor: colors.ink }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing['4'],
         paddingBottom: layout.tabBarHeight + insets.bottom + spacing['8'],

@@ -53,7 +53,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     ? colors.error
     : focused
     ? colors.amber400
-    : colors.stone700;
+    : colors.glassBorder;
 
   return (
     <View style={containerStyle}>
@@ -113,9 +113,9 @@ const styles = StyleSheet.create({
   wrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.stone900,
+    backgroundColor: colors.glassFill,
     borderWidth: 1,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing['5'],
     minHeight: 64,
   },

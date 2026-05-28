@@ -11,6 +11,7 @@ import { useSubscription } from '@stores/subscription';
 import { usePrefs } from '@stores/prefs';
 import { ToastHost } from '@components/Toast';
 import { colors } from '@design/tokens';
+import { useAppFonts } from '@design/useAppFonts';
 import { startAnalytics, stopAnalytics, flush as flushAnalytics } from '@lib/analytics';
 // Side-effect import: registers TaskManager.defineTask at the top level so
 // the background GPS task is available as soon as the JS bundle loads.
@@ -25,18 +26,26 @@ export default function RootLayout() {
   const initSub = useSubscription((s) => s.initialize);
   const resetSub = useSubscription((s) => s.reset);
   const hydratePrefs = usePrefs((s) => s.hydrate);
+  // Display font (Fraunces). Body/UI uses the system font, so we never block the
+  // splash indefinitely on this — `fontsReady` flips on success OR failure.
+  const [fontsLoaded, fontError] = useAppFonts();
+  const fontsReady = fontsLoaded || !!fontError;
 
   useEffect(() => {
-    Promise.all([bootstrap(), hydratePrefs()]).finally(() =>
-      SplashScreen.hideAsync().catch(() => {}),
-    );
+    Promise.all([bootstrap(), hydratePrefs()]).finally(() => {
+      if (fontsReady) SplashScreen.hideAsync().catch(() => {});
+    });
     startAnalytics();
     return () => {
       // Best-effort flush on unmount.
       void flushAnalytics();
       stopAnalytics();
     };
-  }, [bootstrap, hydratePrefs]);
+  }, [bootstrap, hydratePrefs, fontsReady]);
+
+  useEffect(() => {
+    if (fontsReady && isReady) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsReady, isReady]);
 
   useEffect(() => {
     if (user?.id) {
@@ -47,14 +56,14 @@ export default function RootLayout() {
   }, [user?.id, initSub, resetSub]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.ink }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <StatusBar style="light" />
           <Stack
             screenOptions={{
               headerShown: false,
-              contentStyle: { backgroundColor: colors.stone950 },
+              contentStyle: { backgroundColor: colors.ink },
               animation: 'slide_from_right',
             }}
           >

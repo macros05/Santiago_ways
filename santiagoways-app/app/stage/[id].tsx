@@ -191,7 +191,7 @@ export default function StageDetail() {
 
   if (stageQ.isError) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
         <Header onBack={() => router.back()} />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
@@ -214,7 +214,7 @@ export default function StageDetail() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
       <Header title={stage?.name} onBack={() => router.back()} blur />
 

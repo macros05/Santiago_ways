@@ -20,7 +20,7 @@ export default function MapSettings() {
   const setUnits = usePrefs((s) => s.setUnits);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header title="Mapa & unidades" onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

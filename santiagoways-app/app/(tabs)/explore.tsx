@@ -14,6 +14,7 @@ import { Button } from '@components/Button';
 import { StageCard } from '@components/StageCard';
 import { HomeBanner } from '@components/ads/HomeBanner';
 import { FeaturedAlbergueCard } from '@components/ads/FeaturedAlbergueCard';
+import { AuroraBackground } from '@components/AuroraBackground';
 import { colors, layout, radius, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
 import {
@@ -75,13 +76,15 @@ export default function ExploreScreen() {
   }, []);
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.stone950 }}
-      contentContainerStyle={{
-        paddingTop: insets.top + spacing['4'],
-        paddingBottom: layout.tabBarHeight + insets.bottom + spacing['8'],
-      }}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
+      <AuroraBackground bloom={0.5} subtle />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingTop: insets.top + spacing['4'],
+          paddingBottom: layout.tabBarHeight + insets.bottom + spacing['8'],
+        }}
+      >
       <View style={styles.greeting}>
         <View style={{ flex: 1 }}>
           <Text variant="small" color={colors.stone400}>
@@ -217,10 +220,10 @@ export default function ExploreScreen() {
 
       {/* Daily quote */}
       <View style={{ paddingHorizontal: spacing['5'], marginTop: spacing['6'] }}>
-        <Card padding="4" style={{ borderColor: 'rgba(251,191,36,0.3)', borderWidth: 1 }}>
-          <View style={{ flexDirection: 'row', gap: spacing['2'] }}>
-            <Ionicons name="sparkles" size={16} color={colors.amber400} />
-            <Text variant="small" color={colors.stone200} style={{ flex: 1, fontStyle: 'italic' }}>
+        <Card elevation="glass" padding="4">
+          <View style={{ flexDirection: 'row', gap: spacing['3'], alignItems: 'flex-start' }}>
+            <Ionicons name="sparkles" size={16} color={colors.amber300} style={{ marginTop: 3 }} />
+            <Text variant="body" color={colors.cream} italic style={{ flex: 1 }}>
               {quote}
             </Text>
           </View>
@@ -397,7 +400,8 @@ export default function ExploreScreen() {
           )}
         </View>
       </Section>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -484,12 +488,12 @@ const styles = StyleSheet.create({
     gap: spacing['3'],
   },
   bell: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.stone900,
-    borderWidth: 1,
-    borderColor: colors.stone700,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: colors.glassFillAmber,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.amberTintStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -593,12 +597,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   qaIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.stone900,
-    borderWidth: 1,
-    borderColor: colors.stone800,
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: colors.glassFillAmber,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.glassBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },

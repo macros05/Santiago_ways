@@ -28,7 +28,7 @@ export default function ChatRoomsScreen() {
 
   if (!isCompostelero) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+      <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
         <Header title="Chat Compostelero" onBack={() => router.back()} />
         <ScrollView
@@ -81,7 +81,7 @@ export default function ChatRoomsScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.stone950 }}>
+    <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
       <Header title="Composteleros 🐚" onBack={() => router.back()} />
       <ScrollView
