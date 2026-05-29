@@ -80,7 +80,10 @@
       "react-native-health",
       "react-native-health-connect",
       "expo-apple-authentication",
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      "expo-font",
+      "expo-localization",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

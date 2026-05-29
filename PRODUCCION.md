@@ -138,3 +138,35 @@ y base `ink` unificada en toda la app.
 GEMINI_API_KEY=tu_clave node scripts/gen-assets.mjs
 ```
 Genera todos los assets de marca en `santiagoways-app/assets/generated/`.
+
+---
+
+## 6. Preview en iPhone físico con cuenta Apple GRATIS (build local)
+
+Para enseñar el rediseño en un iPhone sin pagar Apple Developer ($99), se hizo un
+build local con **firma gratuita** (provisioning personal, caduca a los 7 días).
+Limitaciones de la cuenta gratis → se **desactivaron** estos permisos en
+`ios/SantiagoWays/SantiagoWays.entitlements` (se guardó copia `.bak`):
+`HealthKit`, `Sign in with Apple` (`applesignin`) y Push (`aps-environment`).
+Por eso esas 3 funciones **no operan** en la preview (se reactivan con cuenta de pago).
+
+Pasos (con el iPhone conectado por cable, desbloqueado, Developer Mode ON):
+1. En Xcode → target SantiagoWays → Signing & Capabilities → Team = tu *Personal Team*.
+2. Bundle id único para firma gratis (ya puesto en el proyecto local):
+   `com.marcosmor.santiagoways` (el de producción sigue siendo `com.santiagoways.app`).
+3. Instalar la build ya compilada:  `bash scripts/install-iphone.sh`
+4. En el iPhone: Ajustes → General → VPN y gestión de dispositivos → Confiar en el perfil.
+
+### ⚠️ Gotcha MapLibre (importante también para EAS)
+`@maplibre/maplibre-react-native` trae su SDK nativo como **Swift Package** y su
+podspec expone `$MLRN.post_install(installer)`, que **el Podfile debe llamar**.
+El `ios/Podfile` prebuild no lo llamaba (el plugin se añadió después del prebuild),
+así que `MapLibre.xcframework` nunca se descargaba → `'MapLibre/MapLibre.h' file not found`.
+Se añadió la llamada al `post_install` del Podfile. **Para builds de EAS**: como
+EAS hace `prebuild` limpio, verifica que el plugin `@maplibre/maplibre-react-native`
+(ya en `app.json`) inserta ese hook; si no, añade un config-plugin/`post_install`.
+
+### Versiones del SDK
+Se ejecutó `npx expo install --fix` para alinear paquetes (p. ej. `expo-notifications`
+→ `~0.32.17`), porque una versión desalineada rompía la compilación nativa de
+`EXNotifications`. Mantén las versiones alineadas al SDK 54 antes de compilar.
