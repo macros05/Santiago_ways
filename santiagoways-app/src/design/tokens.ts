@@ -91,19 +91,17 @@ export type ColorToken = keyof typeof colors;
 // Tuples consumed by expo-linear-gradient. The "dawn" set is the signature
 // atmosphere; "glass" sheens give surfaces their liquid, light-catching feel.
 export const gradients = {
-  // Full-screen ambient backdrop: night → twilight → ember whisper.
-  dawn: ['#08070B', '#0E0B1F', '#1A1340', '#2A1A2E', '#0C0A09'] as const,
-  // Hero overlay scrim from transparent to deep ink (bottom-anchored).
-  heroScrim: ['rgba(8,7,11,0)', 'rgba(8,7,11,0.35)', 'rgba(8,7,11,0.96)'] as const,
-  // Signature amber → gold sunrise, for primary CTAs and emblems.
-  sunrise: ['#FCD34D', '#FBBF24', '#F0A92B', '#D97706'] as const,
-  // Cool aurora ribbon for accents and progress.
-  aurora: ['#5B8DEF', '#A78BFA', '#FBBF24'] as const,
-  // Premium / Compostelero gold sheen.
-  gold: ['#FDE68A', '#FFD700', '#D97706'] as const,
-  // Subtle glass sheen (top-left highlight to transparent).
+  // Full-screen ambient backdrop: warm stone-night (no indigo aurora).
+  dawn: ['#0B0A09', '#14110D', '#1A140F', '#13100C', '#0B0A09'] as const,
+  // Hero overlay scrim (transparent → deep ink).
+  heroScrim: ['rgba(11,10,9,0)', 'rgba(11,10,9,0.35)', 'rgba(11,10,9,0.96)'] as const,
+  // Single-hue flecha sheen for the primary CTA (no four-yellow stack).
+  sunrise: ['#F8D24A', '#F5C518', '#D9A912'] as const,
+  // Forest-green ribbon for non-primary accents/progress.
+  aurora: ['#4F7A52', '#3A5A40'] as const,
+  // Antique-brass sheen for premium (was gold).
+  gold: ['#D8C078', '#C9A84A', '#A8863A'] as const,
   glassSheen: ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0)'] as const,
-  // Card base tint that lets blur show through.
   glassCard: ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)'] as const,
 } as const;
 
@@ -258,15 +256,15 @@ export const glow = {
   amber:
     Platform.OS === 'android'
       ? { elevation: 10 }
-      : { shadowColor: '#FBBF24', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.55, shadowRadius: 22 },
+      : { shadowColor: '#F5C518', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 18 },
   gold:
     Platform.OS === 'android'
-      ? { elevation: 12 }
-      : { shadowColor: '#FFD700', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 26 },
+      ? { elevation: 8 }
+      : { shadowColor: '#C9A84A', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.35, shadowRadius: 14 },
   aurora:
     Platform.OS === 'android'
-      ? { elevation: 10 }
-      : { shadowColor: '#7C7BFF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 24 },
+      ? { elevation: 8 }
+      : { shadowColor: '#4F7A52', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.3, shadowRadius: 16 },
 } as const;
 
 export const layout = {
