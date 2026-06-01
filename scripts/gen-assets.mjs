@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * SantiagoWays — brand asset generation via Gemini image models.
- * Concept: "Aurora Camino — Liquid Dawn". Obsidian base, aurora light-blooms
- * (cool pre-dawn indigo melting into amber sunrise), luminous gold scallop-shell
- * (vieira) iconography, liquid-glass depth.
+ * Concept: "Flecha — documental auténtico". Authentic, natural documentary
+ * photography of the real Camino de Santiago — weathered stone, eucalyptus and
+ * oak greens, the iconic yellow arrow. No aurora, no liquid metal, no sci-fi.
  *
  * Usage: GEMINI_API_KEY=... node scripts/gen-assets.mjs
  */
@@ -20,73 +20,71 @@ const OUT = path.resolve('santiagoways-app/assets/generated');
 const MODELS = ['gemini-3-pro-image-preview', 'gemini-2.5-flash-image'];
 
 const STYLE =
-  'Aesthetic: futuristic Apple-style "liquid glass" with a spiritual Camino de Santiago soul. ' +
-  'Deep obsidian near-black background (#0B0A09) with a soft aurora bloom — cool pre-dawn indigo/teal ' +
-  'melting into warm amber and gold sunrise light. Cinematic, atmospheric, premium, high detail, ' +
-  'subtle film grain, volumetric light, glassy translucent surfaces, elegant and serene. No text, no words, no letters, no watermark.';
+  'Aesthetic: authentic, natural documentary photography of the real Camino de Santiago in Spain. ' +
+  'Shot on a 35mm camera, soft natural golden-hour or overcast daylight, realistic true-to-life colors, ' +
+  'gentle film grain, natural depth of field. Warm earthy palette — weathered grey stone, eucalyptus and oak greens, ' +
+  'cream sky, the iconic Camino yellow arrow. Calm, grounded, hopeful, unpretentious. ' +
+  'STRICTLY NO aurora borealis, NO northern lights, NO liquid metal, NO glossy 3D render, NO neon glow, ' +
+  'NO surreal sky, NO holographic, NO sci-fi. No text, no words, no letters, no watermark.';
 
 const JOBS = [
   {
     name: 'icon.png',
     aspect: '1:1',
     prompt:
-      'App icon. A single luminous gold scallop shell (vieira, the symbol of the Camino de Santiago) ' +
-      'rendered as polished liquid glass, glowing softly, centered, radial aurora glow behind it, ' +
-      'minimal and iconic, crisp, premium app-icon composition with generous padding. ' + STYLE,
+      'Flat minimalist app icon: a single bright Camino yellow arrow (#F5C518) angled slightly up-right, ' +
+      'hand-painted look with a slightly imperfect edge, on a solid deep forest-green (#3A5A40) rounded square ' +
+      'with a subtle concrete/stone texture. No gloss, no bevel, no gradient, no shell, no glow. ' +
+      'Looks like a real spray-painted wall waymark. Crisp, iconic, generous padding.',
   },
   {
     name: 'adaptive-icon.png',
     aspect: '1:1',
     prompt:
-      'Android adaptive icon foreground. A single glowing gold scallop shell (vieira) centered in the ' +
-      'middle third of the frame with large transparent-feeling dark margins, simple, iconic, no background clutter. ' + STYLE,
+      'Android adaptive icon foreground: the same flat yellow arrow (#F5C518) centered in the middle third on ' +
+      'deep forest-green (#3A5A40), large safe margins, simple and iconic, no clutter, no gloss.',
   },
   {
     name: 'splash.png',
     aspect: '9:16',
     prompt:
-      'Vertical mobile splash screen. A lone pilgrim silhouette walking a misty mountain path at dawn toward ' +
-      'a glowing horizon, a faint golden scallop shell motif formed by the aurora light in the sky, ' +
-      'vast atmospheric depth, cinematic vertical composition with the figure small and centered low. ' + STYLE,
+      'Vertical splash: a real photograph of a yellow Camino arrow painted on weathered grey Galician stone at soft dawn, ' +
+      'calm and minimal, muted natural color, lots of negative space, deep warm vignette at the bottom, no people. ' + STYLE,
   },
   {
     name: 'onboarding-hero.png',
     aspect: '9:16',
     prompt:
-      'Vertical hero image. A breathtaking dawn over the Camino de Santiago — rolling Galician hills, ' +
-      'a winding stone path disappearing into golden morning mist, a yellow Camino arrow subtly glowing on a stone, ' +
-      'epic cinematic landscape, painterly yet photoreal, sense of journey and hope. ' + STYLE,
+      'Real photo: a yellow Camino arrow on a stone marker pointing down a eucalyptus-lined dirt path in green Galicia ' +
+      'at golden hour, soft mist, natural and hopeful, a genuine pilgrimage trail. ' + STYLE,
   },
   {
     name: 'onboarding-routes.png',
     aspect: '9:16',
     prompt:
-      'Vertical image. An aerial cinematic view of multiple Camino routes threading across northern Spain at ' +
-      'golden hour — coastline, mountains, vineyards and medieval villages, soft volumetric clouds, ' +
-      'a glowing network of light-trails tracing the pilgrim paths like liquid gold. ' + STYLE,
+      'Real photo: green rolling hills with a winding dirt Camino path through the northern Spain countryside at golden ' +
+      'hour, a small medieval stone village in the distance, natural documentary landscape, NO light trails. ' + STYLE,
   },
   {
     name: 'onboarding-community.png',
     aspect: '9:16',
     prompt:
-      'Vertical image. Warm silhouettes of a small group of pilgrims sharing a moment at a stone albergue ' +
-      'courtyard at dusk, string lights, glowing lanterns, sense of belonging and warmth, ' +
-      'soft bokeh, intimate cinematic atmosphere. ' + STYLE,
+      'Real candid photo: a few pilgrims with backpacks resting and talking in a stone albergue courtyard at dusk, ' +
+      'warm natural lantern light, a genuine human moment, soft documentary, natural faces (not blurred). ' + STYLE,
   },
   {
-    name: 'aurora-bg.png',
+    name: 'home-hero.png',
     aspect: '9:16',
     prompt:
-      'Vertical abstract background texture. A smooth aurora gradient mesh — deep obsidian at the edges ' +
-      'blooming into indigo, teal and warm amber light in the center, very soft, dreamy, no objects, ' +
-      'pure atmospheric gradient with subtle grain, suitable as an app background. ' + STYLE,
+      'Real photo: a Galician Camino landscape — green hills and a stone path under a soft cream sky at golden hour, ' +
+      'evocative and natural, room for an overlay at the bottom, no people, no text. ' + STYLE,
   },
   {
     name: 'notification-icon.png',
     aspect: '1:1',
     prompt:
-      'Simple monochrome notification glyph. A clean solid white scallop shell (vieira) silhouette ' +
-      'centered on a fully transparent-feeling pure black background, flat, high contrast, no gradients, no text.',
+      'Simple monochrome notification glyph: a clean solid white Camino arrow silhouette, slightly up-right, ' +
+      'centered on pure black, flat, high contrast, no gradients, no text.',
   },
 ];
 
