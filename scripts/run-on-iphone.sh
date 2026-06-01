@@ -20,7 +20,9 @@ xcodebuild "${COMMON[@]}" -resolvePackageDependencies >/dev/null 2>&1
 
 build_and_get_app () { # $1 = Release|Debug
   local cfg="$1" sdkdir
-  echo "▸ Compilando $cfg (apuntando a tu iPhone)…"
+  # NOTE: this function's stdout is captured into $APP, so all human-facing
+  # logging here MUST go to stderr (>&2) — otherwise it pollutes the .app path.
+  echo "▸ Compilando $cfg (apuntando a tu iPhone)…" >&2
   xcodebuild "${COMMON[@]}" -configuration "$cfg" -sdk iphoneos \
     -destination "platform=iOS,id=$UDID" build > "/tmp/sw_run_${cfg}.log" 2>&1
   grep -q "BUILD SUCCEEDED" "/tmp/sw_run_${cfg}.log" || return 1
