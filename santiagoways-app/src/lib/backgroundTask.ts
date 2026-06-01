@@ -128,7 +128,7 @@ function buildOptions(r: Regime): Location.LocationTaskOptions {
         ? {
             notificationTitle: 'Trackeando tu etapa del Camino',
             notificationBody: 'Grabando tu posición. Toca para volver a la app.',
-            notificationColor: '#FBBF24',
+            notificationColor: '#F5C518',
           }
         : undefined,
   };
