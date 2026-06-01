@@ -1,4 +1,5 @@
 import { api } from './api';
+import { withTimeout } from './withTimeout';
 
 type SignedUpload = {
   cloudName: string;
@@ -33,7 +34,7 @@ export async function uploadImage(localUri: string, folder: UploadFolder): Promi
   // for file:// URIs returned by ImagePicker). We don't fail loudly if HEAD is
   // unsupported — Cloudinary will reject oversized uploads anyway.
   try {
-    const head = await fetch(localUri);
+    const head = await withTimeout((signal) => fetch(localUri, { signal }), 8_000);
     const len = Number(head.headers.get('content-length') ?? 0);
     if (len && len > MAX_BYTES) {
       throw new Error('La imagen supera los 8 MB.');
@@ -55,7 +56,10 @@ export async function uploadImage(localUri: string, folder: UploadFolder): Promi
   form.append('folder', signed.folder);
   if (signed.publicIdPrefix) form.append('public_id', signed.publicIdPrefix);
 
-  const res = await fetch(signed.uploadUrl, { method: 'POST', body: form });
+  const res = await withTimeout(
+    (signal) => fetch(signed.uploadUrl, { method: 'POST', body: form, signal }),
+    30_000,
+  );
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
     throw new Error(`Cloudinary rejected upload (${res.status}) ${detail.slice(0, 200)}`);
