@@ -7,5 +7,6 @@ export const media = {
   onboardingHero: require('../assets/generated/onboarding-hero.png'),
   onboardingRoutes: require('../assets/generated/onboarding-routes.png'),
   onboardingCommunity: require('../assets/generated/onboarding-community.png'),
+  homeHero: require('../assets/generated/home-hero.png'),
   icon: require('../assets/generated/icon.png'),
 } as const;

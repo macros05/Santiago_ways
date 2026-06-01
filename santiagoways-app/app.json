@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#08070B"
+      "backgroundColor": "#0B0A09"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -38,7 +38,7 @@
       "package": "com.santiagoways.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#08070B"
+        "backgroundColor": "#3A5A40"
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
@@ -68,7 +68,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#FBBF24"
+          "color": "#F5C518"
         }
       ],
       [

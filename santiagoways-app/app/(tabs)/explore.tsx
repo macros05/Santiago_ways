@@ -2,7 +2,9 @@ import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { media } from '@/media';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@design/text';
 import { Card } from '@components/Card';
@@ -133,9 +135,13 @@ export default function ExploreScreen() {
         </View>
       ) : myQ.data && stats ? (
         <Card style={styles.hero} elevation="floating" padding={0}>
-          {/* homeHero photo pending GEMINI_API_KEY — see plan Task 13 */}
+          <Image
+            source={media.homeHero}
+            style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
+            contentFit="cover"
+          />
           <LinearGradient
-            colors={['rgba(12,10,9,0.45)', 'rgba(12,10,9,0.95)']}
+            colors={['rgba(11,10,9,0.35)', 'rgba(11,10,9,0.92)']}
             style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
           />
           <View style={styles.heroContent}>
