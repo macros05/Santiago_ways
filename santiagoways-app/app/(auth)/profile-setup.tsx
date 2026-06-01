@@ -208,7 +208,7 @@ export default function ProfileSetup() {
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
                               <Text variant="bodyBold" color={colors.cream}>{r.name}</Text>
                               {locked ? (
-                                <Ionicons name="lock-closed" size={12} color={colors.amber400} />
+                                <Ionicons name="lock-closed" size={12} color={colors.gold} />
                               ) : null}
                             </View>
                             <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
@@ -217,7 +217,7 @@ export default function ProfileSetup() {
                               {' · '}{startCity}
                             </Text>
                             {locked ? (
-                              <Text variant="caption" color={colors.amber400} style={{ marginTop: 2 }}>
+                              <Text variant="caption" color={colors.gold} style={{ marginTop: 2 }}>
                                 {t('profileSetup.requiresBuenCamino')}
                               </Text>
                             ) : null}
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: colors.amber400,
+    backgroundColor: colors.musgo,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,

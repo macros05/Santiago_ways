@@ -108,7 +108,7 @@ export default function ExploreScreen() {
           accessibilityRole="button"
           accessibilityLabel="Ver planes premium"
         >
-          <Ionicons name="diamond-outline" size={20} color={colors.amber400} />
+          <Ionicons name="diamond-outline" size={20} color={colors.musgo} />
         </Pressable>
       </View>
 
@@ -118,12 +118,12 @@ export default function ExploreScreen() {
           style={styles.guestBanner}
           accessibilityRole="button"
         >
-          <Ionicons name="person-circle-outline" size={20} color={colors.amber400} />
+          <Ionicons name="person-circle-outline" size={20} color={colors.musgo} />
           <View style={{ flex: 1 }}>
             <Text variant="caption" color={colors.cream}>{t('guest.banner')}</Text>
-            <Text variant="caption" color={colors.amber400}>{t('guest.bannerCta')}</Text>
+            <Text variant="caption" color={colors.musgo}>{t('guest.bannerCta')}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color={colors.amber400} />
+          <Ionicons name="chevron-forward" size={16} color={colors.musgo} />
         </Pressable>
       ) : null}
 
@@ -155,7 +155,7 @@ export default function ExploreScreen() {
             <View style={{ flex: 1, paddingRight: spacing['3'] }}>
               <Badge
                 label={`${myQ.data.route.name}${stats.active ? ` · Etapa ${stats.active.stage.number}` : ''}`}
-                variant="gold"
+                variant="neutral"
               />
               <Text
                 variant="h1"
@@ -191,7 +191,7 @@ export default function ExploreScreen() {
         <Card style={styles.hero} elevation="raised" padding="5">
           <View style={styles.emptyHero}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="trail-sign" size={28} color={colors.amber400} />
+              <Ionicons name="trail-sign" size={28} color={colors.musgo} />
             </View>
             <Text variant="h2" color={colors.cream} align="center" style={{ marginTop: spacing['3'] }}>
               Aún no has empezado
@@ -299,11 +299,11 @@ export default function ExploreScreen() {
             <Pressable onPress={() => router.push('/ai-guide')}>
               <Card elevation="raised" style={styles.aiCard}>
                 <LinearGradient
-                  colors={['rgba(255,215,0,0.10)', 'rgba(255,215,0,0.02)']}
+                  colors={['rgba(79,122,82,0.10)', 'rgba(79,122,82,0.02)']}
                   style={StyleSheet.absoluteFill}
                 />
                 <View style={styles.aiIcon}>
-                  <Ionicons name="sparkles" size={20} color={colors.gold} />
+                  <Ionicons name="sparkles" size={20} color={colors.musgo} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyBold" color={colors.cream}>
@@ -350,7 +350,7 @@ export default function ExploreScreen() {
           <Card>
             <View style={{ flexDirection: 'row', gap: spacing['3'] }}>
               <View style={styles.tipIcon}>
-                <Ionicons name="bulb" size={20} color={colors.amber400} />
+                <Ionicons name="bulb" size={20} color={colors.musgo} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text variant="bodyBold" color={colors.cream}>{tip.title}</Text>
@@ -386,7 +386,7 @@ export default function ExploreScreen() {
                     <View style={{ flex: 1 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
                         <Text variant="bodyBold" color={colors.cream}>{r.name}</Text>
-                        {r.isPopular ? <Badge label="popular" variant="gold" size="sm" /> : null}
+                        {r.isPopular ? <Badge label="popular" variant="success" size="sm" /> : null}
                       </View>
                       <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
                         {r.totalKm.toFixed(0)} km · {r._count?.stages ?? '?'} etapas · {r.startCity}
@@ -417,7 +417,7 @@ function QuickAction({
   return (
     <Pressable onPress={onPress} style={styles.qa}>
       <View style={styles.qaIcon}>
-        <Ionicons name={icon} size={20} color={colors.amber400} />
+        <Ionicons name={icon} size={20} color={colors.musgo} />
       </View>
       <Text variant="caption" color={colors.cream} numberOfLines={1}>
         {label}
@@ -447,7 +447,7 @@ function LockedRouteRow({
           </Text>
         </View>
         <View style={styles.lockBadge}>
-          <Ionicons name="lock-closed" size={14} color={colors.amber400} />
+          <Ionicons name="lock-closed" size={14} color={colors.gold} />
         </View>
       </Card>
     </Pressable>
@@ -491,9 +491,9 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: colors.glassFillAmber,
+    backgroundColor: colors.greenTintSoft,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.amberTintStrong,
+    borderColor: colors.greenTintStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(251,191,36,0.12)',
+    backgroundColor: 'rgba(58,90,64,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(251,191,36,0.12)',
+    backgroundColor: 'rgba(58,90,64,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -540,24 +540,24 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(251,191,36,0.12)',
+    backgroundColor: 'rgba(58,90,64,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(251,191,36,0.3)',
+    borderColor: 'rgba(79,122,82,0.30)',
   },
   aiCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3'],
     overflow: 'hidden',
-    borderColor: 'rgba(255,215,0,0.4)',
+    borderColor: 'rgba(79,122,82,0.30)',
   },
   aiIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,215,0,0.12)',
+    backgroundColor: 'rgba(79,122,82,0.10)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -570,9 +570,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['3'],
     paddingHorizontal: spacing['4'],
     borderRadius: radius.md,
-    backgroundColor: 'rgba(251,191,36,0.08)',
+    backgroundColor: 'rgba(58,90,64,0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(251,191,36,0.3)',
+    borderColor: 'rgba(79,122,82,0.30)',
   },
   offRoute: {
     flexDirection: 'row',
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 18,
-    backgroundColor: colors.glassFillAmber,
+    backgroundColor: colors.greenTintSoft,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.glassBorder,
     alignItems: 'center',
