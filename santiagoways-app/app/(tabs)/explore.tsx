@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@design/text';
@@ -13,6 +12,7 @@ import { ProgressRing } from '@components/ProgressRing';
 import { Button } from '@components/Button';
 import { StageCard } from '@components/StageCard';
 import { HomeBanner } from '@components/ads/HomeBanner';
+import { HoyCard } from '@components/HoyCard';
 import { FeaturedAlbergueCard } from '@components/ads/FeaturedAlbergueCard';
 import { AuroraBackground } from '@components/AuroraBackground';
 import { colors, layout, radius, spacing } from '@design/tokens';
@@ -34,14 +34,6 @@ import { Analytics } from '@lib/analytics';
 import { useTracking } from '@lib/tracking';
 import { usePrefs } from '@stores/prefs';
 
-const TIPS = [
-  { title: 'Hidratación en la Meseta', body: 'Lleva 2L de agua. La sombra escasea entre las 11 y las 16h.' },
-  { title: 'Pies sanos, Camino largo', body: 'Vaselina antes de andar, calcetines de merino, secado al aire cada parada.' },
-  { title: 'Sello cada día', body: 'Necesitas mínimo 2 sellos por día en los últimos 100km para la Compostela.' },
-  { title: 'Empieza temprano', body: 'En verano, sal antes de las 7am. El calor del mediodía pega muy fuerte.' },
-  { title: 'Donativo no es gratis', body: 'En los albergues donativo, deja al menos 8-10€ — sostienen el lugar.' },
-];
-
 export default function ExploreScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -53,7 +45,6 @@ export default function ExploreScreen() {
   const showAds = useShowAds();
   const plan = usePlan();
   const locale = usePrefs((s) => s.locale);
-  const tip = TIPS[new Date().getDate() % TIPS.length]!;
   const quote = dailyQuote(locale);
 
   const stats = pilgrimageStats(myQ.data);
@@ -142,11 +133,7 @@ export default function ExploreScreen() {
         </View>
       ) : myQ.data && stats ? (
         <Card style={styles.hero} elevation="floating" padding={0}>
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1200' }}
-            style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
-            contentFit="cover"
-          />
+          {/* homeHero photo pending GEMINI_API_KEY — see plan Task 13 */}
           <LinearGradient
             colors={['rgba(12,10,9,0.45)', 'rgba(12,10,9,0.95)']}
             style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
@@ -211,52 +198,19 @@ export default function ExploreScreen() {
 
       {/* Quick actions — surface the new diary, credential, practical, community shortcuts. */}
       <View style={styles.quickActions}>
-        <QuickAction icon="walk-outline" label={t('home.qaTrack')} onPress={() => router.push('/(tabs)/route')} />
         <QuickAction icon="book-outline" label={t('home.qaDiary')} onPress={() => router.push('/diary')} />
         <QuickAction icon="ribbon-outline" label={t('home.qaCredential')} onPress={() => router.push('/credential')} />
         <QuickAction icon="information-circle-outline" label={t('home.qaPractical')} onPress={() => router.push('/practical')} />
         <QuickAction icon="people-outline" label={t('home.qaCommunity')} onPress={() => router.push('/(tabs)/community')} />
       </View>
 
-      {/* Daily quote */}
-      <View style={{ paddingHorizontal: spacing['5'], marginTop: spacing['6'] }}>
-        <Card elevation="glass" padding="4">
-          <View style={{ flexDirection: 'row', gap: spacing['3'], alignItems: 'flex-start' }}>
-            <Ionicons name="sparkles" size={16} color={colors.amber300} style={{ marginTop: 3 }} />
-            <Text variant="body" color={colors.cream} italic style={{ flex: 1 }}>
-              {quote}
-            </Text>
-          </View>
-        </Card>
-      </View>
-
-      {/* Weather widget */}
-      {weatherQ.data ? (
-        <View style={{ paddingHorizontal: spacing['5'], marginTop: spacing['4'] }}>
-          <Card padding="4">
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-              <Ionicons name="partly-sunny" size={28} color={colors.amber400} />
-              <View style={{ flex: 1 }}>
-                <Text variant="caption" color={colors.stone400}>{t('home.weather')}</Text>
-                <Text variant="bodyBold" color={colors.cream}>
-                  {locale === 'en' ? weatherQ.data.description_en : weatherQ.data.description}
-                  {' · '}
-                  {weatherQ.data.temperatureC.toFixed(0)}°C
-                </Text>
-                <Text variant="caption" color={colors.stone400}>
-                  Sensación {weatherQ.data.feelsLikeC.toFixed(0)}°C · Viento {weatherQ.data.windKmh.toFixed(0)} km/h
-                </Text>
-              </View>
-            </View>
-          </Card>
-        </View>
-      ) : null}
-
-      {showAds ? (
-        <View style={{ marginTop: spacing['6'] }}>
-          <HomeBanner />
-        </View>
-      ) : null}
+      <HoyCard
+        quote={quote}
+        weather={weatherQ.data ? {
+          label: locale === 'en' ? weatherQ.data.description_en : weatherQ.data.description,
+          tempC: weatherQ.data.temperatureC,
+        } : null}
+      />
 
       {/* Próximas etapas */}
       {upcoming && upcoming.length > 0 ? (
@@ -344,25 +298,6 @@ export default function ExploreScreen() {
         </Section>
       ) : null}
 
-      {/* Consejo del día */}
-      <Section title={t('explore.todaysTip')}>
-        <View style={{ paddingHorizontal: spacing['5'] }}>
-          <Card>
-            <View style={{ flexDirection: 'row', gap: spacing['3'] }}>
-              <View style={styles.tipIcon}>
-                <Ionicons name="bulb" size={20} color={colors.musgo} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyBold" color={colors.cream}>{tip.title}</Text>
-                <Text variant="small" color={colors.stone300} style={{ marginTop: 4 }}>
-                  {tip.body}
-                </Text>
-              </View>
-            </View>
-          </Card>
-        </View>
-      </Section>
-
       {/* Todas las rutas */}
       <Section
         title="Rutas del Camino"
@@ -400,6 +335,12 @@ export default function ExploreScreen() {
           )}
         </View>
       </Section>
+
+      {showAds ? (
+        <View style={{ marginTop: spacing['6'] }}>
+          <HomeBanner />
+        </View>
+      ) : null}
       </ScrollView>
     </View>
   );
@@ -522,14 +463,6 @@ const styles = StyleSheet.create({
   hScroll: {
     paddingHorizontal: spacing['5'],
     gap: spacing['3'],
-  },
-  tipIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(58,90,64,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   routeDot: {
     width: 10,
