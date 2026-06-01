@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@lib/api';
 
 export type Route = {
@@ -96,6 +96,20 @@ export function usePilgrimage(id: string | null) {
     queryKey: ['pilgrimage', id],
     queryFn: () => api<Pilgrimage>(`/pilgrimages/${id}`),
     enabled: !!id,
+  });
+}
+
+export function useCreatePilgrimage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: { routeSlug: string; startDate: string }) =>
+      api<Pilgrimage>('/pilgrimages', { method: 'POST', body: vars }),
+    onSuccess: (data) => {
+      // Seed the cache so the home shows the new Camino immediately, then
+      // refetch to reconcile with the server (avoids the stale-null empty state).
+      qc.setQueryData(['pilgrimage', 'me'], data);
+      qc.invalidateQueries({ queryKey: ['pilgrimage', 'me'] });
+    },
   });
 }
 
