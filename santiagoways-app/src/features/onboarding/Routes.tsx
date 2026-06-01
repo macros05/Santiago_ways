@@ -28,7 +28,7 @@ export function Routes() {
 
   return (
     <View style={styles.root}>
-      <Image source={media.auroraBg} style={[StyleSheet.absoluteFill, { width, height }]} contentFit="cover" />
+      <Image source={media.onboardingRoutes} style={[StyleSheet.absoluteFill, { width, height }]} contentFit="cover" />
       <LinearGradient
         colors={['rgba(8,7,11,0.72)', 'rgba(8,7,11,0.86)', 'rgba(8,7,11,0.96)']}
         style={StyleSheet.absoluteFill}
