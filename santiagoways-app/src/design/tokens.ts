@@ -12,31 +12,37 @@ export const colors = {
   stone200: '#E7E5E4',
   stone100: '#F5F5F4',
 
-  amber300: '#FCD34D',
-  amber400: '#FBBF24',
-  amber500: '#F59E0B',
-  amber600: '#D97706',
+  // Amber family → one single "flecha" wayfinding yellow.
+  amber300: '#F8D24A',
+  amber400: '#F5C518',
+  amber500: '#D9A912',
+  amber600: '#B8860B',
 
-  cream: '#FFFBEB',
+  cream: '#F7F3EA',
   cream100: '#FEF3C7',
 
-  // Compostelero accent — used wherever the gold tier needs to stand out.
-  gold: '#FFD700',
+  // Premium "Compostela" is now a material (antique brass hairline), not a yellow.
+  gold: '#C9A84A',
 
-  success: '#34D399',
-  error: '#FB7185',
-  warning: '#FBBF24',
-  info: '#60A5FA',
+  // Forest-green structural tier (Galicia).
+  bosque: '#3A5A40',
+  musgo: '#4F7A52',
+  sendero: '#2E5A3D',
+
+  success: '#4F7A52',
+  error: '#C2553D',
+  warning: '#F5C518',
+  info: '#A8A29E',
 
   // ── Aurora / Liquid Dawn palette ────────────────────────────────────────────
   // The futuristic "pre-dawn → sunrise" spectrum that gives the app its depth.
   // Cool night blues bleed into warm ember and gold as the horizon wakes.
-  ink: '#08070B', // deepest base, below stone950 — the void behind glass
+  ink: '#0B0A09', // warm stone-shadow base
   night: '#0B1026', // cool pre-dawn navy
   twilight: '#1A1340', // indigo twilight
   violet: '#3B2A6B', // soft aurora violet
   ember: '#7C3A12', // warm horizon ember
-  horizon: '#F0A92B', // sunrise gold-amber
+  horizon: '#F5C518', // retired: aliased to the single flecha yellow
   aurora1: '#5B8DEF', // luminous sky blue (cool accent)
   aurora2: '#A78BFA', // electric lavender
   aurora3: '#34D399', // mint shimmer
@@ -46,15 +52,20 @@ export const colors = {
   transparent: 'transparent',
 
   // ── Semantic tints / overlays ───────────────────────────────────────────────
-  // Amber (Buen Camino) tints — for icon backgrounds, soft highlights, badges.
-  amberTintSoft: 'rgba(251,191,36,0.12)',
-  amberTintMuted: 'rgba(251,191,36,0.18)',
-  amberTintStrong: 'rgba(251,191,36,0.30)',
+  // Flecha tints (was amber).
+  amberTintSoft: 'rgba(245,197,24,0.12)',
+  amberTintMuted: 'rgba(245,197,24,0.18)',
+  amberTintStrong: 'rgba(245,197,24,0.30)',
 
-  // Gold (Compostelero) tints — same scale as amber for the premium tier.
-  goldTintSoft: 'rgba(255,215,0,0.10)',
-  goldTintMuted: 'rgba(255,215,0,0.15)',
-  goldTintStrong: 'rgba(255,215,0,0.30)',
+  // Brass tints (premium, was gold).
+  goldTintSoft: 'rgba(201,168,74,0.10)',
+  goldTintMuted: 'rgba(201,168,74,0.15)',
+  goldTintStrong: 'rgba(201,168,74,0.30)',
+
+  // Forest-green tints.
+  greenTintSoft: 'rgba(58,90,64,0.12)',
+  greenTintMuted: 'rgba(58,90,64,0.18)',
+  greenTintStrong: 'rgba(79,122,82,0.30)',
 
   // Stone overlays — for image scrims and modal dim layers.
   scrimWeak: 'rgba(8,7,11,0.20)',
@@ -67,7 +78,7 @@ export const colors = {
   // frosted backdrop reads through them. Borders catch light along the top edge.
   glassFill: 'rgba(255,255,255,0.055)',
   glassFillStrong: 'rgba(255,255,255,0.085)',
-  glassFillAmber: 'rgba(251,191,36,0.10)',
+  glassFillAmber: 'rgba(245,197,24,0.10)',
   glassBorder: 'rgba(255,255,255,0.14)',
   glassBorderStrong: 'rgba(255,255,255,0.22)',
   glassHighlight: 'rgba(255,255,255,0.55)', // top hairline sheen
