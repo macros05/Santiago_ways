@@ -15,7 +15,7 @@ import { toast } from '@stores/toast';
 import { api } from '@lib/api';
 import { uploadImage } from '@lib/uploads';
 import { t } from '@lib/i18n';
-import { isLockedRoute, useRoutes } from '@hooks/usePilgrimage';
+import { isLockedRoute, useCreatePilgrimage, useRoutes } from '@hooks/usePilgrimage';
 import { Skeleton } from '@components/Skeleton';
 
 export default function ProfileSetup() {
@@ -30,6 +30,7 @@ export default function ProfileSetup() {
   const [routeSlug, setRouteSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const routesQ = useRoutes();
+  const createPilgrimage = useCreatePilgrimage();
 
   const mounted = useRef(true);
   useEffect(() => () => { mounted.current = false; }, []);
@@ -59,6 +60,7 @@ export default function ProfileSetup() {
     }
     setLoading(true);
     try {
+      // Avatar + bio are best-effort and must never block (or hang) Camino creation.
       let remoteAvatar: string | null = null;
       if (avatar && avatar.startsWith('file:')) {
         try {
@@ -74,13 +76,19 @@ export default function ProfileSetup() {
       if (bio) patch.bio = bio;
       if (remoteAvatar) patch.avatar = remoteAvatar;
       if (Object.keys(patch).length > 0) {
-        await api('/users/me', { method: 'PATCH', body: patch });
+        try {
+          await api('/users/me', { method: 'PATCH', body: patch });
+        } catch {
+          /* non-fatal: profile details can be edited later */
+        }
       }
 
-      await api('/pilgrimages', {
-        method: 'POST',
-        body: { routeSlug, startDate: new Date().toISOString() },
+      // Decisive path: bounded by api() timeout; seeds the cache on success.
+      await createPilgrimage.mutateAsync({
+        routeSlug,
+        startDate: new Date().toISOString(),
       });
+
       if (!mounted.current) return;
       if (user) setUser({ ...user, avatar: remoteAvatar ?? user.avatar });
       router.replace('/(tabs)/explore');
