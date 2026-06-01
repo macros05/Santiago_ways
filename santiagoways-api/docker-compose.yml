@@ -1,0 +1,66 @@
+# SantiagoWays API — persistent self-hosted stack.
+# Postgres + API + Caddy (automatic HTTPS). Everything restarts on reboot and
+# Postgres data lives in a named volume, so the deploy survives restarts.
+#
+#   1. cp .env.production.example .env   &&  fill it in
+#   2. docker compose up -d --build
+#   3. docker compose exec api npm run prisma:seed   # first run only (optional)
+#
+# DATABASE_URL is DERIVED here from POSTGRES_* — do not set it in .env.
+
+services:
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-santiagoways}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-santiagoways}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-santiagoways} -d ${POSTGRES_DB:-santiagoways}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      # Derived from POSTGRES_* above so you only manage the password once.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-santiagoways}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-santiagoways}?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(()=>process.exit(0)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

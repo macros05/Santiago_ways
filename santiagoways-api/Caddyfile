@@ -1,0 +1,7 @@
+# Automatic HTTPS (Let's Encrypt) for the API. Requires:
+#   • a DNS A/AAAA record for $API_DOMAIN pointing at this server
+#   • ports 80 and 443 reachable from the internet
+{$API_DOMAIN} {
+	encode gzip
+	reverse_proxy api:3000
+}

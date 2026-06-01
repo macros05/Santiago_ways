@@ -1,0 +1,42 @@
+# syntax=docker/dockerfile:1
+# SantiagoWays API — Next.js 15 (App Router) + Prisma/Postgres.
+# Self-contained image: it does NOT rely on the monorepo workspace; it installs
+# the API's own dependencies standalone so it can be built and deployed alone.
+
+FROM node:20-bookworm-slim AS base
+ENV NODE_ENV=production
+# openssl is required by Prisma at runtime; ca-certificates for outbound HTTPS.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# ---- build stage ----
+FROM base AS builder
+WORKDIR /app
+# Build tools for native deps (argon2).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 make g++ \
+ && rm -rf /var/lib/apt/lists/*
+COPY package.json ./
+# No standalone lockfile exists in the monorepo, so resolve this service's deps.
+RUN npm install --no-audit --no-fund
+COPY . .
+# Generate the Prisma client and build Next. Neither step needs a live DB.
+RUN npx prisma generate && npm run build
+
+# ---- runtime stage ----
+FROM base AS runner
+WORKDIR /app
+ENV PORT=3000
+# Full dependency tree (incl. the prisma CLI + tsx for migrate/seed) and build.
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
+COPY --from=builder /app/prisma ./prisma
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+EXPOSE 3000
+# Entrypoint applies pending migrations, then runs the CMD (next start).
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["npm", "run", "start"]
