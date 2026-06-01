@@ -38,7 +38,7 @@
       "package": "com.santiagoways.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#3A5A40"
+        "backgroundColor": "#3A6B47"
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
@@ -68,7 +68,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#F5C518"
+          "color": "#4E9D63"
         }
       ],
       [

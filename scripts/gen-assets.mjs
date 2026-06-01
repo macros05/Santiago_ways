@@ -32,31 +32,33 @@ const JOBS = [
     name: 'icon.png',
     aspect: '1:1',
     prompt:
-      'Flat minimalist app icon: a single bright Camino yellow arrow (#F5C518) angled slightly up-right, ' +
-      'hand-painted look with a slightly imperfect edge, on a solid deep forest-green (#3A5A40) rounded square ' +
-      'with a subtle concrete/stone texture. No gloss, no bevel, no gradient, no shell, no glow. ' +
-      'Looks like a real spray-painted wall waymark. Crisp, iconic, generous padding.',
+      'Flat minimalist app icon: a single hand-painted Camino arrow in warm CREAM / off-white (#F7F3EA) angled ' +
+      'slightly up-right, with a slightly imperfect painted edge, on a solid rich forest-green (#3A6B47) rounded ' +
+      'square with a subtle concrete/stone texture. No gloss, no bevel, no gradient, no shell, no glow, ABSOLUTELY NO YELLOW. ' +
+      'Looks like a real painted wall waymark. Crisp, iconic, generous padding.',
   },
   {
     name: 'adaptive-icon.png',
     aspect: '1:1',
     prompt:
-      'Android adaptive icon foreground: the same flat yellow arrow (#F5C518) centered in the middle third on ' +
-      'deep forest-green (#3A5A40), large safe margins, simple and iconic, no clutter, no gloss.',
+      'Android adaptive icon foreground: the same flat CREAM / off-white (#F7F3EA) Camino arrow centered in the ' +
+      'middle third on rich forest-green (#3A6B47), large safe margins, simple and iconic, no clutter, no gloss, no yellow.',
   },
   {
     name: 'splash.png',
     aspect: '9:16',
     prompt:
-      'Vertical splash: a real photograph of a yellow Camino arrow painted on weathered grey Galician stone at soft dawn, ' +
-      'calm and minimal, muted natural color, lots of negative space, deep warm vignette at the bottom, no people. ' + STYLE,
+      'Vertical mobile splash screen: deep warm near-black (#0B0A09) background with a very subtle stone texture, ' +
+      'a single hand-painted CREAM / off-white (#F7F3EA) Camino arrow centered, calm and minimal, lots of negative ' +
+      'space, no people, no text, ABSOLUTELY NO YELLOW, no aurora, no liquid metal, no glossy render.',
   },
   {
     name: 'onboarding-hero.png',
     aspect: '9:16',
     prompt:
-      'Real photo: a yellow Camino arrow on a stone marker pointing down a eucalyptus-lined dirt path in green Galicia ' +
-      'at golden hour, soft mist, natural and hopeful, a genuine pilgrimage trail. ' + STYLE,
+      'Real photo: a weathered stone Camino marker (mojón) beside a eucalyptus-lined dirt path winding through ' +
+      'lush green Galicia at golden hour, soft mist, a lone pilgrim with a backpack small in the distance, ' +
+      'natural and hopeful, a genuine pilgrimage trail. NO yellow paint, no yellow arrow, no signage. ' + STYLE,
   },
   {
     name: 'onboarding-routes.png',
@@ -76,8 +78,9 @@ const JOBS = [
     name: 'home-hero.png',
     aspect: '9:16',
     prompt:
-      'Real photo: a Galician Camino landscape — green hills and a stone path under a soft cream sky at golden hour, ' +
-      'evocative and natural, room for an overlay at the bottom, no people, no text. ' + STYLE,
+      'Real photo: a Galician Camino landscape — a cobblestone and dirt path through green rolling hills with ' +
+      'dry-stone walls and a small medieval hamlet under a soft cream sky at golden hour, evocative and natural, ' +
+      'room for an overlay at the bottom, no people, no text, NO yellow paint, no yellow arrow, no signage. ' + STYLE,
   },
   {
     name: 'notification-icon.png',
@@ -128,9 +131,12 @@ async function generate(job) {
 }
 
 await mkdir(OUT, { recursive: true });
-console.log(`Generating ${JOBS.length} assets → ${OUT}`);
+// Optional ONLY=icon.png,splash.png filter to regenerate a subset.
+const ONLY = (process.env.ONLY ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+const jobs = ONLY.length ? JOBS.filter((j) => ONLY.includes(j.name)) : JOBS;
+console.log(`Generating ${jobs.length} assets → ${OUT}`);
 // Sequential to stay under rate limits.
-for (const job of JOBS) {
+for (const job of jobs) {
   // eslint-disable-next-line no-await-in-loop
   await generate(job);
 }

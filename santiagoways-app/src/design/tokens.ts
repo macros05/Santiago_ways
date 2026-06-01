@@ -12,17 +12,19 @@ export const colors = {
   stone200: '#E7E5E4',
   stone100: '#F5F5F4',
 
-  // Amber family → one single "flecha" wayfinding yellow.
-  amber300: '#F8D24A',
-  amber400: '#F5C518',
-  amber500: '#D9A912',
-  amber600: '#B8860B',
+  // "amber*" tokens are kept by name but repointed to the GREEN action ramp.
+  // Two-colour system: GREEN (action + structure) + warm stone/cream neutrals.
+  // No yellow, no brass. (Token names unchanged so ~50 call-sites inherit this.)
+  amber300: '#6BB87E', // light green
+  amber400: '#4E9D63', // ACTION green (theme.accent) — vivid "Verde Camino"
+  amber500: '#3E7E50', // darker green
+  amber600: '#2F5D3E', // deepest green
 
   cream: '#F7F3EA',
   cream100: '#FEF3C7',
 
-  // Premium "Compostela" is now a material (antique brass hairline), not a yellow.
-  gold: '#C9A84A',
+  // Premium is no longer a 3rd colour — it reuses the deep green (outline/tint).
+  gold: '#2F5D3E',
 
   // Forest-green structural tier (Galicia).
   bosque: '#3A5A40',
@@ -31,7 +33,7 @@ export const colors = {
 
   success: '#4F7A52',
   error: '#C2553D',
-  warning: '#F5C518',
+  warning: '#C77D4A', // clay/caution (not yellow)
   info: '#A8A29E',
 
   // ── Aurora / Liquid Dawn palette ────────────────────────────────────────────
@@ -42,7 +44,7 @@ export const colors = {
   twilight: '#1A1340', // indigo twilight
   violet: '#3B2A6B', // soft aurora violet
   ember: '#7C3A12', // warm horizon ember
-  horizon: '#F5C518', // retired: aliased to the single flecha yellow
+  horizon: '#4E9D63', // retired: aliased to the action green
   aurora1: '#5B8DEF', // luminous sky blue (cool accent)
   aurora2: '#A78BFA', // electric lavender
   aurora3: '#34D399', // mint shimmer
@@ -52,15 +54,15 @@ export const colors = {
   transparent: 'transparent',
 
   // ── Semantic tints / overlays ───────────────────────────────────────────────
-  // Flecha tints (was amber).
-  amberTintSoft: 'rgba(245,197,24,0.12)',
-  amberTintMuted: 'rgba(245,197,24,0.18)',
-  amberTintStrong: 'rgba(245,197,24,0.30)',
+  // Action-green tints (token names kept as amber*).
+  amberTintSoft: 'rgba(78,157,99,0.12)',
+  amberTintMuted: 'rgba(78,157,99,0.18)',
+  amberTintStrong: 'rgba(78,157,99,0.30)',
 
-  // Brass tints (premium, was gold).
-  goldTintSoft: 'rgba(201,168,74,0.10)',
-  goldTintMuted: 'rgba(201,168,74,0.15)',
-  goldTintStrong: 'rgba(201,168,74,0.30)',
+  // Premium tints — deep green (was brass/gold), keeps it within 2 colours.
+  goldTintSoft: 'rgba(47,93,62,0.12)',
+  goldTintMuted: 'rgba(47,93,62,0.18)',
+  goldTintStrong: 'rgba(47,93,62,0.32)',
 
   // Forest-green tints.
   greenTintSoft: 'rgba(58,90,64,0.12)',
@@ -78,7 +80,7 @@ export const colors = {
   // frosted backdrop reads through them. Borders catch light along the top edge.
   glassFill: 'rgba(255,255,255,0.055)',
   glassFillStrong: 'rgba(255,255,255,0.085)',
-  glassFillAmber: 'rgba(245,197,24,0.10)',
+  glassFillAmber: 'rgba(78,157,99,0.10)',
   glassBorder: 'rgba(255,255,255,0.14)',
   glassBorderStrong: 'rgba(255,255,255,0.22)',
   glassHighlight: 'rgba(255,255,255,0.55)', // top hairline sheen
@@ -95,12 +97,12 @@ export const gradients = {
   dawn: ['#0B0A09', '#14110D', '#1A140F', '#13100C', '#0B0A09'] as const,
   // Hero overlay scrim (transparent → deep ink).
   heroScrim: ['rgba(11,10,9,0)', 'rgba(11,10,9,0.35)', 'rgba(11,10,9,0.96)'] as const,
-  // Single-hue flecha sheen for the primary CTA (no four-yellow stack).
-  sunrise: ['#F8D24A', '#F5C518', '#D9A912'] as const,
-  // Forest-green ribbon for non-primary accents/progress.
+  // Action-green sheen for the primary CTA (single hue, no yellow).
+  sunrise: ['#6BB87E', '#4E9D63', '#3E7E50'] as const,
+  // Deep-green ribbon for non-primary accents/progress.
   aurora: ['#4F7A52', '#3A5A40'] as const,
-  // Antique-brass sheen for premium (was gold).
-  gold: ['#D8C078', '#C9A84A', '#A8863A'] as const,
+  // Premium sheen — deep green (was brass), keeps the 2-colour system.
+  gold: ['#4E9D63', '#3E7E50', '#2F5D3E'] as const,
   glassSheen: ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0)'] as const,
   glassCard: ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)'] as const,
 } as const;
@@ -256,11 +258,11 @@ export const glow = {
   amber:
     Platform.OS === 'android'
       ? { elevation: 10 }
-      : { shadowColor: '#F5C518', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 18 },
+      : { shadowColor: '#4E9D63', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 18 },
   gold:
     Platform.OS === 'android'
       ? { elevation: 8 }
-      : { shadowColor: '#C9A84A', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.35, shadowRadius: 14 },
+      : { shadowColor: '#2F5D3E', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.35, shadowRadius: 14 },
   aurora:
     Platform.OS === 'android'
       ? { elevation: 8 }

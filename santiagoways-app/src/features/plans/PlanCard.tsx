@@ -87,7 +87,7 @@ export function PlanCard({
     >
       {isCompostelero ? (
         <LinearGradient
-          colors={['rgba(255,215,0,0.10)', 'rgba(255,165,0,0.04)']}
+          colors={['rgba(47,93,62,0.10)', 'rgba(62,126,80,0.04)']}
           style={StyleSheet.absoluteFill}
         />
       ) : null}

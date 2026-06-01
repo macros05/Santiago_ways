@@ -15,7 +15,7 @@ type BadgeProps = {
 
 const palette: Record<Variant, { bg: string; fg: string; border: string }> = {
   success: { bg: 'rgba(79,122,82,0.14)', fg: colors.success, border: 'rgba(79,122,82,0.30)' },
-  warning: { bg: 'rgba(245,197,24,0.14)', fg: colors.warning, border: 'rgba(245,197,24,0.30)' },
+  warning: { bg: 'rgba(199,125,74,0.14)', fg: colors.warning, border: 'rgba(199,125,74,0.30)' },
   error: { bg: 'rgba(194,85,61,0.14)', fg: colors.error, border: 'rgba(194,85,61,0.30)' },
   info: { bg: 'rgba(168,162,158,0.14)', fg: colors.info, border: 'rgba(168,162,158,0.30)' },
   gold: { bg: colors.goldTintSoft, fg: colors.gold, border: colors.goldTintStrong },

@@ -116,7 +116,7 @@ export default function AIGuideScreen() {
       >
         <View style={styles.headerCard}>
           <LinearGradient
-            colors={['rgba(255,215,0,0.12)', 'rgba(255,215,0,0.02)']}
+            colors={['rgba(47,93,62,0.12)', 'rgba(47,93,62,0.02)']}
             style={StyleSheet.absoluteFill}
           />
           <Text variant="display" color={colors.cream}>
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     padding: spacing['5'],
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,215,0,0.3)',
+    borderColor: 'rgba(47,93,62,0.3)',
   },
   badge: {
     position: 'absolute',
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,215,0,0.12)',
+    backgroundColor: 'rgba(47,93,62,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },

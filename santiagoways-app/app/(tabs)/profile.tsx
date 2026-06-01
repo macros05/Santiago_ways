@@ -68,11 +68,11 @@ export default function ProfileScreen() {
               />
             ) : null}
             {isCompostelero ? (
-              <View style={[styles.planBadge, { borderColor: colors.gold, backgroundColor: 'rgba(255,215,0,0.15)' }]}>
+              <View style={[styles.planBadge, { borderColor: colors.gold, backgroundColor: 'rgba(47,93,62,0.15)' }]}>
                 <Text variant="caption" color={colors.gold}>🐚 Compostelero</Text>
               </View>
             ) : isBuenCamino ? (
-              <View style={[styles.planBadge, { borderColor: colors.amber400, backgroundColor: 'rgba(251,191,36,0.15)' }]}>
+              <View style={[styles.planBadge, { borderColor: colors.amber400, backgroundColor: 'rgba(78,157,99,0.15)' }]}>
                 <Text variant="caption" color={colors.amber400}>⭐ Buen Camino</Text>
               </View>
             ) : null}
@@ -93,7 +93,7 @@ export default function ProfileScreen() {
           <Card style={{ marginTop: spacing['3'], overflow: 'hidden' }}>
             {isCompostelero ? (
               <LinearGradient
-                colors={['rgba(255,215,0,0.10)', 'rgba(255,215,0,0.02)']}
+                colors={['rgba(47,93,62,0.10)', 'rgba(47,93,62,0.02)']}
                 style={StyleSheet.absoluteFill}
               />
             ) : null}
@@ -103,9 +103,9 @@ export default function ProfileScreen() {
                   styles.planIcon,
                   {
                     backgroundColor: isCompostelero
-                      ? 'rgba(255,215,0,0.18)'
+                      ? 'rgba(47,93,62,0.18)'
                       : isBuenCamino
-                        ? 'rgba(251,191,36,0.18)'
+                        ? 'rgba(78,157,99,0.18)'
                         : colors.stone800,
                   },
                 ]}
@@ -141,7 +141,7 @@ export default function ProfileScreen() {
           <View style={{ marginTop: spacing['6'], gap: spacing['3'] }}>
             <Pressable onPress={() => router.push('/ai-guide')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-                <View style={[styles.qIcon, { backgroundColor: 'rgba(255,215,0,0.12)' }]}>
+                <View style={[styles.qIcon, { backgroundColor: 'rgba(47,93,62,0.12)' }]}>
                   <Ionicons name="sparkles" size={18} color={colors.gold} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
@@ -152,7 +152,7 @@ export default function ProfileScreen() {
             </Pressable>
             <Pressable onPress={() => router.push('/health-dashboard')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-                <View style={[styles.qIcon, { backgroundColor: 'rgba(251,191,36,0.12)' }]}>
+                <View style={[styles.qIcon, { backgroundColor: 'rgba(78,157,99,0.12)' }]}>
                   <Ionicons name="heart" size={18} color={colors.amber400} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
@@ -163,7 +163,7 @@ export default function ProfileScreen() {
             </Pressable>
             <Pressable onPress={() => router.push('/chat')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-                <View style={[styles.qIcon, { backgroundColor: 'rgba(255,215,0,0.12)' }]}>
+                <View style={[styles.qIcon, { backgroundColor: 'rgba(47,93,62,0.12)' }]}>
                   <Ionicons name="chatbubbles" size={18} color={colors.gold} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
@@ -185,7 +185,7 @@ export default function ProfileScreen() {
                 style={[
                   styles.achCircle,
                   {
-                    backgroundColor: a.unlocked ? 'rgba(251,191,36,0.15)' : colors.stone800,
+                    backgroundColor: a.unlocked ? 'rgba(78,157,99,0.15)' : colors.stone800,
                     borderColor: a.unlocked ? colors.amber400 : colors.stone700,
                   },
                 ]}

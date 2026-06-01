@@ -45,7 +45,7 @@ export default function CredentialScreen() {
         ) : (
           <Card padding={0} style={styles.compostela}>
             <LinearGradient
-              colors={['rgba(251,191,36,0.18)', 'rgba(251,191,36,0.04)']}
+              colors={['rgba(78,157,99,0.18)', 'rgba(78,157,99,0.04)']}
               style={StyleSheet.absoluteFill}
             />
             <View style={styles.compostelaContent}>
@@ -140,7 +140,7 @@ function StampRow({ stamp }: { stamp: Stamp }) {
 const styles = StyleSheet.create({
   compostela: {
     overflow: 'hidden',
-    borderColor: 'rgba(251,191,36,0.4)',
+    borderColor: 'rgba(78,157,99,0.4)',
     borderWidth: 1,
     minHeight: 200,
     justifyContent: 'center',
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(251,191,36,0.12)',
+    backgroundColor: 'rgba(78,157,99,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
