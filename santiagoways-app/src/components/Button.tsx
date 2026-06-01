@@ -41,7 +41,7 @@ const horizontalPadding: Record<Size, number> = { sm: 16, md: 22, lg: 26 };
 const textColor: Record<Variant, string> = {
   primary: colors.stone950,
   secondary: colors.cream,
-  ghost: colors.amber400,
+  ghost: colors.musgo,
   danger: colors.white,
   glass: colors.cream,
 };

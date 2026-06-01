@@ -14,11 +14,11 @@ type BadgeProps = {
 };
 
 const palette: Record<Variant, { bg: string; fg: string; border: string }> = {
-  success: { bg: 'rgba(52,211,153,0.14)', fg: colors.success, border: 'rgba(52,211,153,0.30)' },
-  warning: { bg: 'rgba(251,191,36,0.14)', fg: colors.warning, border: 'rgba(251,191,36,0.30)' },
-  error: { bg: 'rgba(251,113,133,0.14)', fg: colors.error, border: 'rgba(251,113,133,0.30)' },
-  info: { bg: 'rgba(96,165,250,0.14)', fg: colors.info, border: 'rgba(96,165,250,0.30)' },
-  gold: { bg: colors.glassFillAmber, fg: colors.amber300, border: colors.amberTintStrong },
+  success: { bg: 'rgba(79,122,82,0.14)', fg: colors.success, border: 'rgba(79,122,82,0.30)' },
+  warning: { bg: 'rgba(245,197,24,0.14)', fg: colors.warning, border: 'rgba(245,197,24,0.30)' },
+  error: { bg: 'rgba(194,85,61,0.14)', fg: colors.error, border: 'rgba(194,85,61,0.30)' },
+  info: { bg: 'rgba(168,162,158,0.14)', fg: colors.info, border: 'rgba(168,162,158,0.30)' },
+  gold: { bg: colors.goldTintSoft, fg: colors.gold, border: colors.goldTintStrong },
   neutral: { bg: colors.glassFill, fg: colors.stone300, border: colors.glassBorder },
 };
 
