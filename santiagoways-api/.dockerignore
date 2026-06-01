@@ -10,6 +10,5 @@ npm-debug.log*
 .expo-export
 .next-export
 .DS_Store
-prisma/data
 README.md
 DEPLOY.md

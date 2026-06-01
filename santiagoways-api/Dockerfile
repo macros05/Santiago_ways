@@ -21,6 +21,10 @@ COPY package.json ./
 # No standalone lockfile exists in the monorepo, so resolve this service's deps.
 RUN npm install --no-audit --no-fund
 COPY . .
+# This service's tsconfig extends "expo/tsconfig.base" — a monorepo hoist that
+# is NOT installed in this standalone image. Drop the extends; the API's own
+# compilerOptions (baseUrl + the @lib/* path aliases) are self-sufficient for Next.
+RUN node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('tsconfig.json','utf8'));delete j.extends;fs.writeFileSync('tsconfig.json',JSON.stringify(j,null,2));"
 # Generate the Prisma client and build Next. Neither step needs a live DB.
 RUN npx prisma generate && npm run build
 

@@ -1,3 +1,8 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
@@ -24,8 +29,21 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['@prisma/client', 'argon2'],
+  // Lint runs as its own step (npm run lint / CI); don't fail production builds
+  // on it — especially while the eslint-plugin resolver is being sorted out.
+  eslint: { ignoreDuringBuilds: true },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
+  },
+  // Resolve the `@lib/*` path alias explicitly so the build never depends on
+  // tsconfig path inheritance (the tsconfig `extends "expo/tsconfig.base"`,
+  // a monorepo hoist that isn't present in a standalone/Docker build).
+  webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@lib': path.resolve(__dirname, 'lib'),
+    };
+    return config;
   },
 };
 
