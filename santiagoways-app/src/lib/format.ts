@@ -1,3 +1,10 @@
+import { i18n } from './i18n';
+
+/** Active app locale as a BCP-47 tag for Intl / toLocale* number & date formatting. */
+export function dateLocale(): string {
+  return i18n.locale === 'en' ? 'en-GB' : 'es-ES';
+}
+
 export function formatKm(value: number, decimals = 1): string {
   return `${value.toFixed(decimals)} km`;
 }

@@ -10,6 +10,7 @@ import { Badge } from '@components/Badge';
 import { Skeleton } from '@components/Skeleton';
 import { Button } from '@components/Button';
 import { colors, layout, radius, spacing } from '@design/tokens';
+import { dateLocale } from '@lib/format';
 import { pilgrimageStats, useMyPilgrimage } from '@hooks/usePilgrimage';
 
 export default function RouteScreen() {
@@ -96,7 +97,7 @@ export default function RouteScreen() {
                   Pasos estimados
                 </Text>
                 <Text variant="h2" color={colors.cream}>
-                  {Math.round(stats.walkedKm * 1400).toLocaleString('es-ES')}
+                  {Math.round(stats.walkedKm * 1400).toLocaleString(dateLocale())}
                 </Text>
               </Card>
               <Card style={styles.statCard}>
@@ -105,7 +106,7 @@ export default function RouteScreen() {
                   Desnivel +
                 </Text>
                 <Text variant="h2" color={colors.cream}>
-                  {stats.elevationGain.toLocaleString('es-ES')} m
+                  {stats.elevationGain.toLocaleString(dateLocale())} m
                 </Text>
               </Card>
               <Card style={styles.statCard}>

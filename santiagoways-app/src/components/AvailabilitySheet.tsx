@@ -7,6 +7,7 @@ import { Card } from '@components/Card';
 import { BottomSheet } from '@components/BottomSheet';
 import { colors, radius, spacing } from '@design/tokens';
 import { api, ApiError } from '@lib/api';
+import { dateLocale } from '@lib/format';
 
 type Props = {
   visible: boolean;
@@ -54,7 +55,7 @@ function addDays(base: Date, days: number): Date {
 }
 
 function shortDayLabel(d: Date): string {
-  return d.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '');
+  return d.toLocaleDateString(dateLocale(), { weekday: 'short' }).replace('.', '');
 }
 
 function bookingFallbackUrl(opts: {

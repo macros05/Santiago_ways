@@ -1,6 +1,7 @@
 import type { DiaryEntry } from '@hooks/useDiary';
 import type { Stamp } from '@hooks/useCredential';
 import type { AuthUser } from '@stores/auth';
+import { dateLocale } from './format';
 
 export type CompostelaInput = {
   entry: DiaryEntry;
@@ -24,7 +25,7 @@ function formatDate(value: string | null | undefined): string {
   if (!value) return '';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  return d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 export function generateCompostelaHTML(input: CompostelaInput): string {

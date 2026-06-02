@@ -239,16 +239,31 @@ Tras una auditoría profunda (backend + cliente), corregido:
 - **`explore.tsx` (home)** y **`chat/index.tsx`** totalmente localizados y
   tokenizados. La primera pantalla del usuario ya no tiene literales en español.
 
+### Sexta pasada — cola i18n + colores cerrada (en `main`) ✅
+Mergeada la rama a `main` y rematada la cola larga:
+- **i18n cableado** en `albergue/[id]`, el cuerpo de `stage/[id]`, los seis
+  `settings/*` (profile, language, notifications, privacy, map, downloads), los
+  labels de accesibilidad sueltos de `community.tsx` y el error/retry de
+  `chat/[id]`. **49 claves nuevas**; diccionario **en/es 100% simétrico (555/555)**.
+- **Fechas según locale activo**: `diary/index`, `diary/[id]`, `route.tsx` (números),
+  `AvailabilitySheet` y `compostela.ts` usan ahora `dateLocale()` (`es→es-ES`,
+  `en→en-GB`) en vez de `'es-ES'` fijo. (Las ramas `es-ES`/`en-GB` de
+  `format.timeAgo` son correctas por locale y se mantienen.)
+- **Colores tokenizados**: **0 literales de color inline** en `app/` (antes ~49,
+  no ~23 como decía la pasada anterior — el conteo estaba subestimado). Tokens
+  nuevos `amberTintFaint`, `dotInactive`, `chipFillInactive`.
+- **Verificado**: `tsc --noEmit` 0 errores · `jest` 61/61 · auditoría de claves
+  `t()` 0 faltantes y en/es simétrico · 0 colores inline en pantallas.
+
 ### Sigue pendiente (cola larga, honesta)
-- **i18n**: el recorrido principal está localizado (onboarding, auth, home,
-  paywall, perfil, IA, salud, credencial, diario, comunidad, chat, stage
-  tracking). Queda una **cola larga** en pantallas de detalle/ajustes:
-  `albergue/[id]`, el cuerpo de `stage/[id]`, `settings/*` (profile, language,
-  notifications, privacy, map, downloads) y algún literal suelto en
-  `community.tsx`. Es trabajo mecánico, no bloqueante.
-- **~23 colores hardcodeados**: la **mayoría son primitivas de diseño legítimas**
-  (`Glass`, `AuroraBackground`, `Button`, `Badge`, `TabBar`, `HeroOverlay`); el
-  resto en `stage/[id]` (4) y `settings/downloads`.
+- **i18n — straggler descubierto**: la pestaña `route.tsx` ("Mi Ruta") tiene
+  labels en español sin `t()` ("Pasos estimados", "Desnivel +", etc.) — no estaba
+  en la auditoría original; pendiente de localizar. El resto del recorrido
+  principal + detalle/ajustes ya está localizado (ver Sexta pasada).
+- **Lint roto a nivel de tooling**: `eslint` cae con
+  `eslint-import-resolver-typescript` (interfaz inválida); no es código, es
+  config/versiones. `tsc` cubre la resolución de imports en verde. Arreglar el
+  resolver (o alinear `node_modules`) para reactivar el lint.
 - **Next.js**: quedan advisories que solo se cierran en **Next 16** (major).
   Se subió al último parche 15.5.19; planificar el salto a 16 con pruebas.
 - **`npm audit`**: ~24 vulns, la mayoría en tooling de build (xcode/xmldom/uuid),
