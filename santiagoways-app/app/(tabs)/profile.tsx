@@ -14,16 +14,9 @@ import { useSubscription } from '@stores/subscription';
 import { useSubscriptionStatus } from '@hooks/useSubscription';
 import { toast } from '@stores/toast';
 import { useHealthPermission } from '@hooks/useHealth';
+import { useStats } from '@hooks/useStats';
+import { evaluate } from '@lib/achievements';
 import { t } from '@lib/i18n';
-
-const ACHIEVEMENTS = [
-  { id: 'first_steps', icon: 'footsteps' as const, unlocked: true },
-  { id: '100km', icon: 'trophy' as const, unlocked: true },
-  { id: 'halfway', icon: 'flag' as const, unlocked: true },
-  { id: 'meseta', icon: 'sunny' as const, unlocked: false },
-  { id: 'compostela', icon: 'star' as const, unlocked: false },
-  { id: 'finisterre', icon: 'compass' as const, unlocked: false },
-];
 
 // Buen Camino / Compostelero are brand names; only the free tier is localized.
 function planName(plan: string): string {
@@ -40,11 +33,13 @@ export default function ProfileScreen() {
   const { plan, status, currentPeriodEnd, cancelAtPeriodEnd } = useSubscriptionStatus();
   const restore = useSubscription((s) => s.restore);
   const health = useHealthPermission();
+  const stats = useStats();
+  const achievements = evaluate(stats);
 
   const isCompostelero = plan === 'compostelero';
   const isBuenCamino = plan === 'buen_camino';
   const isPaid = isBuenCamino || isCompostelero;
-  const unlockedCount = ACHIEVEMENTS.filter((a) => a.unlocked).length;
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   return (
     <ScrollView
@@ -186,7 +181,7 @@ export default function ProfileScreen() {
           {t('profile.achievementsHeading')}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.achievements}>
-          {ACHIEVEMENTS.map((a) => (
+          {achievements.map((a) => (
             <View key={a.id} style={styles.ach}>
               <View
                 style={[

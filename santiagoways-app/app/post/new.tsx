@@ -14,6 +14,7 @@ import { colors, radius, spacing } from '@design/tokens';
 import { api, ApiError } from '@lib/api';
 import { uploadImages } from '@lib/uploads';
 import { toast } from '@stores/toast';
+import { t } from '@lib/i18n';
 
 export default function NewPost() {
   const router = useRouter();
@@ -44,11 +45,11 @@ export default function NewPost() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['posts'] });
-      toast.success('Publicación enviada.');
+      toast.success(t('community.published'));
       router.back();
     },
     onError: (e) => {
-      const msg = e instanceof ApiError ? e.message : 'No pudimos publicar.';
+      const msg = e instanceof ApiError ? e.message : t('community.publishFailed');
       toast.error(msg);
     },
   });
@@ -56,7 +57,7 @@ export default function NewPost() {
   const pickImages = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      toast.error('Activa el acceso a tus fotos para añadir imágenes.');
+      toast.error(t('community.photoPermission'));
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
@@ -74,15 +75,17 @@ export default function NewPost() {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: colors.ink }}>
       <Header
         onBack={() => router.back()}
-        title="Nueva publicación"
+        title={t('community.newPostTitle')}
         rightAction={
           <Pressable
             disabled={!content.trim() || createPost.isPending}
             onPress={() => createPost.mutate()}
             hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('community.publish')}
           >
             <Text variant="bodyBold" color={!content.trim() ? colors.stone500 : colors.amber400}>
-              Publicar
+              {t('community.publish')}
             </Text>
           </Pressable>
         }
@@ -92,7 +95,7 @@ export default function NewPost() {
         keyboardShouldPersistTaps="handled"
       >
         <Input
-          label="¿Qué quieres compartir?"
+          label={t('community.placeholder')}
           value={content}
           onChangeText={setContent}
           multiline
@@ -104,13 +107,18 @@ export default function NewPost() {
         </Text>
 
         <View style={{ marginTop: spacing['5'] }}>
-          <Pressable onPress={pickImages} style={styles.imageBox}>
+          <Pressable
+            onPress={pickImages}
+            style={styles.imageBox}
+            accessibilityRole="button"
+            accessibilityLabel={t('community.addPhotos')}
+          >
             <Ionicons name="image-outline" size={28} color={colors.amber400} />
             <Text variant="bodyMedium" color={colors.cream} style={{ marginTop: 6 }}>
-              Añadir fotos
+              {t('community.addPhotos')}
             </Text>
             <Text variant="caption" color={colors.stone400}>
-              Hasta 5 imágenes
+              {t('community.addPhotosHint')}
             </Text>
           </Pressable>
           {images.length > 0 ? (
@@ -123,14 +131,14 @@ export default function NewPost() {
         </View>
 
         <Input
-          label="Ubicación (etapa o ciudad)"
+          label={t('community.location')}
           value={location}
           onChangeText={setLocation}
           containerStyle={{ marginTop: spacing['5'] }}
         />
 
         <Button
-          label={uploading ? 'Subiendo…' : 'Publicar'}
+          label={uploading ? t('community.publishing') : t('community.publish')}
           fullWidth
           loading={createPost.isPending}
           disabled={!content.trim() || createPost.isPending}

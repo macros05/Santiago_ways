@@ -12,23 +12,18 @@ import { Card } from '@components/Card';
 import { Skeleton } from '@components/Skeleton';
 import { Button } from '@components/Button';
 import { LockedOverlay } from '@components/LockedOverlay';
-import { colors, layout, radius, spacing } from '@design/tokens';
+import { colors, gradients, layout, radius, spacing } from '@design/tokens';
 import { useIsCompostelero } from '@hooks/useSubscription';
 import { useAIRecommendation, type RecType, type RecommendationResponse } from '@hooks/useAIRecommendation';
+import { t } from '@lib/i18n';
 
-type Chip = {
-  type: RecType;
-  emoji: string;
-  label: string;
-};
-
-const CHIPS: Chip[] = [
-  { type: 'daily_tip', emoji: '💡', label: 'Consejo de hoy' },
-  { type: 'albergue_pick', emoji: '🛏️', label: 'Mejor albergue' },
-  { type: 'hidden_gem', emoji: '📍', label: 'Joyas ocultas' },
-  { type: 'route_planning', emoji: '🗺️', label: 'Planificar etapas' },
-  { type: 'health_advice', emoji: '❤️', label: 'Consejo de salud' },
-  { type: 'weather_advice', emoji: '🌦️', label: 'Preparación meteo' },
+const CHIP_TYPES: RecType[] = [
+  'daily_tip',
+  'albergue_pick',
+  'hidden_gem',
+  'route_planning',
+  'health_advice',
+  'weather_advice',
 ];
 
 type ResultEntry = RecommendationResponse & { id: string };
@@ -40,10 +35,10 @@ export default function AIGuideScreen() {
   const recMut = useAIRecommendation();
   const [results, setResults] = useState<ResultEntry[]>([]);
 
-  const handleChip = async (chip: Chip) => {
+  const handleChip = async (type: RecType) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     try {
-      const data = await recMut.mutateAsync({ type: chip.type });
+      const data = await recMut.mutateAsync({ type });
       setResults((prev) => [{ ...data, id: `${Date.now()}` }, ...prev]);
     } catch {
       // mutation error is exposed via recMut.error
@@ -54,43 +49,40 @@ export default function AIGuideScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
-        <Header title="Tu Guía IA" onBack={() => router.back()} />
+        <Header title={t('aiGuide.title')} onBack={() => router.back()} />
         <ScrollView contentContainerStyle={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'] }}>
           <View style={{ gap: spacing['4'] }}>
             <View>
               <Text variant="display" color={colors.cream}>
-                Tu guía personal del Camino
+                {t('aiGuide.lockedTitle')}
               </Text>
               <Text variant="body" color={colors.stone400} style={{ marginTop: spacing['2'] }}>
-                Activa Compostelero para recomendaciones personalizadas basadas en tu ritmo,
-                salud y ruta.
+                {t('aiGuide.lockedSubtitle')}
               </Text>
             </View>
 
             <View>
               <Card style={{ position: 'relative', minHeight: 220 }}>
                 <Text variant="bodyBold" color={colors.cream}>
-                  Consejo del peregrino veterano
+                  {t('aiGuide.veteranTipTitle')}
                 </Text>
                 <Text variant="body" color={colors.stone300} style={{ marginTop: spacing['2'] }}>
-                  Con 18 km por delante y un sol de justicia, sal antes de las 6:30. La
-                  taberna de Hospital de Órbigo abre a las 9 — perfecto para la primera
-                  pausa larga…
+                  {t('aiGuide.veteranTipBody')}
                 </Text>
                 <View style={{ marginTop: spacing['3'], gap: spacing['1'] }}>
-                  <Text variant="caption" color={colors.amber400}>• Lleva 1,5L por persona</Text>
-                  <Text variant="caption" color={colors.amber400}>• Sombrero ancho, no gorra</Text>
+                  <Text variant="caption" color={colors.amber400}>{t('aiGuide.veteranBullet1')}</Text>
+                  <Text variant="caption" color={colors.amber400}>{t('aiGuide.veteranBullet2')}</Text>
                 </View>
                 <LockedOverlay
                   requiredPlan="compostelero"
-                  message="Tu guía IA personal"
+                  message={t('aiGuide.lockedOverlay')}
                   onPress={() => router.push('/plans')}
                 />
               </Card>
             </View>
 
             <Button
-              label="Ver plan Compostelero"
+              label={t('aiGuide.viewCompostelero')}
               variant="primary"
               fullWidth
               style={{ backgroundColor: colors.gold }}
@@ -105,7 +97,7 @@ export default function AIGuideScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
-      <Header title="Tu Guía IA" onBack={() => router.back()} />
+      <Header title={t('aiGuide.title')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           padding: spacing['5'],
@@ -116,14 +108,14 @@ export default function AIGuideScreen() {
       >
         <View style={styles.headerCard}>
           <LinearGradient
-            colors={['rgba(47,93,62,0.12)', 'rgba(47,93,62,0.02)']}
+            colors={gradients.premiumCard}
             style={StyleSheet.absoluteFill}
           />
           <Text variant="display" color={colors.cream}>
-            Pregunta a tu peregrino veterano
+            {t('aiGuide.askTitle')}
           </Text>
           <Text variant="small" color={colors.stone300} style={{ marginTop: spacing['2'] }}>
-            Combina tu ruta, ritmo, salud y meteo para darte un consejo único.
+            {t('aiGuide.askSubtitle')}
           </Text>
           <View style={[styles.badge, { backgroundColor: colors.gold }]}>
             <Text variant="caption" color={colors.stone950}>
@@ -137,15 +129,17 @@ export default function AIGuideScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: spacing['2'], paddingVertical: spacing['1'] }}
         >
-          {CHIPS.map((chip) => (
+          {CHIP_TYPES.map((type) => (
             <Pressable
-              key={chip.type}
-              onPress={() => handleChip(chip)}
+              key={type}
+              onPress={() => handleChip(type)}
               disabled={recMut.isPending}
+              accessibilityRole="button"
+              accessibilityLabel={t(`aiGuide.types.${type}`)}
               style={({ pressed }) => [styles.chip, pressed && { opacity: 0.7 }]}
             >
               <Text variant="bodyMedium" color={colors.cream}>
-                {chip.emoji}  {chip.label}
+                {t(`aiGuide.chips.${type}`)}
               </Text>
             </Pressable>
           ))}
@@ -162,7 +156,7 @@ export default function AIGuideScreen() {
                 <Ionicons name="sparkles" size={18} color={colors.gold} />
               </MotiView>
               <Text variant="bodyMedium" color={colors.stone300}>
-                Consultando con el peregrino experto…
+                {t('aiGuide.loading')}
               </Text>
             </View>
             <Skeleton height={20} />
@@ -174,10 +168,10 @@ export default function AIGuideScreen() {
         {recMut.error ? (
           <Card>
             <Text variant="bodyBold" color={colors.error}>
-              No se pudo obtener la recomendación
+              {t('aiGuide.errorTitle')}
             </Text>
             <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['2'] }}>
-              {(recMut.error as Error).message ?? 'Error desconocido'}
+              {(recMut.error as Error).message ?? t('common.error')}
             </Text>
           </Card>
         ) : null}
@@ -190,7 +184,7 @@ export default function AIGuideScreen() {
           <View style={{ alignItems: 'center', marginTop: spacing['10'], gap: spacing['2'] }}>
             <Ionicons name="chatbubbles-outline" size={48} color={colors.stone600} />
             <Text variant="small" color={colors.stone500} align="center">
-              Toca un chip para empezar.{'\n'}Cada consejo combina tu contexto en tiempo real.
+              {t('aiGuide.emptyHint')}
             </Text>
           </View>
         ) : null}
@@ -212,7 +206,7 @@ function ResultCard({ entry, delay }: { entry: ResultEntry; delay: number }) {
             <Ionicons name="sparkles" size={14} color={colors.gold} />
           </View>
           <Text variant="caption" color={colors.amber400}>
-            {labelForType(entry.type)}
+            {t(`aiGuide.types.${entry.type}`)}
           </Text>
         </View>
         <Text variant="h2" color={colors.cream} italic>
@@ -234,17 +228,17 @@ function ResultCard({ entry, delay }: { entry: ResultEntry; delay: number }) {
           </View>
         ) : null}
         <View style={styles.contextRow}>
-          {entry.contextUsed.hasStage ? <Tag label="Etapa" /> : null}
-          {entry.contextUsed.hasRoute ? <Tag label="Ruta" /> : null}
-          {entry.contextUsed.hasHealth ? <Tag label="Salud" /> : null}
-          {entry.contextUsed.hasWeather ? <Tag label="Meteo" /> : null}
-          {entry.contextUsed.hasPace ? <Tag label="Ritmo" /> : null}
+          {entry.contextUsed.hasStage ? <Tag label={t('aiGuide.tagStage')} /> : null}
+          {entry.contextUsed.hasRoute ? <Tag label={t('aiGuide.tagRoute')} /> : null}
+          {entry.contextUsed.hasHealth ? <Tag label={t('aiGuide.tagHealth')} /> : null}
+          {entry.contextUsed.hasWeather ? <Tag label={t('aiGuide.tagWeather')} /> : null}
+          {entry.contextUsed.hasPace ? <Tag label={t('aiGuide.tagPace')} /> : null}
         </View>
         <View style={{ flexDirection: 'row', gap: spacing['4'], marginTop: spacing['2'] }}>
-          <Pressable hitSlop={8}>
+          <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel={t('community.saved')}>
             <Ionicons name="bookmark-outline" size={18} color={colors.stone400} />
           </Pressable>
-          <Pressable hitSlop={8}>
+          <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel={t('common.share')}>
             <Ionicons name="share-outline" size={18} color={colors.stone400} />
           </Pressable>
         </View>
@@ -261,17 +255,6 @@ function Tag({ label }: { label: string }) {
       </Text>
     </View>
   );
-}
-
-function labelForType(t: RecType): string {
-  return {
-    daily_tip: 'Consejo del día',
-    albergue_pick: 'Albergue recomendado',
-    hidden_gem: 'Joya oculta',
-    route_planning: 'Planificación',
-    weather_advice: 'Meteorología',
-    health_advice: 'Salud',
-  }[t];
 }
 
 function firstSentence(text: string): string {
@@ -291,7 +274,7 @@ const styles = StyleSheet.create({
     padding: spacing['5'],
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(47,93,62,0.3)',
+    borderColor: colors.goldTintStrong,
   },
   badge: {
     position: 'absolute',
@@ -313,7 +296,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'rgba(47,93,62,0.12)',
+    backgroundColor: colors.goldTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },

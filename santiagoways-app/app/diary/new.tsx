@@ -58,7 +58,7 @@ export default function NewDiaryEntry() {
 
   const save = async () => {
     if (!title.trim() || !body.trim()) {
-      toast.error('Faltan título o contenido.');
+      toast.error(t('diary.missingTitleBody'));
       return;
     }
     setUploading(true);
@@ -87,7 +87,7 @@ export default function NewDiaryEntry() {
       toast.success(t('diary.saved'));
       router.back();
     } catch {
-      toast.error('No pudimos guardar la entrada.');
+      toast.error(t('diary.saveFailed'));
     } finally {
       setUploading(false);
     }
@@ -150,9 +150,14 @@ export default function NewDiaryEntry() {
           <Card padding="3" style={{ marginTop: spacing['6'] }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text variant="bodyBold" color={colors.cream}>
-                Fotos ({images.length}/10)
+                {t('diary.photosCount', { count: images.length })}
               </Text>
-              <Pressable onPress={pickImages} disabled={images.length >= 10}>
+              <Pressable
+                onPress={pickImages}
+                disabled={images.length >= 10}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.add')}
+              >
                 <Ionicons name="add-circle-outline" size={24} color={colors.amber400} />
               </Pressable>
             </View>
@@ -220,7 +225,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: colors.modalDim,
     alignItems: 'center',
     justifyContent: 'center',
   },
