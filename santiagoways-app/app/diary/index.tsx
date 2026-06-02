@@ -30,6 +30,20 @@ export default function DiaryListScreen() {
             <Skeleton height={120} borderRadius={radius.lg} />
             <Skeleton height={120} borderRadius={radius.lg} />
           </View>
+        ) : q.isError ? (
+          <View style={styles.empty}>
+            <View style={styles.emptyIcon}>
+              <Ionicons name="cloud-offline-outline" size={32} color={colors.amber400} />
+            </View>
+            <Text variant="bodyMedium" color={colors.stone400} align="center" style={{ marginTop: spacing['4'] }}>
+              {t('common.offlineError')}
+            </Text>
+            <Button
+              label={t('common.retry')}
+              onPress={() => q.refetch()}
+              style={{ marginTop: spacing['6'] }}
+            />
+          </View>
         ) : data.length === 0 ? (
           <View style={styles.empty}>
             <View style={styles.emptyIcon}>

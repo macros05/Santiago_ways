@@ -41,6 +41,11 @@ COPY --from=builder /app/prisma ./prisma
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 3000
+# Drop privileges: run the server as the built-in non-root `node` user instead
+# of root. The copied files are world-readable and the app writes nothing under
+# /app at runtime (Next is prebuilt, Prisma client generated at build), so no
+# chown is needed; binding :3000 (>1024) works unprivileged.
+USER node
 # Entrypoint applies pending migrations, then runs the CMD (next start).
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npm", "run", "start"]

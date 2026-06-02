@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { api } from '@lib/api';
+import { toast } from '@stores/toast';
+import { t } from '@lib/i18n';
 import {
   getCurrentOfferings,
   getCustomerInfo,
@@ -115,6 +117,12 @@ export const useSubscription = create<SubscriptionState>((set, get) => ({
       }
       await get().refresh();
       return get().plan;
+    } catch (e) {
+      // Never let a RevenueCat/network error become an unhandled rejection —
+      // callers fire this from onPress (incl. fire-and-forget). Surface it.
+      console.warn('[subscription] restore failed', e);
+      toast.error(t('common.error'));
+      return null;
     } finally {
       set({ isLoading: false });
     }

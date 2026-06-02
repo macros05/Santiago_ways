@@ -168,6 +168,62 @@ puedes completar (requieren cuentas, dominios, decisiones legales).
   `achievements` y `compostela` (incluye prueba de **escape XSS** en la
   generación del HTML de la Compostela). Suite: 61 tests en verde.
 
+### Segunda pasada — auditoría de seguridad + UX (esta rama)
+
+Tras una auditoría profunda (backend + cliente), corregido:
+
+**Seguridad (API):**
+- 🔴 **Escalada de privilegios en `subscriptions/sync`**: cualquier usuario
+  podía pasar el `revenueCatCustomerId` de otro (expuesto como id de usuario) y
+  copiarse sus entitlements → premium gratis. Ahora el id se deriva de `auth.sub`
+  y nunca se confía en el cuerpo.
+- 🔴 **Fuga de errores internos**: `handleApiError` devolvía `e.message` en los
+  500 (detalles de Prisma, cuerpos de Gemini/RevenueCat). Ahora loguea
+  server-side y devuelve un 500 genérico.
+- 🟠 **`ai/recommendations` sin rate-limit** (endpoint de pago, Gemini): añadido
+  `RATE_AI` (10/min por usuario) para frenar abuso de coste.
+- 🟠 **Reseñas de albergue**: sin comprobar existencia, sin límite y con
+  duplicados ilimitados (manipulación de rating). Ahora: comprueba existencia,
+  rate-limit, y `@@unique([userId, albergueId])` + upsert (con migración que
+  deduplica de forma segura).
+- 🟡 **Replay de refresh token**: al reusar un token ya rotado, se revoca toda
+  la familia del usuario (detección de robo), no solo se rechaza.
+- 🟡 **Secreto de cron** comparado con `timingSafeEqual`.
+
+**Correctitud / UX (app):**
+- 🔴 **Like/bookmark** sin update optimista ni feedback de error: cada toque
+  refetcheaba todo el feed (lag/flicker) y los fallos eran silenciosos. Ahora
+  update optimista con rollback + toast y reconciliación con el servidor (sin
+  refetch del feed completo).
+- 🔴 **URL pública del diario** se construía con `replace('/api','')` (rompía
+  hosts como `api.santiagoways.app` y apuntaba a localhost en dev). Ahora usa
+  `EXPO_PUBLIC_WEB_URL` o quita solo el `/api` final.
+- 🔴 **`restore()` de compras** sin `catch` → posible unhandled rejection. Ahora
+  captura y muestra toast.
+- 🟠 **Listas (community, diary)** mostraban "vacío" en error en vez de
+  error+reintento. Añadida rama `isError` con botón de reintento.
+- 🟠 **Chat** hacía auto-scroll al fondo al cargar mensajes **antiguos** (rompía
+  la paginación). Ahora solo baja cuando llega un mensaje nuevo al final.
+- 🟡 **`signOut`** no limpiaba la caché de React Query → el siguiente usuario
+  podía ver datos del anterior. Añadido `queryClient.clear()`.
+
+### Documentado pero NO resuelto (deuda priorizada para el siguiente sprint)
+- **i18n en pantallas críticas**: `plans.tsx` (paywall) y `profile.tsx` tienen
+  textos en español hardcodeados que ignoran `t()` → un usuario en inglés ve el
+  paywall en español. Extraer a claves `plans.*`/`profile.*`. (Alta — es una
+  pantalla de ingresos.)
+- **Colores hardcodeados** fuera de `tokens.ts` en `ads/HomeBanner.tsx`,
+  `profile.tsx`, `diary/index.tsx`, `(auth)/_layout.tsx`. Mover a tokens.
+- **Etapa marcada como completada al pulsar "Parar"** sin validar distancia
+  recorrida ni proximidad al final (`stage/[id].tsx`). Gatear por % de
+  `distanceKm` o cercanía al endpoint.
+- **Accesibilidad**: algunos `Pressable` de iconos (login, diary detail) sin
+  `accessibilityLabel`/`Role`.
+- **Next.js**: quedan advisories que solo se cierran en **Next 16** (major).
+  Se subió al último parche 15.5.19; planificar el salto a 16 con pruebas.
+- **`npm audit`**: ~24 vulns, la mayoría en tooling de build (xcode/xmldom/uuid),
+  bajo riesgo en runtime. `ws` y otras moderadas se cierran con `npm audit fix`.
+
 ---
 
 ## 5. Camino a producción (orden recomendado)

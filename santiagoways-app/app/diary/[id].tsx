@@ -20,7 +20,13 @@ import { toast } from '@stores/toast';
 import { useAuth } from '@stores/auth';
 import { t } from '@lib/i18n';
 
-const PUBLIC_BASE = process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api', '') ?? 'https://santiagoways.app';
+// Public web origin for shareable diary links. Prefer a dedicated web URL;
+// otherwise derive it from the API base by stripping only a TRAILING `/api`
+// (a naive replace('/api','') would corrupt a host like `api.santiagoways.app`).
+const PUBLIC_BASE =
+  process.env.EXPO_PUBLIC_WEB_URL ??
+  process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/api\/?$/, '') ??
+  'https://santiagoways.app';
 
 export default function DiaryEntryDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();

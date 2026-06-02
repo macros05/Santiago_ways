@@ -44,9 +44,18 @@ export default function ChatRoomScreen() {
   }, [messages.data]);
   const scrollRef = useRef<ScrollView>(null);
 
+  // Only auto-scroll to the bottom when a NEW message lands at the tail (initial
+  // load or an incoming/sent message). Loading older history prepends messages —
+  // the tail id is unchanged — so we must NOT yank the view down, or pagination
+  // becomes unusable.
+  const lastIdRef = useRef<string | null>(null);
   useEffect(() => {
-    requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
-  }, [ordered.length]);
+    const lastId = ordered.length ? ordered[ordered.length - 1]!.id : null;
+    if (lastId !== lastIdRef.current) {
+      lastIdRef.current = lastId;
+      requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
+    }
+  }, [ordered]);
 
   const loadOlder = useCallback(() => {
     if (messages.hasNextPage && !messages.isFetchingNextPage) messages.fetchNextPage();

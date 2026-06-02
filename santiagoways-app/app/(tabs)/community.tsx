@@ -102,6 +102,23 @@ export default function CommunityScreen() {
               <Skeleton height={300} borderRadius={radius.lg} />
               <Skeleton height={300} borderRadius={radius.lg} />
             </View>
+          ) : feed.isError ? (
+            <View style={{ alignItems: 'center', marginTop: 80 }}>
+              <Ionicons name="cloud-offline-outline" size={56} color={colors.stone600} />
+              <Text variant="bodyMedium" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
+                {t('common.offlineError')}
+              </Text>
+              <Pressable
+                onPress={() => feed.refetch()}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.retry')}
+                style={{ marginTop: spacing['3'], paddingVertical: spacing['2'], paddingHorizontal: spacing['5'] }}
+              >
+                <Text variant="bodyMedium" color={colors.amber400}>
+                  {t('common.retry')}
+                </Text>
+              </Pressable>
+            </View>
           ) : (
             <View style={{ alignItems: 'center', marginTop: 80 }}>
               <Ionicons name="leaf-outline" size={56} color={colors.stone600} />

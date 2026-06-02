@@ -5,6 +5,7 @@ import { handleApiError, forbidden, ok } from '@lib/http';
 import { prisma } from '@lib/prisma';
 import { canUseAI } from '@lib/permissions';
 import { geminiGenerate } from '@lib/gemini';
+import { checkRate, RATE_AI } from '@lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,6 +91,8 @@ function parseTips(text: string): string[] {
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuth(req);
+    const limited = await checkRate(req, `ai:${auth.sub}`, RATE_AI);
+    if (limited) return limited;
     const user = await prisma.user.findUnique({
       where: { id: auth.sub },
       include: { subscription: true },

@@ -214,6 +214,7 @@ model AlbergueReview {
   comment    String?
   createdAt  DateTime @default(now())
 
+  @@unique([userId, albergueId])
   @@index([albergueId])
 }
 

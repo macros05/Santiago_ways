@@ -17,7 +17,20 @@ export async function POST(req: NextRequest) {
 
     const hash = hashRefreshToken(refreshToken);
     const stored = await prisma.refreshToken.findUnique({ where: { tokenHash: hash } });
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+    if (!stored) {
+      return err('Refresh token expired', 401, 'expired_refresh');
+    }
+    // Replay detection: a token that we issued but already rotated away is being
+    // presented again. Either it was stolen, or the legitimate client lost the
+    // race. Revoke the whole family so neither party can keep using it.
+    if (stored.revokedAt) {
+      await prisma.refreshToken.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      return err('Refresh token reuse detected', 401, 'reused_refresh');
+    }
+    if (stored.expiresAt < new Date()) {
       return err('Refresh token expired', 401, 'expired_refresh');
     }
 

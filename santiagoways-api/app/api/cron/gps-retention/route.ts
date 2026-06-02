@@ -1,6 +1,14 @@
 import { NextRequest } from 'next/server';
+import crypto from 'node:crypto';
 import { prisma } from '@lib/prisma';
 import { err, handleApiError, ok } from '@lib/http';
+
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
+}
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -14,8 +22,8 @@ async function run(req: NextRequest) {
   try {
     const secret = process.env.CRON_SECRET;
     if (!secret) return err('CRON_SECRET not configured', 500, 'misconfigured');
-    const header = req.headers.get('authorization');
-    if (header !== `Bearer ${secret}`) return err('unauthorized', 401, 'unauthorized');
+    const header = req.headers.get('authorization') ?? '';
+    if (!safeEqual(header, `Bearer ${secret}`)) return err('unauthorized', 401, 'unauthorized');
 
     const cutoff = new Date(Date.now() - RETENTION_DAYS * 86_400_000);
     const result = await prisma.gpsPoint.deleteMany({

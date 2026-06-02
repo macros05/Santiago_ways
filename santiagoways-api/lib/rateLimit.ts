@@ -121,3 +121,6 @@ export const RATE_SEARCH = { limit: 60, windowMs: 60_000 } as const;
 export const RATE_GPS = { limit: 6, windowMs: 60_000 } as const;
 // Analytics events are best-effort; cap at 12 batches/min per IP.
 export const RATE_ANALYTICS = { limit: 12, windowMs: 60_000 } as const;
+// AI guide hits Gemini (paid) + an external weather fetch. Cap tightly to
+// prevent cost-abuse by a subscribed user looping the endpoint.
+export const RATE_AI = { limit: 10, windowMs: 60_000 } as const;

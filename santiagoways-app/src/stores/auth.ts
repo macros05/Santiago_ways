@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { api, clearTokens, setTokens } from '@lib/api';
+import { queryClient } from '@lib/queryClient';
 
 export type AuthUser = {
   id: string;
@@ -106,6 +107,9 @@ export const useAuth = create<AuthState>((set) => ({
     }
     await clearTokens();
     await AsyncStorage.removeItem(GUEST_KEY).catch(() => {});
+    // Drop all cached server data so the next account never sees the previous
+    // user's posts/diary/pilgrimage/chat from the React Query cache.
+    queryClient.clear();
     set({ user: null, isGuest: false });
   },
 

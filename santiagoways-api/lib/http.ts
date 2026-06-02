@@ -34,11 +34,11 @@ export function forbidden(message = 'Forbidden') {
 export function handleApiError(e: unknown) {
   if (e instanceof AuthError) return err(e.message, e.status, 'unauthorized');
   if (e instanceof ZodError) return err('Invalid request', 422, 'validation_error', e.flatten());
-  if (e instanceof Error) {
-    console.error(e);
-    return err(e.message, 500, 'server_error');
-  }
-  return err('Unknown error', 500, 'server_error');
+  // Log the real error server-side for debugging, but never leak internal
+  // details (Prisma table/column names, upstream API error bodies, stack
+  // traces) to the client. Return a generic 500.
+  console.error(e);
+  return err('Internal server error', 500, 'server_error');
 }
 
 export function paginationParams(searchParams: URLSearchParams) {
