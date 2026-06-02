@@ -13,6 +13,12 @@ Monorepo (npm workspaces) con dos proyectos:
 
 ✅ **Verificado funcionando en simulador iOS** (iPhone 17, iOS 26.4) y bundle Android exporta limpio.
 
+> 📋 **¿Listo para producción?** Lee la auditoría completa en
+> [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md) (estado, puntos
+> débiles, bloqueantes de tienda y runbook de lanzamiento) y el plan de marketing
+> en [`docs/MARKETING.md`](docs/MARKETING.md). El backlog de producto está en
+> [`PENDIENTES.md`](PENDIENTES.md).
+
 ### Datos en la base de datos (después del seed)
 - **7 rutas reales del Camino**: Francés (33 etapas), Portugués (14), del Norte (33), Primitivo (14), Inglés (5), Vía de la Plata (38), Aragonés (7) — **144 etapas en total**.
 - **83 albergues** distribuidos a lo largo de las 7 rutas, con tipo (municipal/privado/parroquial), precio, camas, amenities.
@@ -248,14 +254,27 @@ cd santiagoways-app && npx expo export --platform ios --output-dir .expo-export
 
 ## Lo que falta para producción
 
-1. **Subida de imágenes** a Cloudinary (composer manda `images: []` ahora mismo).
-2. **Pusher broadcasts** — backend escribe localización, falta el `pusher.trigger()` al canal.
-3. **Background GPS tracking** — `expo-task-manager` + UX start/stop en el FAB del Map.
-4. **Offline downloads** — `expo-sqlite` cache + Mapbox tiles para etapas descargadas.
-5. **Apple Sign In JWKS** — actualmente devuelve 501.
-6. **Daily push 07:00** — Expo notification + cron (Vercel cron / EAS jobs).
-7. **Settings funcionales** — placeholders en el Profile tab.
-8. **Iconos y splash** — actualmente faltan los PNGs (`assets/icon.png`, etc.). Expo usa defaults.
-9. **Booking flow real** — la API de availability funciona, falta el wizard de 3 pasos.
+> Esta lista se mantiene resumida; la versión auditada y priorizada (con
+> semáforo, bloqueantes de tienda y runbook) vive en
+> [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md).
 
-Cada uno es un workstream aislado.
+**Bloqueantes de configuración / contenido (no de código):**
+1. Subir `version` a `1.0.0` (`package.json` + `app.json`) y `eas init` para
+   rellenar `extra.eas.projectId` (vacío hoy).
+2. Definir `EXPO_PUBLIC_API_BASE_URL` en los builds (hoy `apiBaseUrl` =
+   `http://localhost:3000/api`, la app no carga datos en el móvil).
+3. **Páginas legales** `/terms` y `/privacy` (el paywall las enlaza; Apple/Google
+   las exigen) — aún no existen.
+4. **RevenueCat**: crear productos en App Store Connect + Play Console + API keys.
+5. Rellenar secretos de `.env.production.example` y desplegar el backend
+   (`docker compose` + `prisma migrate deploy`).
+6. **Verificar en dispositivo físico**: GPS background, compras, offline, push.
+
+**Ya resuelto (antes listado como pendiente):** subida de imágenes a Cloudinary
+(`uploads.ts`), Apple Sign In (implementado, ya no es 501), background GPS
+(`backgroundTask.ts`), iconos/splash (PNGs presentes), descarga offline
+(`offline.ts`). Seed con guarda de producción (no crea cuentas demo en prod).
+
+**Mejoras de calidad pendientes:** observabilidad (Sentry), push **remoto**
+(solo hay locales hoy), más tests (0 cobertura de las rutas API), reactivar lint
+en CI/build. Detalle en `docs/PRODUCTION_READINESS.md` §6.

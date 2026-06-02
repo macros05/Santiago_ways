@@ -436,6 +436,31 @@ async function seedPilgrimageFor(
 }
 
 async function main() {
+  const isProd = process.env.NODE_ENV === 'production';
+  const allowDestructive = process.env.SEED_ALLOW_DESTRUCTIVE === 'true';
+  // Demo data (12 accounts with the public password "demo1234", fake posts,
+  // follows, pilgrimages) must NEVER land in a production database. In dev it
+  // is always on; in prod it requires an explicit, deliberate opt-in.
+  const seedDemo = isProd ? process.env.SEED_DEMO === 'true' : true;
+
+  // ── Production safety net ────────────────────────────────────────────────
+  // clear() DELETES every row. Running this seed against a live database would
+  // wipe real pilgrims' data. Refuse unless the operator explicitly opts in on
+  // a known-empty database.
+  if (isProd && !allowDestructive) {
+    throw new Error(
+      'Refusing to run the destructive seed in production: clear() deletes ALL ' +
+        'data. If this is a fresh, empty database, set SEED_ALLOW_DESTRUCTIVE=true ' +
+        'to proceed (reference data only). Demo accounts stay off unless SEED_DEMO=true.',
+    );
+  }
+  if (isProd && seedDemo) {
+    throw new Error(
+      'Refusing to seed demo accounts (public password "demo1234") in production. ' +
+        'Unset SEED_DEMO to seed reference data (routes, albergues, waypoints) only.',
+    );
+  }
+
   console.log('🌿 Seeding SantiagoWays…');
   console.log('  Clearing existing data…');
   await clear();
@@ -447,6 +472,12 @@ async function main() {
   await seedAlbergues();
   console.log('  Achievements…');
   await seedAchievements();
+
+  if (!seedDemo) {
+    console.log('✓ Done (reference data only — demo data skipped).');
+    return;
+  }
+
   console.log('  Users…');
   await seedDemoUsers();
   console.log('  Posts…');
