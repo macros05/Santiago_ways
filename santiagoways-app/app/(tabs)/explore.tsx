@@ -17,7 +17,7 @@ import { HomeBanner } from '@components/ads/HomeBanner';
 import { HoyCard } from '@components/HoyCard';
 import { FeaturedAlbergueCard } from '@components/ads/FeaturedAlbergueCard';
 import { AuroraBackground } from '@components/AuroraBackground';
-import { colors, layout, radius, spacing } from '@design/tokens';
+import { colors, gradients, layout, radius, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
 import {
   isLockedRoute,
@@ -85,7 +85,7 @@ export default function ExploreScreen() {
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
             <Text variant="display" color={colors.cream} numberOfLines={1} style={{ flexShrink: 1 }}>
-              {user?.name?.split(' ')[0] ?? (isGuest ? 'Invitado' : 'Pilgrim')}
+              {user?.name?.split(' ')[0] ?? (isGuest ? t('explore.guest') : t('explore.pilgrim'))}
             </Text>
             {plan === 'compostelero' ? (
               <Text style={{ fontSize: 22 }}>🐚</Text>
@@ -99,7 +99,7 @@ export default function ExploreScreen() {
           hitSlop={8}
           style={styles.bell}
           accessibilityRole="button"
-          accessibilityLabel="Ver planes premium"
+          accessibilityLabel={t('explore.viewPlans')}
         >
           <Ionicons name="diamond-outline" size={20} color={colors.musgo} />
         </Pressable>
@@ -141,13 +141,13 @@ export default function ExploreScreen() {
             contentFit="cover"
           />
           <LinearGradient
-            colors={['rgba(11,10,9,0.35)', 'rgba(11,10,9,0.92)']}
+            colors={gradients.cardScrim}
             style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
           />
           <View style={styles.heroContent}>
             <View style={{ flex: 1, paddingRight: spacing['3'] }}>
               <Badge
-                label={`${myQ.data.route.name}${stats.active ? ` · Etapa ${stats.active.stage.number}` : ''}`}
+                label={`${myQ.data.route.name}${stats.active ? ` · ${t('explore.stageN', { n: stats.active.stage.number })}` : ''}`}
                 variant="neutral"
               />
               <Text
@@ -156,14 +156,18 @@ export default function ExploreScreen() {
                 style={{ marginTop: spacing['3'] }}
                 numberOfLines={2}
               >
-                {stats.active?.stage.name ?? '¡Camino completado!'}
+                {stats.active?.stage.name ?? t('explore.caminoComplete')}
               </Text>
               <Text variant="small" color={colors.stone300} style={{ marginTop: 4 }}>
-                Día {stats.totalDays} · {stats.walkedKm.toFixed(0)} de {stats.totalKmRoute.toFixed(0)} km
+                {t('explore.heroProgress', {
+                  day: stats.totalDays,
+                  walked: stats.walkedKm.toFixed(0),
+                  total: stats.totalKmRoute.toFixed(0),
+                })}
               </Text>
               {stats.active ? (
                 <Button
-                  label="Continuar etapa"
+                  label={t('explore.continueStage')}
                   size="sm"
                   onPress={() => router.push(`/stage/${stats.active!.stage.id}`)}
                   style={{ marginTop: spacing['4'], alignSelf: 'flex-start' }}
@@ -187,13 +191,13 @@ export default function ExploreScreen() {
               <Ionicons name="trail-sign" size={28} color={colors.musgo} />
             </View>
             <Text variant="h2" color={colors.cream} align="center" style={{ marginTop: spacing['3'] }}>
-              Aún no has empezado
+              {t('explore.notStartedTitle')}
             </Text>
             <Text variant="small" color={colors.stone400} align="center" style={{ marginTop: 4 }}>
-              Elige una ruta y comienza tu Camino.
+              {t('explore.notStartedBody')}
             </Text>
             <Button
-              label="Empezar mi Camino"
+              label={t('explore.startMyCamino')}
               size="sm"
               onPress={() => router.push('/(auth)/profile-setup')}
               style={{ marginTop: spacing['4'] }}
@@ -222,7 +226,7 @@ export default function ExploreScreen() {
       {upcoming && upcoming.length > 0 ? (
         <Section
           title={t('explore.yourRoute')}
-          subtitle="Próximas etapas en tu Camino"
+          subtitle={t('explore.upcomingStages')}
         >
           <ScrollView
             horizontal
@@ -254,12 +258,12 @@ export default function ExploreScreen() {
 
       {/* Compostelero: AI guide entry */}
       {plan === 'compostelero' ? (
-        <Section title="Tu Guía IA" subtitle="Recomendaciones personalizadas para hoy">
+        <Section title={t('explore.aiTitle')} subtitle={t('explore.aiSubtitle')}>
           <View style={{ paddingHorizontal: spacing['5'] }}>
-            <Pressable onPress={() => router.push('/ai-guide')}>
+            <Pressable onPress={() => router.push('/ai-guide')} accessibilityRole="button" accessibilityLabel={t('explore.aiTeaser')}>
               <Card elevation="raised" style={styles.aiCard}>
                 <LinearGradient
-                  colors={['rgba(79,122,82,0.10)', 'rgba(79,122,82,0.02)']}
+                  colors={gradients.greenCard}
                   style={StyleSheet.absoluteFill}
                 />
                 <View style={styles.aiIcon}>
@@ -267,10 +271,10 @@ export default function ExploreScreen() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyBold" color={colors.cream}>
-                    Pide consejo a tu peregrino veterano
+                    {t('explore.aiTeaser')}
                   </Text>
                   <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
-                    Etapa, salud, meteo y joyas ocultas, en segundos.
+                    {t('explore.aiTeaserBody')}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.stone400} />
@@ -282,7 +286,7 @@ export default function ExploreScreen() {
 
       {/* Albergues destacados (free plan only) */}
       {showAds && (featuredQ.isLoading || (featuredQ.data && featuredQ.data.length > 0)) ? (
-        <Section title="Albergues destacados" subtitle="Recomendados por SantiagoWays">
+        <Section title={t('explore.featuredAlbergues')} subtitle={t('explore.featuredSubtitle')}>
           {featuredQ.isLoading ? (
             <View style={[styles.hScroll, { flexDirection: 'row' }]}>
               <Skeleton height={180} width={260} borderRadius={radius.lg} />
@@ -306,8 +310,8 @@ export default function ExploreScreen() {
 
       {/* Todas las rutas */}
       <Section
-        title="Rutas del Camino"
-        subtitle={`${routesQ.data?.length ?? '...'} rutas disponibles`}
+        title={t('explore.caminoRoutes')}
+        subtitle={t('explore.routesAvailable', { count: routesQ.data?.length ?? '...' })}
       >
         <View style={{ paddingHorizontal: spacing['5'], gap: spacing['3'] }}>
           {routesQ.isLoading ? (
@@ -327,10 +331,14 @@ export default function ExploreScreen() {
                     <View style={{ flex: 1 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
                         <Text variant="bodyBold" color={colors.cream}>{r.name}</Text>
-                        {r.isPopular ? <Badge label="popular" variant="success" size="sm" /> : null}
+                        {r.isPopular ? <Badge label={t('explore.popular')} variant="success" size="sm" /> : null}
                       </View>
                       <Text variant="small" color={colors.stone400} style={{ marginTop: 2 }}>
-                        {r.totalKm.toFixed(0)} km · {r._count?.stages ?? '?'} etapas · {r.startCity}
+                        {t('explore.routeMeta', {
+                          km: r.totalKm.toFixed(0),
+                          stages: r._count?.stages ?? '?',
+                          city: r.startCity,
+                        })}
                       </Text>
                     </View>
                     <Ionicons name="chevron-forward" size={20} color={colors.stone400} />
@@ -462,7 +470,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(58,90,64,0.12)',
+    backgroundColor: colors.greenTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -479,24 +487,24 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(58,90,64,0.12)',
+    backgroundColor: colors.greenTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(79,122,82,0.30)',
+    borderColor: colors.greenTintStrong,
   },
   aiCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3'],
     overflow: 'hidden',
-    borderColor: 'rgba(79,122,82,0.30)',
+    borderColor: colors.greenTintStrong,
   },
   aiIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(79,122,82,0.10)',
+    backgroundColor: colors.greenTintFaint,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -509,9 +517,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['3'],
     paddingHorizontal: spacing['4'],
     borderRadius: radius.md,
-    backgroundColor: 'rgba(58,90,64,0.12)',
+    backgroundColor: colors.greenTintSoft,
     borderWidth: 1,
-    borderColor: 'rgba(79,122,82,0.30)',
+    borderColor: colors.greenTintStrong,
   },
   offRoute: {
     flexDirection: 'row',

@@ -68,6 +68,7 @@ export const colors = {
   greenTintSoft: 'rgba(58,90,64,0.12)',
   greenTintMuted: 'rgba(58,90,64,0.18)',
   greenTintStrong: 'rgba(79,122,82,0.30)',
+  greenTintFaint: 'rgba(79,122,82,0.10)',
 
   // Stone overlays — for image scrims and modal dim layers.
   scrimWeak: 'rgba(8,7,11,0.20)',
@@ -109,6 +110,10 @@ export const gradients = {
   premiumCard: ['rgba(47,93,62,0.10)', 'rgba(47,93,62,0.02)'] as const,
   // Action-green wash for the Compostela credential card.
   verdeCard: ['rgba(78,157,99,0.18)', 'rgba(78,157,99,0.04)'] as const,
+  // Forest-green wash for the home AI teaser card.
+  greenCard: ['rgba(79,122,82,0.10)', 'rgba(79,122,82,0.02)'] as const,
+  // Strong scrim over a hero photo so white text stays legible.
+  cardScrim: ['rgba(11,10,9,0.35)', 'rgba(11,10,9,0.92)'] as const,
 } as const;
 
 export type GradientToken = keyof typeof gradients;

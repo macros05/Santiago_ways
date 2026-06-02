@@ -12,13 +12,9 @@ import { colors, layout, radius, spacing } from '@design/tokens';
 import { useChatRooms } from '@hooks/useChat';
 import { useIsCompostelero } from '@hooks/useSubscription';
 import { timeAgo } from '@lib/format';
+import { t } from '@lib/i18n';
 
-const SAMPLE_PREVIEW = [
-  { id: 's1', name: '🐚 Composteleros · General', last: 'Marta: ¡Hoy 28 km! ¡Increíble!' },
-  { id: 's2', name: '🇫🇷 Camino Francés', last: 'Pedro: ¿Alguien en Astorga esta noche?' },
-  { id: 's3', name: '🇵🇹 Camino Portugués', last: 'Lara: Recomendación de albergue en Vigo…' },
-  { id: 's4', name: '🏔️ Camino del Norte', last: 'Iván: Subida bestial hoy hacia el Faro.' },
-];
+type SamplePreview = { name: string; last: string };
 
 export default function ChatRoomsScreen() {
   const router = useRouter();
@@ -30,7 +26,7 @@ export default function ChatRoomsScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
-        <Header title="Chat Compostelero" onBack={() => router.back()} />
+        <Header title={t('profile.compChat')} onBack={() => router.back()} />
         <ScrollView
           contentContainerStyle={{
             padding: spacing['5'],
@@ -40,15 +36,15 @@ export default function ChatRoomsScreen() {
           }}
         >
           <Text variant="display" color={colors.cream}>
-            Chat exclusivo para Composteleros
+            {t('chat.lockedTitle')}
           </Text>
           <Text variant="body" color={colors.stone400}>
-            Conecta con peregrinos veteranos en salas privadas por ruta.
+            {t('chat.lockedSubtitle')}
           </Text>
 
           <View style={{ position: 'relative', gap: spacing['3'] }}>
-            {SAMPLE_PREVIEW.map((r) => (
-              <Card key={r.id} style={{ flexDirection: 'row', gap: spacing['3'] }}>
+            {(t('chat.sample') as unknown as SamplePreview[]).map((r, i) => (
+              <Card key={i} style={{ flexDirection: 'row', gap: spacing['3'] }}>
                 <View style={styles.avatar}>
                   <Ionicons name="chatbubbles" size={18} color={colors.gold} />
                 </View>
@@ -64,13 +60,13 @@ export default function ChatRoomsScreen() {
             ))}
             <LockedOverlay
               requiredPlan="compostelero"
-              message="Únete a la comunidad premium"
+              message={t('chat.lockedOverlay')}
               onPress={() => router.push('/plans')}
             />
           </View>
 
           <Button
-            label="Ver plan Compostelero"
+            label={t('chat.viewCompostelero')}
             fullWidth
             onPress={() => router.push('/plans')}
             style={{ backgroundColor: colors.gold }}
@@ -83,7 +79,7 @@ export default function ChatRoomsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
-      <Header title="Composteleros 🐚" onBack={() => router.back()} />
+      <Header title={t('chat.roomsTitle')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           padding: spacing['5'],
@@ -112,7 +108,7 @@ export default function ChatRoomsScreen() {
                   <Text variant="caption" color={colors.stone400} numberOfLines={1}>
                     {room.lastMessage
                       ? `${room.lastMessage.user.name.split(' ')[0]}: ${room.lastMessage.content}`
-                      : 'Sin mensajes todavía'}
+                      : t('chat.noMessages')}
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
@@ -129,7 +125,7 @@ export default function ChatRoomsScreen() {
           <View style={{ alignItems: 'center', paddingTop: spacing['10'] }}>
             <Ionicons name="leaf-outline" size={56} color={colors.stone600} />
             <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-              Aún no hay salas disponibles.
+              {t('chat.noRooms')}
             </Text>
           </View>
         )}
@@ -143,10 +139,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(47,93,62,0.12)',
+    backgroundColor: colors.goldTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(47,93,62,0.3)',
+    borderColor: colors.goldTintStrong,
   },
 });
