@@ -9,6 +9,7 @@ import { colors, layout, spacing } from '@design/tokens';
 import { api, ApiError } from '@lib/api';
 import { useAuth, type AuthUser } from '@stores/auth';
 import { toast } from '@stores/toast';
+import { t } from '@lib/i18n';
 
 export default function PrivacySettings() {
   const router = useRouter();
@@ -30,13 +31,13 @@ export default function PrivacySettings() {
     } catch (e) {
       setPrivateAccount(previous.privateAccount);
       setShareLocation(previous.shareLocation);
-      toast.error(e instanceof ApiError ? e.message : 'No pudimos guardar el cambio.');
+      toast.error(e instanceof ApiError ? e.message : t('settingsPrivacy.saveFailed'));
     }
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
-      <Header title="Privacidad" onBack={() => router.back()} />
+      <Header title={t('settings.privacy')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + layout.headerHeight + spacing['4'],
@@ -47,9 +48,9 @@ export default function PrivacySettings() {
       >
         <Card style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text variant="bodyMedium" color={colors.cream}>Cuenta privada</Text>
+            <Text variant="bodyMedium" color={colors.cream}>{t('settingsPrivacy.privateAccountTitle')}</Text>
             <Text variant="caption" color={colors.stone400} style={{ marginTop: 2 }}>
-              Solo los peregrinos que sigues podrán ver tus publicaciones.
+              {t('settingsPrivacy.privateAccountDesc')}
             </Text>
           </View>
           <Switch
@@ -62,9 +63,9 @@ export default function PrivacySettings() {
 
         <Card style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text variant="bodyMedium" color={colors.cream}>Compartir ubicación</Text>
+            <Text variant="bodyMedium" color={colors.cream}>{t('settingsPrivacy.shareLocationTitle')}</Text>
             <Text variant="caption" color={colors.stone400} style={{ marginTop: 2 }}>
-              Aparece en el mapa de la comunidad mientras estás en el Camino.
+              {t('settingsPrivacy.shareLocationDesc')}
             </Text>
           </View>
           <Switch
@@ -76,8 +77,7 @@ export default function PrivacySettings() {
         </Card>
 
         <Text variant="caption" color={colors.stone500} style={{ marginTop: spacing['4'] }}>
-          La eliminación de cuenta y la exportación de datos están disponibles bajo solicitud
-          escribiendo a soporte@santiagoways.app.
+          {t('settingsPrivacy.supportDisclaimer', { email: 'soporte@santiagoways.app' })}
         </Text>
       </ScrollView>
     </View>

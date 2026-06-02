@@ -8,6 +8,7 @@ import { Card } from '@components/Card';
 import { Text } from '@design/text';
 import { colors, layout, radius, spacing } from '@design/tokens';
 import { api, ApiError } from '@lib/api';
+import { t } from '@lib/i18n';
 import { useAuth, type AuthUser } from '@stores/auth';
 import { usePrefs } from '@stores/prefs';
 import { toast } from '@stores/toast';
@@ -45,9 +46,9 @@ export default function LanguageSettings() {
         });
         setUser({ ...user, ...updated });
       }
-      toast.success(lang === 'es' ? 'Idioma cambiado a Español.' : 'Language switched to English.');
+      toast.success(lang === 'es' ? t('settingsLanguage.switchedToEs') : t('settingsLanguage.switchedToEn'));
     } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : 'No pudimos sincronizar con el servidor.');
+      toast.error(e instanceof ApiError ? e.message : t('settingsLanguage.syncFailed'));
     } finally {
       setPending(null);
     }
@@ -55,7 +56,7 @@ export default function LanguageSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
-      <Header title="Idioma" onBack={() => router.back()} />
+      <Header title={t('settings.language')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + layout.headerHeight + spacing['4'],
@@ -92,8 +93,7 @@ export default function LanguageSettings() {
         })}
 
         <Text variant="caption" color={colors.stone500} style={{ marginTop: spacing['4'] }}>
-          Por ahora el contenido del Camino (rutas, etapas, posts) se mantiene en su idioma
-          original. La interfaz se traducirá completamente en próximas versiones.
+          {t('settingsLanguage.disclaimer')}
         </Text>
       </ScrollView>
     </View>

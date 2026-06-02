@@ -9,6 +9,7 @@ import { Avatar } from '@components/Avatar';
 import { Text } from '@design/text';
 import { colors, layout, spacing } from '@design/tokens';
 import { api, ApiError } from '@lib/api';
+import { t } from '@lib/i18n';
 import { useAuth, type AuthUser } from '@stores/auth';
 import { toast } from '@stores/toast';
 
@@ -27,21 +28,21 @@ export default function EditProfile() {
   const save = async () => {
     const trimmedName = name.trim();
     if (trimmedName.length < 1 || trimmedName.length > 80) {
-      toast.error('El nombre debe tener entre 1 y 80 caracteres.');
+      toast.error(t('settingsProfile.nameLengthError'));
       return;
     }
     if (bio.length > 280) {
-      toast.error('La biografía no puede superar 280 caracteres.');
+      toast.error(t('settingsProfile.bioLengthError'));
       return;
     }
     const trimmedAvatar = avatar.trim();
     if (trimmedAvatar && !/^https?:\/\//i.test(trimmedAvatar)) {
-      toast.error('La URL del avatar debe comenzar por http(s)://');
+      toast.error(t('settingsProfile.avatarUrlError'));
       return;
     }
     const upperNationality = nationality.trim().toUpperCase();
     if (upperNationality && !/^[A-Z]{2}$/.test(upperNationality)) {
-      toast.error('La nacionalidad debe ser un código ISO de 2 letras.');
+      toast.error(t('settingsProfile.nationalityError'));
       return;
     }
 
@@ -56,10 +57,10 @@ export default function EditProfile() {
     try {
       const updated = await api<AuthUser>('/users/me', { method: 'PATCH', body });
       setUser({ ...(user ?? updated), ...updated });
-      toast.success('Perfil actualizado.');
+      toast.success(t('settingsProfile.savedToast'));
       router.back();
     } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : 'No pudimos guardar los cambios.');
+      toast.error(e instanceof ApiError ? e.message : t('settingsProfile.saveError'));
     } finally {
       setSaving(false);
     }
@@ -70,7 +71,7 @@ export default function EditProfile() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1, backgroundColor: colors.ink }}
     >
-      <Header title="Editar perfil" onBack={() => router.back()} />
+      <Header title={t('profile.editProfile')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + layout.headerHeight + spacing['4'],
@@ -83,14 +84,14 @@ export default function EditProfile() {
         <View style={{ alignItems: 'center', gap: spacing['2'] }}>
           <Avatar source={avatar || user?.avatar} name={name || user?.name} size="xl" />
           <Text variant="caption" color={colors.stone400} align="center">
-            Pega una URL para cambiar tu avatar.
+            {t('settingsProfile.avatarHint')}
           </Text>
         </View>
 
         <View style={{ gap: spacing['4'] }}>
-          <Input label="Nombre" value={name} onChangeText={setName} maxLength={80} />
+          <Input label={t('settingsProfile.nameLabel')} value={name} onChangeText={setName} maxLength={80} />
           <Input
-            label="Biografía"
+            label={t('settingsProfile.bioLabel')}
             value={bio}
             onChangeText={setBio}
             multiline
@@ -99,23 +100,23 @@ export default function EditProfile() {
             helperText={`${bio.length}/280`}
           />
           <Input
-            label="URL de avatar"
+            label={t('settingsProfile.avatarLabel')}
             value={avatar}
             onChangeText={setAvatar}
             autoCapitalize="none"
             keyboardType="url"
           />
           <Input
-            label="Nacionalidad (ISO)"
+            label={t('settingsProfile.nationalityLabel')}
             value={nationality}
             onChangeText={(v) => setNationality(v.toUpperCase().slice(0, 2))}
             autoCapitalize="characters"
             maxLength={2}
-            helperText="Ej. ES, FR, DE, JP"
+            helperText={t('settingsProfile.nationalityHelper')}
           />
         </View>
 
-        <Button label="Guardar cambios" fullWidth loading={saving} onPress={save} />
+        <Button label={t('settingsProfile.saveChanges')} fullWidth loading={saving} onPress={save} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

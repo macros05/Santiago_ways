@@ -17,6 +17,7 @@ import { Header } from '@components/Header';
 import { Avatar } from '@components/Avatar';
 import { Skeleton } from '@components/Skeleton';
 import { colors, layout, radius, spacing } from '@design/tokens';
+import { t } from '@lib/i18n';
 import { useAuth } from '@stores/auth';
 import {
   useChatMessages,
@@ -78,7 +79,7 @@ export default function ChatRoomScreen() {
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
       <Header
-        title="Compostelero"
+        title={t('chat.title')}
         onBack={() => router.back()}
         rightAction={
           <View style={[styles.statusDot, { backgroundColor: connected ? colors.success : colors.stone500 }]} />
@@ -100,16 +101,16 @@ export default function ChatRoomScreen() {
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
             <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
             <Text variant="bodyMedium" color={colors.stone300} style={{ marginTop: spacing['3'], textAlign: 'center' }}>
-              No pudimos cargar el chat.
+              {t('chat.loadFailed')}
             </Text>
             <Pressable
               onPress={() => messages.refetch()}
               hitSlop={12}
               accessibilityRole="button"
-              accessibilityLabel="Reintentar carga del chat"
+              accessibilityLabel={t('chat.retryLoad')}
               style={{ marginTop: spacing['4'] }}
             >
-              <Text variant="bodyMedium" color={colors.amber400}>Reintentar</Text>
+              <Text variant="bodyMedium" color={colors.amber400}>{t('common.retry')}</Text>
             </Pressable>
           </View>
         ) : (

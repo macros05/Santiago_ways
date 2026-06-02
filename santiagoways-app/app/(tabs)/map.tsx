@@ -232,7 +232,7 @@ function LayerChip({
         styles.chip,
         {
           // Mirror stone900 with ~85% alpha so the chip floats over the map.
-          backgroundColor: active ? colors.amber400 : 'rgba(28,25,23,0.85)',
+          backgroundColor: active ? colors.amber400 : colors.chipFillInactive,
           borderColor: active ? colors.amber400 : colors.stone700,
         },
       ]}

@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(78,157,99,0.12)',
+    backgroundColor: colors.amberTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -23,6 +23,7 @@ import {
 import { scheduleAlbergueClosingAlert } from '@lib/notifications';
 import { Analytics } from '@lib/analytics';
 import { toast } from '@stores/toast';
+import { t } from '@lib/i18n';
 
 type Albergue = {
   id: string;
@@ -88,9 +89,9 @@ export default function AlbergueDetail() {
     if (!a) return;
     const r = await scheduleAlbergueClosingAlert(a.name);
     if (r) {
-      toast.success('Alerta a las 21:30 programada.');
+      toast.success(t('albergue.closingAlertScheduled'));
     } else {
-      toast.info('Activa las notificaciones para recibir alertas.');
+      toast.info(t('albergue.enableNotificationsForAlerts'));
     }
   };
 
@@ -101,7 +102,7 @@ export default function AlbergueDetail() {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
           <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
           <Text variant="bodyMedium" color={colors.stone300} style={{ marginTop: spacing['3'], textAlign: 'center' }}>
-            No pudimos cargar el albergue.
+            {t('albergue.loadFailed')}
           </Text>
         </View>
       </View>
@@ -115,7 +116,7 @@ export default function AlbergueDetail() {
         title={a?.name}
         rightAction={
           a ? (
-            <Pressable onPress={handleToggleFav} hitSlop={12} accessibilityLabel="Favorito">
+            <Pressable onPress={handleToggleFav} hitSlop={12} accessibilityLabel={t('albergue.favorite')}>
               <Ionicons
                 name={isFavorite ? 'heart' : 'heart-outline'}
                 size={24}
@@ -153,9 +154,9 @@ export default function AlbergueDetail() {
         <View style={{ padding: spacing['5'], gap: spacing['4'] }}>
           {a ? (
             <Card style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-              <Stat label="Precio" value={a.pricePerNight === 0 ? 'Donativo' : a.pricePerNight ? `${a.pricePerNight}€` : '—'} />
-              <Stat label="Camas" value={String(a.totalBeds ?? '—')} />
-              <Stat label="Rating" value={a.ratingAvg ? a.ratingAvg.toFixed(1) : '—'} />
+              <Stat label={t('albergue.price')} value={a.pricePerNight === 0 ? t('albergue.donation') : a.pricePerNight ? `${a.pricePerNight}€` : '—'} />
+              <Stat label={t('albergue.beds')} value={String(a.totalBeds ?? '—')} />
+              <Stat label={t('albergue.rating')} value={a.ratingAvg ? a.ratingAvg.toFixed(1) : '—'} />
             </Card>
           ) : null}
 
@@ -163,7 +164,7 @@ export default function AlbergueDetail() {
             <Text variant="body" color={colors.stone200}>{a.description}</Text>
           ) : null}
 
-          <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['4'] }}>Servicios</Text>
+          <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['4'] }}>{t('albergue.services')}</Text>
           <View style={styles.amenities}>
             {(a?.amenities ?? []).map((am) => (
               <View key={am} style={styles.amenity}>
@@ -174,23 +175,23 @@ export default function AlbergueDetail() {
           </View>
 
           <Button
-            label="Comprobar disponibilidad"
+            label={t('albergue.checkAvailability')}
             fullWidth
             disabled={!a}
             style={{ marginTop: spacing['3'] }}
             onPress={() => setAvailabilityOpen(true)}
           />
           <Button
-            label="Avísame antes del cierre (21:30)"
+            label={t('albergue.closingAlertButton')}
             variant="ghost"
             fullWidth
             disabled={!a}
             onPress={handleClosingAlert}
           />
 
-          <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['6'] }}>Opiniones</Text>
+          <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['6'] }}>{t('albergue.reviews')}</Text>
           {(a?.reviews ?? []).length === 0 ? (
-            <Text variant="small" color={colors.stone400}>Aún no hay opiniones.</Text>
+            <Text variant="small" color={colors.stone400}>{t('albergue.noReviews')}</Text>
           ) : (
             (a?.reviews ?? []).map((r) => (
               <Card key={r.id}>

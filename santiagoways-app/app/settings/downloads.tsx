@@ -8,6 +8,7 @@ import { Button } from '@components/Button';
 import { Text } from '@design/text';
 import { colors, layout, radius, spacing } from '@design/tokens';
 import { useCanAccess } from '@hooks/useSubscription';
+import { t } from '@lib/i18n';
 
 export default function DownloadsSettings() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function DownloadsSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
-      <Header title="Descargas offline" onBack={() => router.back()} />
+      <Header title={t('settings.offlineDownloads')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + layout.headerHeight + spacing['4'],
@@ -31,7 +32,7 @@ export default function DownloadsSettings() {
               width: 64,
               height: 64,
               borderRadius: radius.full,
-              backgroundColor: 'rgba(78,157,99,0.12)',
+              backgroundColor: colors.amberTintSoft,
               alignItems: 'center',
               justifyContent: 'center',
             }}
@@ -39,28 +40,31 @@ export default function DownloadsSettings() {
             <Ionicons name="cloud-download-outline" size={28} color={colors.amber400} />
           </View>
           <Text variant="h2" color={colors.cream} align="center">
-            No hay mapas descargados
+            {t('settingsDownloads.emptyTitle')}
           </Text>
           <Text variant="small" color={colors.stone400} align="center">
             {canOffline
-              ? 'Abre cualquier etapa y pulsa "Descargar para offline" para llevar el Camino sin cobertura.'
-              : 'Los mapas offline son una característica del plan Buen Camino.'}
+              ? t('settingsDownloads.emptyBodyCanOffline')
+              : t('settingsDownloads.emptyBodyLocked')}
           </Text>
           {canOffline ? (
             <Button
-              label="Explorar etapas"
+              label={t('settingsDownloads.exploreStages')}
               variant="secondary"
               fullWidth
               onPress={() => router.push('/(tabs)/route')}
             />
           ) : (
-            <Button label="Ver planes" fullWidth onPress={() => router.push('/plans')} />
+            <Button
+              label={t('profile.viewPlans')}
+              fullWidth
+              onPress={() => router.push('/plans')}
+            />
           )}
         </Card>
 
         <Text variant="caption" color={colors.stone500}>
-          Las etapas descargadas ocupan entre 8 y 25 MB cada una. Podrás eliminar cualquier
-          descarga individualmente desde aquí cuando esté disponible.
+          {t('settingsDownloads.sizeDisclaimer')}
         </Text>
       </ScrollView>
     </View>

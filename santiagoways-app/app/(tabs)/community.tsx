@@ -160,7 +160,7 @@ export default function CommunityScreen() {
           }
         }}
         accessibilityRole="button"
-        accessibilityLabel={canPost ? 'Crear nueva publicación' : 'Publicar requiere plan Buen Camino'}
+        accessibilityLabel={canPost ? t('community.createPost') : t('community.createPostLocked')}
       >
         <Ionicons name={canPost ? 'add' : 'lock-closed'} size={canPost ? 28 : 22} color={colors.stone950} />
       </Pressable>
@@ -230,7 +230,7 @@ function PostCard({
           hitSlop={8}
           style={styles.action}
           accessibilityRole="button"
-          accessibilityLabel={post.likedByMe ? 'Quitar me gusta' : 'Me gusta'}
+          accessibilityLabel={post.likedByMe ? t('community.unlike') : t('community.like')}
           accessibilityState={{ selected: post.likedByMe }}
         >
           <Ionicons
@@ -247,7 +247,7 @@ function PostCard({
           hitSlop={8}
           style={styles.action}
           accessibilityRole="button"
-          accessibilityLabel={`Ver ${post._count.comments} comentarios`}
+          accessibilityLabel={t('community.viewComments', { count: post._count.comments })}
         >
           <Ionicons name="chatbubble-outline" size={20} color={colors.stone300} />
           <Text variant="small" color={colors.stone300}>
@@ -259,7 +259,7 @@ function PostCard({
           hitSlop={8}
           style={styles.action}
           accessibilityRole="button"
-          accessibilityLabel={post.bookmarkedByMe ? 'Quitar de guardados' : 'Guardar publicación'}
+          accessibilityLabel={post.bookmarkedByMe ? t('community.unsave') : t('community.saved')}
           accessibilityState={{ selected: post.bookmarkedByMe }}
         >
           <Ionicons

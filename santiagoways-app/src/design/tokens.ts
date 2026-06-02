@@ -86,6 +86,13 @@ export const colors = {
   glassBorderStrong: 'rgba(255,255,255,0.22)',
   glassHighlight: 'rgba(255,255,255,0.55)', // top hairline sheen
   glassShadowInk: 'rgba(0,0,0,0.45)',
+
+  // Faint action-green tint (alpha 0.08) — lockedThumb fill on stage screen.
+  amberTintFaint: 'rgba(78,157,99,0.08)',
+  // Dim/inactive pagination dot fill — white at 25% alpha.
+  dotInactive: 'rgba(255,255,255,0.25)',
+  // Inactive LayerChip fill floating over the map — stone900 at 85% alpha.
+  chipFillInactive: 'rgba(28,25,23,0.85)',
 } as const;
 
 export type ColorToken = keyof typeof colors;

@@ -18,7 +18,11 @@ import { useMyPilgrimage } from '@hooks/usePilgrimage';
 import { generateCompostelaHTML } from '@lib/compostela';
 import { toast } from '@stores/toast';
 import { useAuth } from '@stores/auth';
-import { t } from '@lib/i18n';
+import { i18n, t } from '@lib/i18n';
+
+// Use the active app locale for date formatting instead of hardcoding 'es-ES',
+// mapping the i18n locale ('es' | 'en') to a BCP-47 tag.
+const dateLocale = () => (i18n.locale === 'en' ? 'en-GB' : 'es-ES');
 
 // Public web origin for shareable diary links. Prefer a dedicated web URL;
 // otherwise derive it from the API base by stripping only a TRAILING `/api`
@@ -127,7 +131,7 @@ export default function DiaryEntryDetail() {
         ) : (
           <>
             <Text variant="caption" color={colors.stone400}>
-              {new Date(entry.date).toLocaleDateString('es-ES', {
+              {new Date(entry.date).toLocaleDateString(dateLocale(), {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',

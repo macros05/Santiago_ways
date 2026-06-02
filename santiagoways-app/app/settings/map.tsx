@@ -7,10 +7,11 @@ import { Card } from '@components/Card';
 import { Text } from '@design/text';
 import { colors, layout, radius, spacing } from '@design/tokens';
 import { usePrefs, type DistanceUnit } from '@stores/prefs';
+import { t } from '@lib/i18n';
 
-const OPTIONS: Array<{ value: DistanceUnit; label: string; example: string }> = [
-  { value: 'km', label: 'Kilómetros', example: '24,5 km · +680 m' },
-  { value: 'mi', label: 'Millas', example: '15.2 mi · +2,231 ft' },
+const OPTIONS: Array<{ value: DistanceUnit; labelKey: string; example: string }> = [
+  { value: 'km', labelKey: 'settingsMap.optionKilometers', example: '24,5 km · +680 m' },
+  { value: 'mi', labelKey: 'settingsMap.optionMiles', example: '15.2 mi · +2,231 ft' },
 ];
 
 export default function MapSettings() {
@@ -21,7 +22,7 @@ export default function MapSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
-      <Header title="Mapa & unidades" onBack={() => router.back()} />
+      <Header title={t('settingsMap.title')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + layout.headerHeight + spacing['4'],
@@ -31,9 +32,9 @@ export default function MapSettings() {
         }}
       >
         <View>
-          <Text variant="h2" color={colors.cream}>Unidades de distancia</Text>
+          <Text variant="h2" color={colors.cream}>{t('settingsMap.distanceUnits')}</Text>
           <Text variant="caption" color={colors.stone400} style={{ marginTop: 4 }}>
-            Cómo se muestran los kilómetros y la elevación en toda la app.
+            {t('settingsMap.distanceUnitsDescription')}
           </Text>
         </View>
 
@@ -49,7 +50,7 @@ export default function MapSettings() {
                   ]}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text variant="bodyMedium" color={colors.cream}>{opt.label}</Text>
+                    <Text variant="bodyMedium" color={colors.cream}>{t(opt.labelKey)}</Text>
                     <Text variant="caption" color={colors.stone400} style={{ marginTop: 2 }}>
                       {opt.example}
                     </Text>
@@ -66,8 +67,7 @@ export default function MapSettings() {
         </View>
 
         <Text variant="caption" color={colors.stone500}>
-          La conversión es solo de presentación: el backend siempre almacena valores en
-          kilómetros y metros para mantener la consistencia entre dispositivos.
+          {t('settingsMap.conversionDisclaimer')}
         </Text>
       </ScrollView>
     </View>

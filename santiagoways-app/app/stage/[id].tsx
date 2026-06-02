@@ -242,7 +242,7 @@ export default function StageDetail() {
           <View style={styles.heroFooter}>
             {stage ? (
               <>
-                <Badge label={`Etapa ${stage.number}`} variant="gold" />
+                <Badge label={t('stage.etapaPrefix', { number: stage.number })} variant="gold" />
                 <Text variant="display" color={colors.cream} style={{ marginTop: spacing['3'] }}>
                   {stage.name}
                 </Text>
@@ -258,10 +258,10 @@ export default function StageDetail() {
 
         {stage ? (
           <View style={styles.stats}>
-            <Stat icon="walk" label="Distancia" value={formatKm(stage.distanceKm)} />
-            <Stat icon="trending-up" label="Subida" value={formatElevation(stage.elevationGain)} />
-            <Stat icon="trending-down" label="Bajada" value={formatElevation(stage.elevationLoss)} />
-            <Stat icon="alert-circle" label="Dificultad" value={stage.difficulty} />
+            <Stat icon="walk" label={t('stage.statDistance')} value={formatKm(stage.distanceKm)} />
+            <Stat icon="trending-up" label={t('stage.statAscent')} value={formatElevation(stage.elevationGain)} />
+            <Stat icon="trending-down" label={t('stage.statDescent')} value={formatElevation(stage.elevationLoss)} />
+            <Stat icon="alert-circle" label={t('stage.statDifficulty')} value={stage.difficulty} />
           </View>
         ) : null}
 
@@ -288,7 +288,7 @@ export default function StageDetail() {
                     width: 44,
                     height: 44,
                     borderRadius: 22,
-                    backgroundColor: 'rgba(78,157,99,0.12)',
+                    backgroundColor: colors.amberTintSoft,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
@@ -301,16 +301,16 @@ export default function StageDetail() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyBold" color={colors.cream}>
-                    {isTracking ? 'Tracking activo' : 'Track esta etapa'}
+                    {isTracking ? t('stage.trackingActive') : t('stage.trackThisStage')}
                   </Text>
                   <Text variant="caption" color={colors.stone400}>
                     {isTracking
-                      ? `${(distanceMeters / 1000).toFixed(2)} km registrados`
-                      : 'GPS preciso, GPX al final, validación de etapa'}
+                      ? t('stage.kmTracked', { km: (distanceMeters / 1000).toFixed(2) })
+                      : t('stage.trackingBenefits')}
                   </Text>
                 </View>
                 <Button
-                  label={isTracking ? 'Parar' : 'Empezar'}
+                  label={isTracking ? t('stage.stop') : t('stage.start')}
                   size="sm"
                   onPress={isTracking ? stopTrack : startTrack}
                 />
@@ -322,13 +322,13 @@ export default function StageDetail() {
               <Pressable style={{ flex: 1 }} onPress={() => router.push(`/diary/new?stageId=${stage.id}${myQ.data?.id ? `&pilgrimageId=${myQ.data.id}` : ''}`)}>
                 <Card padding="3" style={{ alignItems: 'center', gap: 6 }}>
                   <Ionicons name="book-outline" size={20} color={colors.amber400} />
-                  <Text variant="caption" color={colors.cream}>Anotar en diario</Text>
+                  <Text variant="caption" color={colors.cream}>{t('stage.noteInDiary')}</Text>
                 </Card>
               </Pressable>
               <Pressable style={{ flex: 1 }} onPress={() => router.push('/credential/add')}>
                 <Card padding="3" style={{ alignItems: 'center', gap: 6 }}>
                   <Ionicons name="ribbon-outline" size={20} color={colors.amber400} />
-                  <Text variant="caption" color={colors.cream}>Sellar credencial</Text>
+                  <Text variant="caption" color={colors.cream}>{t('stage.stampCredential')}</Text>
                 </Card>
               </Pressable>
             </View>
@@ -337,11 +337,11 @@ export default function StageDetail() {
               {stage.description}
             </Text>
             <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-              Puntos de interés
+              {t('stage.points')}
             </Text>
             {stage.waypoints.length === 0 ? (
               <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-                Esta etapa no tiene puntos de interés registrados.
+                {t('stage.noPoints')}
               </Text>
             ) : (
               <View style={{ marginTop: spacing['4'], gap: spacing['3'] }}>
@@ -375,7 +375,7 @@ export default function StageDetail() {
                     <View style={styles.mapEmpty}>
                       <Ionicons name="map-outline" size={48} color={colors.stone600} />
                       <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['3'] }}>
-                        Esta etapa no tiene coordenadas
+                        {t('stage.noCoords')}
                       </Text>
                     </View>
                   );
@@ -429,12 +429,12 @@ export default function StageDetail() {
             <Button
               label={
                 !canOffline
-                  ? 'Descarga offline · Premium'
+                  ? t('stage.offlinePremium')
                   : downloading
-                  ? `Descargando… ${downloadPct}%`
+                  ? t('stage.offlineDownloading', { pct: downloadPct })
                   : downloaded
-                  ? 'Eliminar mapas offline'
-                  : 'Descargar para offline'
+                  ? t('stage.offlineDelete')
+                  : t('stage.offlineDownload')
               }
               variant="secondary"
               fullWidth
@@ -525,7 +525,7 @@ export default function StageDetail() {
                             ) : null}
                             {a.totalBeds != null ? (
                               <Text variant="caption" color={colors.stone400}>
-                                {a.totalBeds} camas
+                                {t('stage.beds', { count: a.totalBeds })}
                               </Text>
                             ) : null}
                           </View>
@@ -536,7 +536,7 @@ export default function StageDetail() {
                 )}
                 {albergueQ.data?.length === 0 ? (
                   <Text variant="small" color={colors.stone400}>
-                    Sin albergues registrados en esta etapa.
+                    {t('stage.noAlbergues')}
                   </Text>
                 ) : null}
               </View>
@@ -563,12 +563,8 @@ export default function StageDetail() {
         onClose={() => setOfflineUpgrade(false)}
         requiredPlan="buen_camino"
         iconName="cloud-download"
-        title="Mapas para llevar offline"
-        bullets={[
-          'Descarga etapas completas para sin cobertura',
-          'GPS preciso aunque pierdas señal',
-          'Lleva el Camino siempre en el bolsillo',
-        ]}
+        title={t('stage.offlineSheetTitle')}
+        bullets={t('stage.offlineSheetBullets') as unknown as string[]}
       />
     </View>
   );
@@ -681,7 +677,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(78,157,99,0.12)',
+    backgroundColor: colors.amberTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -715,9 +711,9 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: radius.md,
-    backgroundColor: 'rgba(78,157,99,0.08)',
+    backgroundColor: colors.amberTintFaint,
     borderWidth: 1,
-    borderColor: 'rgba(78,157,99,0.3)',
+    borderColor: colors.amberTintStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },

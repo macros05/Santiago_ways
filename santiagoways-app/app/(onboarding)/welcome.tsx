@@ -124,7 +124,7 @@ export default function Welcome() {
             style={[
               styles.dot,
               {
-                backgroundColor: i === page ? colors.amber300 : 'rgba(255,255,255,0.25)',
+                backgroundColor: i === page ? colors.amber300 : colors.dotInactive,
                 width: i === page ? 26 : 8,
               },
             ]}

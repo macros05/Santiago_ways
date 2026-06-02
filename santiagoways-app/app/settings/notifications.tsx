@@ -48,7 +48,7 @@ export default function NotificationsSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
-      <Header title="Notificaciones" onBack={() => router.back()} />
+      <Header title={t('settings.notifications')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + layout.headerHeight + spacing['4'],
@@ -59,9 +59,9 @@ export default function NotificationsSettings() {
       >
         <Card style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text variant="bodyMedium" color={colors.cream}>Recibir notificaciones</Text>
+            <Text variant="bodyMedium" color={colors.cream}>{t('notifications.toggleLabel')}</Text>
             <Text variant="caption" color={colors.stone400} style={{ marginTop: 2 }}>
-              Likes, comentarios, mensajes y avisos del Camino.
+              {t('notifications.toggleDescription')}
             </Text>
           </View>
           <Switch
@@ -76,12 +76,12 @@ export default function NotificationsSettings() {
         {pushEnabled && status === 'granted' ? (
           <View style={{ gap: spacing['3'] }}>
             <Text variant="caption" color={colors.stone400} style={{ marginTop: spacing['2'] }}>
-              Avisos inteligentes
+              {t('notifications.smartSection')}
             </Text>
             <Pressable
               onPress={async () => {
                 const r = await scheduleDepartureReminder({ hour: 6, minute: 30 });
-                toast.success(r ? 'Recordatorio diario a las 6:30 ✓' : 'Permiso necesario.');
+                toast.success(r ? t('notifications.dailyReminderSet') : t('notifications.permissionRequired'));
               }}
             >
               <Card style={styles.smartRow}>
@@ -90,7 +90,7 @@ export default function NotificationsSettings() {
                   <Text variant="bodyMedium" color={colors.cream}>
                     {t('notifications.departureReminder')}
                   </Text>
-                  <Text variant="caption" color={colors.stone400}>06:30 todos los días</Text>
+                  <Text variant="caption" color={colors.stone400}>{t('notifications.everyDayAt', { time: '06:30' })}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.stone500} />
               </Card>
@@ -98,7 +98,7 @@ export default function NotificationsSettings() {
             <Pressable
               onPress={async () => {
                 const r = await scheduleWeeklyRecap();
-                toast.success(r ? 'Resumen semanal activado ✓' : 'Permiso necesario.');
+                toast.success(r ? t('notifications.weeklyRecapSet') : t('notifications.permissionRequired'));
               }}
             >
               <Card style={styles.smartRow}>
@@ -107,7 +107,7 @@ export default function NotificationsSettings() {
                   <Text variant="bodyMedium" color={colors.cream}>
                     {t('notifications.weeklyRecap')}
                   </Text>
-                  <Text variant="caption" color={colors.stone400}>Domingos a las 19:00</Text>
+                  <Text variant="caption" color={colors.stone400}>{t('notifications.sundaysAt', { time: '19:00' })}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.stone500} />
               </Card>
@@ -115,12 +115,12 @@ export default function NotificationsSettings() {
             <Pressable
               onPress={async () => {
                 await cancelAllScheduled();
-                toast.success('Avisos programados borrados.');
+                toast.success(t('notifications.allCancelled'));
               }}
             >
               <Card style={styles.smartRow}>
                 <Ionicons name="close-circle-outline" size={20} color={colors.stone400} />
-                <Text variant="bodyMedium" color={colors.stone300}>Cancelar todos</Text>
+                <Text variant="bodyMedium" color={colors.stone300}>{t('notifications.cancelAll')}</Text>
               </Card>
             </Pressable>
           </View>
@@ -131,15 +131,14 @@ export default function NotificationsSettings() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['2'] }}>
               <Ionicons name="alert-circle" size={18} color={colors.amber400} />
               <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
-                Permiso bloqueado
+                {t('notifications.permissionBlocked')}
               </Text>
             </View>
             <Text variant="small" color={colors.stone400}>
-              Has rechazado las notificaciones para SantiagoWays. Para activarlas debes
-              hacerlo desde los ajustes del sistema.
+              {t('notifications.permissionBlockedBody')}
             </Text>
             <Button
-              label="Abrir ajustes del sistema"
+              label={t('notifications.openSystemSettings')}
               variant="secondary"
               fullWidth
               onPress={() => Linking.openSettings()}
@@ -148,7 +147,7 @@ export default function NotificationsSettings() {
         ) : null}
 
         <Text variant="caption" color={colors.stone500} style={{ marginTop: spacing['4'] }}>
-          Estado del permiso del sistema:{' '}
+          {t('notifications.systemPermissionStatus')}{' '}
           <Text variant="caption" color={colors.amber400}>{status}</Text>
         </Text>
       </ScrollView>

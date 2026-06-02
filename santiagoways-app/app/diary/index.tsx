@@ -12,7 +12,9 @@ import { Header } from '@components/Header';
 import { Skeleton } from '@components/Skeleton';
 import { colors, radius, spacing } from '@design/tokens';
 import { useDiaryEntries, type DiaryEntry } from '@hooks/useDiary';
-import { t } from '@lib/i18n';
+import { i18n, t } from '@lib/i18n';
+
+const DATE_LOCALES: Record<string, string> = { es: 'es-ES', en: 'en-GB' };
 
 export default function DiaryListScreen() {
   const insets = useSafeAreaInsets();
@@ -86,7 +88,8 @@ export default function DiaryListScreen() {
 }
 
 function EntryCard({ entry, onPress }: { entry: DiaryEntry; onPress: () => void }) {
-  const date = new Date(entry.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  const dateLocale = DATE_LOCALES[i18n.locale] ?? 'es-ES';
+  const date = new Date(entry.date).toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' });
   const cover = entry.images[0];
   return (
     <Pressable onPress={onPress}>
