@@ -10,7 +10,7 @@ import { Skeleton } from '@components/Skeleton';
 import { Badge } from '@components/Badge';
 import { Button } from '@components/Button';
 import { Text } from '@design/text';
-import { colors, radius, spacing } from '@design/tokens';
+import { colors, gradients, radius, spacing } from '@design/tokens';
 import { useCredential, type Stamp } from '@hooks/useCredential';
 import { useMyPilgrimage } from '@hooks/usePilgrimage';
 import { useAuth } from '@stores/auth';
@@ -45,7 +45,7 @@ export default function CredentialScreen() {
         ) : (
           <Card padding={0} style={styles.compostela}>
             <LinearGradient
-              colors={['rgba(78,157,99,0.18)', 'rgba(78,157,99,0.04)']}
+              colors={gradients.verdeCard}
               style={StyleSheet.absoluteFill}
             />
             <View style={styles.compostelaContent}>
@@ -69,7 +69,10 @@ export default function CredentialScreen() {
                   size="sm"
                   onPress={() =>
                     Share.share({
-                      message: `He completado el Camino de Santiago — ${user?.name ?? 'pilgrim'} · ${stamps.length} sellos`,
+                      message: t('credential.shareMessage', {
+                        name: user?.name ?? 'pilgrim',
+                        count: stamps.length,
+                      }),
                     })
                   }
                   style={{ marginTop: spacing['4'] }}
@@ -108,7 +111,7 @@ export default function CredentialScreen() {
 }
 
 function StampRow({ stamp }: { stamp: Stamp }) {
-  const date = new Date(stamp.stampedAt).toLocaleDateString('es-ES', {
+  const date = new Date(stamp.stampedAt).toLocaleDateString(undefined, {
     day: 'numeric',
     month: 'short',
   });
@@ -140,7 +143,7 @@ function StampRow({ stamp }: { stamp: Stamp }) {
 const styles = StyleSheet.create({
   compostela: {
     overflow: 'hidden',
-    borderColor: 'rgba(78,157,99,0.4)',
+    borderColor: colors.amberTintStrong,
     borderWidth: 1,
     minHeight: 200,
     justifyContent: 'center',
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(78,157,99,0.12)',
+    backgroundColor: colors.amberTintSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -91,10 +91,10 @@ export default function AddStampScreen() {
           userLng: coords?.lng,
         });
         Analytics.credentialStamp(parsed.slug, 'qr');
-        toast.success('Sello añadido.');
+        toast.success(t('credential.add.stampAdded'));
         router.back();
       } catch (e) {
-        const msg = e instanceof Error ? e.message : 'No pudimos añadir el sello.';
+        const msg = e instanceof Error ? e.message : t('credential.add.addFailed');
         toast.error(msg);
       } finally {
         setBusy(false);
@@ -139,11 +139,11 @@ export default function AddStampScreen() {
 
   const submitManualOrGps = async () => {
     if (!name.trim()) {
-      toast.error('Falta el nombre del lugar.');
+      toast.error(t('credential.add.missingPlace'));
       return;
     }
     if (!coords) {
-      toast.error('No tenemos tu ubicación.');
+      toast.error(t('credential.add.noLocation'));
       return;
     }
     setBusy(true);
@@ -161,10 +161,10 @@ export default function AddStampScreen() {
         userLng: coords.lng,
       });
       Analytics.credentialStamp(slug, method === 'qr' ? 'manual' : method);
-      toast.success('Sello añadido.');
+      toast.success(t('credential.add.stampAdded'));
       router.back();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'No pudimos añadir el sello.';
+      const msg = e instanceof Error ? e.message : t('credential.add.addFailed');
       toast.error(msg);
     } finally {
       setBusy(false);
@@ -195,6 +195,8 @@ export default function AddStampScreen() {
             onPress={() => setScannerOpen(false)}
             style={styles.scannerClose}
             hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.close')}
           >
             <Ionicons name="close" size={22} color={colors.cream} />
           </Pressable>
@@ -274,14 +276,14 @@ export default function AddStampScreen() {
         ) : (
           <>
             <Input
-              label="Lugar"
+              label={t('credential.add.placeField')}
               value={name}
               onChangeText={setName}
               maxLength={120}
               containerStyle={{ marginTop: spacing['6'] }}
             />
             <Input
-              label="Ciudad"
+              label={t('credential.add.cityField')}
               value={city}
               onChangeText={setCity}
               maxLength={80}
@@ -299,7 +301,7 @@ export default function AddStampScreen() {
               <Ionicons name="navigate" size={18} color={colors.amber400} />
               <View style={{ flex: 1 }}>
                 <Text variant="bodyBold" color={colors.cream}>
-                  Tu ubicación actual
+                  {t('credential.add.currentLocation')}
                 </Text>
                 <Text variant="caption" color={colors.stone400}>
                   {coords ? `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}` : '...'}
@@ -337,7 +339,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.modalDim,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -345,7 +347,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing['3'],
     paddingVertical: spacing['2'],
     borderRadius: radius.md,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.modalDim,
     maxWidth: 240,
   },
   scannerFrame: {
@@ -355,7 +357,7 @@ const styles = StyleSheet.create({
     right: '15%',
     bottom: '30%',
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: colors.glassHighlight,
     borderRadius: 24,
   },
 });

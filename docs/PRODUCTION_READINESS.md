@@ -224,17 +224,24 @@ Tras una auditoría profunda (backend + cliente), corregido:
   contraseña), diary detail (compartir/revocar), filas de ajustes del perfil,
   paywall (restaurar, términos, privacidad) y banner de anuncios.
 
+### Cuarta pasada — i18n de pantallas + logros reales (esta rama) ✅
+- **i18n completada en las pantallas grandes**: `ai-guide`, `health-dashboard`,
+  `credential/index`, `credential/add`, `diary/new`, `post/new` y los toasts de
+  `stage/[id]` — nuevos namespaces `aiGuide.*` y `health.*` + claves añadidas.
+- **Logros del perfil ahora son reales**: el perfil usa `evaluate(useStats())`
+  en vez de flags `unlocked` hardcodeados; el contador y el estado se calculan
+  de etapas completadas + diario.
+- **Más colores → tokens**: tokenizados ai-guide, health, credential, diary/new
+  (nuevos gradientes `premiumCard`/`verdeCard`); colores hardcodeados de pantalla
+  bajados de ~48 a ~34.
+
 ### Sigue pendiente (deuda real, honesta)
-- **i18n incompleta en otras pantallas**: `ai-guide.tsx`, `health-dashboard.tsx`,
-  `credential/*`, `diary/new.tsx`, `post/new.tsx` aún tienen literales en
-  español. El núcleo de ingresos (paywall/perfil) ya está; el resto es trabajo
-  mecánico de extracción a `t()`.
-- **~48 colores hardcodeados** en otras pantallas (`ai-guide`, `health-dashboard`,
-  `chat`, `credential`, `map`, etc.) y en componentes de diseño (algunos son
-  primitivas legítimas: `Glass`, `AuroraBackground`, `Button`). Migrar los de
-  pantalla a tokens; auditar los de componentes caso por caso.
-- **Logros del perfil aún son demo**: los flags `unlocked` están hardcodeados;
-  falta calcularlos con `evaluate()` de `@lib/achievements` + stats reales.
+- **i18n parcial**: aún quedan literales en `explore.tsx`, `chat/index.tsx`,
+  `settings/*` y alguna pantalla menor. El grueso (paywall, perfil, IA, salud,
+  credencial, diario, comunidad) ya está localizado.
+- **~34 colores hardcodeados**: la mayoría en componentes de diseño (`Glass`,
+  `AuroraBackground`, `Button`, `Badge`, `TabBar`) que son **primitivas
+  legítimas**; el resto en `explore.tsx` (9), `stage/[id]` (4) y `chat/index`.
 - **Next.js**: quedan advisories que solo se cierran en **Next 16** (major).
   Se subió al último parche 15.5.19; planificar el salto a 16 con pruebas.
 - **`npm audit`**: ~24 vulns, la mayoría en tooling de build (xcode/xmldom/uuid),

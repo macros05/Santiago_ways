@@ -107,6 +107,8 @@ export const gradients = {
   glassCard: ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)'] as const,
   // Subtle deep-green wash for the premium subscription card.
   premiumCard: ['rgba(47,93,62,0.10)', 'rgba(47,93,62,0.02)'] as const,
+  // Action-green wash for the Compostela credential card.
+  verdeCard: ['rgba(78,157,99,0.18)', 'rgba(78,157,99,0.04)'] as const,
 } as const;
 
 export type GradientToken = keyof typeof gradients;

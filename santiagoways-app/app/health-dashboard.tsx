@@ -16,6 +16,7 @@ import {
   useHealthPermission,
   type ServerSnapshot,
 } from '@hooks/useHealth';
+import { t } from '@lib/i18n';
 
 export default function HealthDashboard() {
   const router = useRouter();
@@ -32,31 +33,31 @@ export default function HealthDashboard() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
-        <Header title="Salud en el Camino" onBack={() => router.back()} />
+        <Header title={t('health.title')} onBack={() => router.back()} />
         <ScrollView contentContainerStyle={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'], gap: spacing['5'] }}>
           <Text variant="display" color={colors.cream}>
-            Conecta tu salud al Camino
+            {t('health.connectTitle')}
           </Text>
           <Text variant="body" color={colors.stone400}>
-            La integración con Apple Health y Google Fit es exclusiva del plan Compostelero.
+            {t('health.compostExclusive')}
           </Text>
           <View style={{ position: 'relative', minHeight: 240 }}>
             <Card>
               <Text variant="bodyBold" color={colors.cream}>
-                Pasos · Sueño · Frecuencia
+                {t('health.stepsSleepHr')}
               </Text>
               <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['2'] }}>
-                Mejora tus recomendaciones de IA con datos reales de tu cuerpo.
+                {t('health.improveAI')}
               </Text>
             </Card>
             <LockedOverlay
               requiredPlan="compostelero"
               onPress={() => router.push('/plans')}
-              message="Salud · Compostelero"
+              message={t('health.lockedOverlay')}
             />
           </View>
           <Button
-            label="Ver plan Compostelero"
+            label={t('health.viewCompostelero')}
             onPress={() => router.push('/plans')}
             style={{ backgroundColor: colors.gold }}
             fullWidth
@@ -70,14 +71,13 @@ export default function HealthDashboard() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
-        <Header title="Salud en el Camino" onBack={() => router.back()} />
+        <Header title={t('health.title')} onBack={() => router.back()} />
         <View style={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'] }}>
           <Text variant="bodyBold" color={colors.cream}>
-            HealthKit/Health Connect no disponible
+            {t('health.unavailableTitle')}
           </Text>
           <Text variant="small" color={colors.stone400} style={{ marginTop: spacing['2'] }}>
-            Necesitas un build de desarrollo nativo (no Expo Go) con
-            react-native-health (iOS) o react-native-health-connect (Android).
+            {t('health.unavailableBody')}
           </Text>
         </View>
       </View>
@@ -88,22 +88,20 @@ export default function HealthDashboard() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.ink }}>
         <Stack.Screen options={{ headerShown: false }} />
-        <Header title="Salud en el Camino" onBack={() => router.back()} />
+        <Header title={t('health.title')} onBack={() => router.back()} />
         <ScrollView contentContainerStyle={{ padding: spacing['5'], paddingTop: insets.top + layout.headerHeight + spacing['4'], gap: spacing['5'] }}>
           <View style={styles.heroIcon}>
             <Ionicons name="heart" size={36} color={colors.amber400} />
           </View>
           <Text variant="display" color={colors.cream} align="center">
-            Conecta tu salud al Camino
+            {t('health.connectTitle')}
           </Text>
           <Text variant="body" color={colors.stone400} align="center">
-            Leemos pasos, frecuencia cardíaca, sueño y distancia para entender tu fatiga
-            y mejorar las recomendaciones de IA. Tus datos no salen del dispositivo y del
-            backend cifrado.
+            {t('health.connectBody')}
           </Text>
-          <Button label="Autorizar acceso" fullWidth onPress={() => perm.request()} />
+          <Button label={t('health.authorize')} fullWidth onPress={() => perm.request()} />
           <Button
-            label="Ahora no"
+            label={t('health.notNow')}
             variant="ghost"
             fullWidth
             onPress={() => router.back()}
@@ -123,7 +121,7 @@ export default function HealthDashboard() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.ink }}>
       <Stack.Screen options={{ headerShown: false }} />
-      <Header title="Tu Salud en el Camino" onBack={() => router.back()} />
+      <Header title={t('health.titleYours')} onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={{
           padding: spacing['5'],
@@ -135,35 +133,35 @@ export default function HealthDashboard() {
         <View style={styles.todayRow}>
           <StatCard
             icon="walk"
-            label="Pasos"
+            label={t('health.steps')}
             value={String(today?.steps ?? '—')}
-            sub={`Meta 25.000`}
+            sub={t('health.goal25k')}
             progress={Math.min(1, (today?.steps ?? 0) / 25000)}
           />
           <StatCard
             icon="heart"
-            label="FC media"
+            label={t('health.hrAvg')}
             value={today?.heartRateAvg ? `${today.heartRateAvg} bpm` : '—'}
-            sub={today?.heartRateMax ? `Máx ${today.heartRateMax}` : 'Sin máx'}
+            sub={today?.heartRateMax ? t('health.max', { v: today.heartRateMax }) : t('health.noMax')}
           />
         </View>
 
         <View style={styles.todayRow}>
           <StatCard
             icon="flame"
-            label="Calorías"
+            label={t('health.calories')}
             value={today?.calories ? `${today.calories} kcal` : '—'}
           />
           <StatCard
             icon="moon"
-            label="Sueño"
+            label={t('health.sleep')}
             value={today?.sleepHours ? `${today.sleepHours.toFixed(1)} h` : '—'}
           />
         </View>
 
         <Card>
           <Text variant="bodyBold" color={colors.cream}>
-            Nivel de fatiga estimado
+            {t('health.fatigueTitle')}
           </Text>
           <Text
             variant="display"
@@ -179,7 +177,7 @@ export default function HealthDashboard() {
 
         <Card>
           <Text variant="bodyBold" color={colors.cream} style={{ marginBottom: spacing['3'] }}>
-            Pasos últimos 7 días
+            {t('health.steps7d')}
           </Text>
           <BarChart items={history.data?.items ?? []} />
         </Card>
@@ -187,12 +185,12 @@ export default function HealthDashboard() {
         <View style={styles.aiNote}>
           <Ionicons name="sparkles" size={16} color={colors.gold} />
           <Text variant="caption" color={colors.stone300} style={{ flex: 1 }}>
-            Estos datos mejoran tus recomendaciones de IA en tiempo real.
+            {t('health.aiNote')}
           </Text>
         </View>
 
         <Button
-          label="Revocar acceso a salud"
+          label={t('health.revoke')}
           variant="ghost"
           fullWidth
           onPress={() => perm.revoke()}
@@ -247,7 +245,7 @@ function BarChart({ items }: { items: ServerSnapshot[] }) {
   if (items.length === 0) {
     return (
       <Text variant="small" color={colors.stone500}>
-        Sin datos. Empieza a caminar 🚶
+        {t('health.noData')}
       </Text>
     );
   }
@@ -282,7 +280,8 @@ function BarChart({ items }: { items: ServerSnapshot[] }) {
 
 function dayLabel(iso: string): string {
   const d = new Date(iso);
-  return ['D', 'L', 'M', 'X', 'J', 'V', 'S'][d.getDay()] ?? '';
+  const labels = t('health.dayLabels') as unknown as string[];
+  return labels[d.getDay()] ?? '';
 }
 
 function computeFatigue(
@@ -291,9 +290,9 @@ function computeFatigue(
 ): { label: string; color: string; advice: string } {
   if (!today) {
     return {
-      label: 'Sin datos',
+      label: t('health.fatigue.noData'),
       color: colors.stone400,
-      advice: 'Sincroniza datos para ver tu nivel de fatiga.',
+      advice: t('health.fatigue.noDataAdvice'),
     };
   }
   const sleep = today.sleepHours ?? 7;
@@ -309,20 +308,20 @@ function computeFatigue(
 
   if (score <= 1)
     return {
-      label: 'Fresco',
+      label: t('health.fatigue.fresh'),
       color: colors.success,
-      advice: 'Buen nivel de recuperación. Mantén tu ritmo.',
+      advice: t('health.fatigue.freshAdvice'),
     };
   if (score <= 3)
     return {
-      label: 'Moderado',
+      label: t('health.fatigue.moderate'),
       color: colors.amber400,
-      advice: 'Ritmo bien gestionado. Estira y bebe agua extra.',
+      advice: t('health.fatigue.moderateAdvice'),
     };
   return {
-    label: 'Alto · Necesitas descanso',
+    label: t('health.fatigue.high'),
     color: colors.error,
-    advice: 'Considera una etapa más corta o un día de descanso mañana.',
+    advice: t('health.fatigue.highAdvice'),
   };
 }
 
@@ -334,9 +333,9 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(78,157,99,0.12)',
+    backgroundColor: colors.amberTintSoft,
     borderWidth: 1,
-    borderColor: 'rgba(78,157,99,0.3)',
+    borderColor: colors.amberTintStrong,
   },
   todayRow: {
     flexDirection: 'row',
@@ -359,10 +358,10 @@ const styles = StyleSheet.create({
     gap: spacing['2'],
     paddingHorizontal: spacing['3'],
     paddingVertical: spacing['2'],
-    backgroundColor: 'rgba(47,93,62,0.06)',
+    backgroundColor: colors.goldTintSoft,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(47,93,62,0.2)',
+    borderColor: colors.goldTintMuted,
   },
   chart: {
     flexDirection: 'row',
