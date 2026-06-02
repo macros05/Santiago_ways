@@ -235,13 +235,20 @@ Tras una auditoría profunda (backend + cliente), corregido:
   (nuevos gradientes `premiumCard`/`verdeCard`); colores hardcodeados de pantalla
   bajados de ~48 a ~34.
 
-### Sigue pendiente (deuda real, honesta)
-- **i18n parcial**: aún quedan literales en `explore.tsx`, `chat/index.tsx`,
-  `settings/*` y alguna pantalla menor. El grueso (paywall, perfil, IA, salud,
-  credencial, diario, comunidad) ya está localizado.
-- **~34 colores hardcodeados**: la mayoría en componentes de diseño (`Glass`,
-  `AuroraBackground`, `Button`, `Badge`, `TabBar`) que son **primitivas
-  legítimas**; el resto en `explore.tsx` (9), `stage/[id]` (4) y `chat/index`.
+### Quinta pasada — home + chat (esta rama) ✅
+- **`explore.tsx` (home)** y **`chat/index.tsx`** totalmente localizados y
+  tokenizados. La primera pantalla del usuario ya no tiene literales en español.
+
+### Sigue pendiente (cola larga, honesta)
+- **i18n**: el recorrido principal está localizado (onboarding, auth, home,
+  paywall, perfil, IA, salud, credencial, diario, comunidad, chat, stage
+  tracking). Queda una **cola larga** en pantallas de detalle/ajustes:
+  `albergue/[id]`, el cuerpo de `stage/[id]`, `settings/*` (profile, language,
+  notifications, privacy, map, downloads) y algún literal suelto en
+  `community.tsx`. Es trabajo mecánico, no bloqueante.
+- **~23 colores hardcodeados**: la **mayoría son primitivas de diseño legítimas**
+  (`Glass`, `AuroraBackground`, `Button`, `Badge`, `TabBar`, `HeroOverlay`); el
+  resto en `stage/[id]` (4) y `settings/downloads`.
 - **Next.js**: quedan advisories que solo se cierran en **Next 16** (major).
   Se subió al último parche 15.5.19; planificar el salto a 16 con pruebas.
 - **`npm audit`**: ~24 vulns, la mayoría en tooling de build (xcode/xmldom/uuid),
