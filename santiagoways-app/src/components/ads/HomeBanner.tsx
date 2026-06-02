@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@design/text';
 import { colors, radius, spacing } from '@design/tokens';
 import { useShowAds } from '@hooks/useSubscription';
+import { t } from '@lib/i18n';
 
 type Sponsorship = {
   id: string;
@@ -22,21 +23,21 @@ const SPONSORSHIPS: Sponsorship[] = [
     title: 'Botas Camino · Salomon X Ultra 4',
     subtitle: 'Para 800 km de Meseta. Envío gratis.',
     ctaUrl: 'https://santiagoways.app/r/salomon',
-    accent: '#8B5CF6',
+    accent: colors.amber400,
   },
   {
     id: 'insurance-1',
     title: 'Seguro Camino · IATI Estrella',
     subtitle: 'Cobertura completa desde 2,90€/día.',
     ctaUrl: 'https://santiagoways.app/r/iati',
-    accent: '#10B981',
+    accent: colors.musgo,
   },
   {
     id: 'guide-1',
     title: 'Guía oficial Buen Camino',
     subtitle: 'Albergues y consejos de la Asociación de Amigos.',
     ctaUrl: 'https://santiagoways.app/r/guidebook',
-    accent: '#F97316',
+    accent: colors.bosque,
   },
 ];
 
@@ -57,6 +58,8 @@ export function HomeBanner() {
     <View style={{ paddingHorizontal: spacing['5'] }}>
       <Pressable
         onPress={() => Linking.openURL(ad.ctaUrl).catch(() => {})}
+        accessibilityRole="link"
+        accessibilityLabel={ad.title}
         style={[styles.banner, { borderLeftColor: ad.accent ?? colors.amber400 }]}
       >
         {ad.imageUrl ? (
@@ -77,6 +80,8 @@ export function HomeBanner() {
         <Pressable
           hitSlop={10}
           onPress={() => setDismissed(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
           style={styles.dismiss}
         >
           <Ionicons name="close" size={16} color={colors.stone400} />
@@ -84,11 +89,11 @@ export function HomeBanner() {
       </Pressable>
       <View style={styles.footerRow}>
         <Text variant="caption" color={colors.stone500}>
-          Publicidad
+          {t('common.adLabel')}
         </Text>
-        <Pressable hitSlop={6} onPress={() => router.push('/plans')}>
+        <Pressable hitSlop={6} onPress={() => router.push('/plans')} accessibilityRole="button" accessibilityLabel={t('common.removeAds')}>
           <Text variant="caption" color={colors.amber400}>
-            Eliminar anuncios →
+            {t('common.removeAds')}
           </Text>
         </Pressable>
       </View>

@@ -53,7 +53,12 @@ export default function Login() {
         contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing['12'] }]}
         keyboardShouldPersistTaps="handled"
       >
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
           <Ionicons name="chevron-back" size={28} color={colors.cream} />
         </Pressable>
 
@@ -82,7 +87,12 @@ export default function Login() {
           />
         </View>
 
-        <Pressable onPress={() => router.push('/(auth)/forgot-password')} style={{ marginTop: spacing['4'] }}>
+        <Pressable
+          onPress={() => router.push('/(auth)/forgot-password')}
+          style={{ marginTop: spacing['4'] }}
+          accessibilityRole="button"
+          accessibilityLabel={t('auth.forgotPassword')}
+        >
           <Text variant="small" color={colors.amber400}>
             {t('auth.forgotPassword')}
           </Text>

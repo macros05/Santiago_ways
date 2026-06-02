@@ -105,6 +105,8 @@ export const gradients = {
   gold: ['#4E9D63', '#3E7E50', '#2F5D3E'] as const,
   glassSheen: ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0)'] as const,
   glassCard: ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)'] as const,
+  // Subtle deep-green wash for the premium subscription card.
+  premiumCard: ['rgba(47,93,62,0.10)', 'rgba(47,93,62,0.02)'] as const,
 } as const;
 
 export type GradientToken = keyof typeof gradients;

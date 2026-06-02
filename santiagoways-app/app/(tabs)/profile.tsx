@@ -8,7 +8,7 @@ import { Avatar } from '@components/Avatar';
 import { Card } from '@components/Card';
 import { Badge } from '@components/Badge';
 import { Button } from '@components/Button';
-import { colors, layout, radius, spacing } from '@design/tokens';
+import { colors, gradients, layout, radius, spacing } from '@design/tokens';
 import { useAuth } from '@stores/auth';
 import { useSubscription } from '@stores/subscription';
 import { useSubscriptionStatus } from '@hooks/useSubscription';
@@ -17,19 +17,20 @@ import { useHealthPermission } from '@hooks/useHealth';
 import { t } from '@lib/i18n';
 
 const ACHIEVEMENTS = [
-  { name: 'Primeros pasos', icon: 'footsteps' as const, unlocked: true },
-  { name: '100 km', icon: 'trophy' as const, unlocked: true },
-  { name: 'Mitad', icon: 'flag' as const, unlocked: true },
-  { name: 'Meseta', icon: 'sunny' as const, unlocked: false },
-  { name: 'Compostela', icon: 'star' as const, unlocked: false },
-  { name: 'Finisterre', icon: 'compass' as const, unlocked: false },
+  { id: 'first_steps', icon: 'footsteps' as const, unlocked: true },
+  { id: '100km', icon: 'trophy' as const, unlocked: true },
+  { id: 'halfway', icon: 'flag' as const, unlocked: true },
+  { id: 'meseta', icon: 'sunny' as const, unlocked: false },
+  { id: 'compostela', icon: 'star' as const, unlocked: false },
+  { id: 'finisterre', icon: 'compass' as const, unlocked: false },
 ];
 
-const PLAN_NAME: Record<string, string> = {
-  free: 'Peregrino',
-  buen_camino: 'Buen Camino',
-  compostelero: 'Compostelero',
-};
+// Buen Camino / Compostelero are brand names; only the free tier is localized.
+function planName(plan: string): string {
+  if (plan === 'buen_camino') return 'Buen Camino';
+  if (plan === 'compostelero') return 'Compostelero';
+  return t('plans.tierFreeTitle');
+}
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -57,7 +58,7 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <Avatar source={user?.avatar} name={user?.name} size="xl" />
           <Text variant="h1" color={colors.cream} style={{ marginTop: spacing['4'] }}>
-            {user?.name ?? 'Pilgrim'}
+            {user?.name ?? t('profile.defaultName')}
           </Text>
           <Text variant="small" color={colors.stone400}>@{user?.username}</Text>
           <View style={{ marginTop: spacing['3'], flexDirection: 'row', gap: spacing['2'] }}>
@@ -68,11 +69,11 @@ export default function ProfileScreen() {
               />
             ) : null}
             {isCompostelero ? (
-              <View style={[styles.planBadge, { borderColor: colors.gold, backgroundColor: 'rgba(47,93,62,0.15)' }]}>
+              <View style={[styles.planBadge, { borderColor: colors.gold, backgroundColor: colors.goldTintSoft }]}>
                 <Text variant="caption" color={colors.gold}>🐚 Compostelero</Text>
               </View>
             ) : isBuenCamino ? (
-              <View style={[styles.planBadge, { borderColor: colors.amber400, backgroundColor: 'rgba(78,157,99,0.15)' }]}>
+              <View style={[styles.planBadge, { borderColor: colors.amber400, backgroundColor: colors.amberTintSoft }]}>
                 <Text variant="caption" color={colors.amber400}>⭐ Buen Camino</Text>
               </View>
             ) : null}
@@ -80,20 +81,19 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.statsRow}>
-          <Stat value={(user?.totalKm ?? 0).toFixed(0)} label="km" />
-          <Stat value={String(user?.timesCompleted ?? 0)} label="completados" />
-          <Stat value={String(unlockedCount)} label="logros" />
+          <Stat value={(user?.totalKm ?? 0).toFixed(0)} label={t('profile.statKm')} />
+          <Stat value={String(user?.timesCompleted ?? 0)} label={t('profile.statCompleted')} />
+          <Stat value={String(unlockedCount)} label={t('profile.statAchievements')} />
         </View>
 
-        {/* Mi Suscripción */}
         <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-          Mi Suscripción
+          {t('profile.mySubscription')}
         </Text>
-        <Pressable onPress={() => router.push('/plans')}>
+        <Pressable onPress={() => router.push('/plans')} accessibilityRole="button" accessibilityLabel={t('profile.mySubscription')}>
           <Card style={{ marginTop: spacing['3'], overflow: 'hidden' }}>
             {isCompostelero ? (
               <LinearGradient
-                colors={['rgba(47,93,62,0.10)', 'rgba(47,93,62,0.02)']}
+                colors={gradients.premiumCard}
                 style={StyleSheet.absoluteFill}
               />
             ) : null}
@@ -103,9 +103,9 @@ export default function ProfileScreen() {
                   styles.planIcon,
                   {
                     backgroundColor: isCompostelero
-                      ? 'rgba(47,93,62,0.18)'
+                      ? colors.goldTintMuted
                       : isBuenCamino
-                        ? 'rgba(78,157,99,0.18)'
+                        ? colors.amberTintMuted
                         : colors.stone800,
                   },
                 ]}
@@ -116,58 +116,65 @@ export default function ProfileScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text variant="bodyBold" color={colors.cream}>
-                  {PLAN_NAME[plan] ?? 'Peregrino'}
+                  {planName(plan)}
                 </Text>
                 <Text variant="caption" color={colors.stone400}>
                   {isPaid && currentPeriodEnd
-                    ? `${cancelAtPeriodEnd ? 'Termina' : 'Renueva'} el ${currentPeriodEnd.toLocaleDateString('es')}`
+                    ? cancelAtPeriodEnd
+                      ? t('profile.endsOn', { date: currentPeriodEnd.toLocaleDateString() })
+                      : t('profile.renewsOn', { date: currentPeriodEnd.toLocaleDateString() })
                     : status === 'active'
-                      ? 'Plan activo'
-                      : 'Plan gratuito'}
+                      ? t('profile.planActive')
+                      : t('profile.planFree')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.stone400} />
             </View>
           </Card>
         </Pressable>
-        <Pressable onPress={() => restore()} style={{ marginTop: spacing['2'], paddingVertical: spacing['2'] }}>
+        <Pressable
+          onPress={() => restore()}
+          style={{ marginTop: spacing['2'], paddingVertical: spacing['2'] }}
+          accessibilityRole="button"
+          accessibilityLabel={t('profile.restorePurchase')}
+        >
           <Text variant="caption" color={colors.amber400} align="center">
-            Restaurar compra anterior
+            {t('profile.restorePurchase')}
           </Text>
         </Pressable>
 
         {/* Compostelero quick links */}
         {isCompostelero ? (
           <View style={{ marginTop: spacing['6'], gap: spacing['3'] }}>
-            <Pressable onPress={() => router.push('/ai-guide')}>
+            <Pressable onPress={() => router.push('/ai-guide')} accessibilityRole="button" accessibilityLabel={t('profile.aiGuide')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-                <View style={[styles.qIcon, { backgroundColor: 'rgba(47,93,62,0.12)' }]}>
+                <View style={[styles.qIcon, { backgroundColor: colors.goldTintSoft }]}>
                   <Ionicons name="sparkles" size={18} color={colors.gold} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
-                  Guía IA
+                  {t('profile.aiGuide')}
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color={colors.stone400} />
               </Card>
             </Pressable>
-            <Pressable onPress={() => router.push('/health-dashboard')}>
+            <Pressable onPress={() => router.push('/health-dashboard')} accessibilityRole="button" accessibilityLabel={t('profile.health')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-                <View style={[styles.qIcon, { backgroundColor: 'rgba(78,157,99,0.12)' }]}>
+                <View style={[styles.qIcon, { backgroundColor: colors.amberTintSoft }]}>
                   <Ionicons name="heart" size={18} color={colors.amber400} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
-                  Salud
+                  {t('profile.health')}
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color={colors.stone400} />
               </Card>
             </Pressable>
-            <Pressable onPress={() => router.push('/chat')}>
+            <Pressable onPress={() => router.push('/chat')} accessibilityRole="button" accessibilityLabel={t('profile.compChat')}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing['3'] }}>
-                <View style={[styles.qIcon, { backgroundColor: 'rgba(47,93,62,0.12)' }]}>
+                <View style={[styles.qIcon, { backgroundColor: colors.goldTintSoft }]}>
                   <Ionicons name="chatbubbles" size={18} color={colors.gold} />
                 </View>
                 <Text variant="bodyMedium" color={colors.cream} style={{ flex: 1 }}>
-                  Chat Compostelero
+                  {t('profile.compChat')}
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color={colors.stone400} />
               </Card>
@@ -176,16 +183,16 @@ export default function ProfileScreen() {
         ) : null}
 
         <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-          Logros
+          {t('profile.achievementsHeading')}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.achievements}>
           {ACHIEVEMENTS.map((a) => (
-            <View key={a.name} style={styles.ach}>
+            <View key={a.id} style={styles.ach}>
               <View
                 style={[
                   styles.achCircle,
                   {
-                    backgroundColor: a.unlocked ? 'rgba(78,157,99,0.15)' : colors.stone800,
+                    backgroundColor: a.unlocked ? colors.amberTintSoft : colors.stone800,
                     borderColor: a.unlocked ? colors.amber400 : colors.stone700,
                   },
                 ]}
@@ -201,33 +208,31 @@ export default function ProfileScreen() {
                 color={a.unlocked ? colors.cream : colors.stone500}
                 style={{ marginTop: spacing['2'] }}
               >
-                {a.name}
+                {t(`profile.achievements.${a.id}`)}
               </Text>
             </View>
           ))}
         </ScrollView>
 
         <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-          Suscripción
+          {t('profile.subscriptionHeading')}
         </Text>
         <Card style={{ marginTop: spacing['3'], padding: 0 }}>
           <SettingsRow
             icon="diamond-outline"
-            label={isPaid ? 'Cambiar de plan' : 'Ver planes'}
+            label={isPaid ? t('profile.changePlan') : t('profile.viewPlans')}
             onPress={() => router.push('/plans')}
           />
           {isPaid ? (
             <SettingsRow
               icon="close-circle-outline"
-              label="Cancelar suscripción"
-              onPress={() =>
-                toast.info('Gestiona tu cancelación desde el sistema de tu dispositivo.')
-              }
+              label={t('profile.cancelSub')}
+              onPress={() => toast.info(t('profile.cancelHint'))}
             />
           ) : null}
           <SettingsRow
             icon="refresh-outline"
-            label="Restaurar compra"
+            label={t('profile.restorePurchaseShort')}
             onPress={() => restore()}
             last
           />
@@ -236,25 +241,23 @@ export default function ProfileScreen() {
         {isCompostelero ? (
           <>
             <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-              Salud
+              {t('profile.healthHeading')}
             </Text>
             <Card style={{ marginTop: spacing['3'], padding: 0 }}>
               <SettingsRow
                 icon="heart-outline"
-                label={
-                  health.granted ? 'Apple Health · Conectado' : 'Conectar Apple Health / Google Fit'
-                }
+                label={health.granted ? t('profile.healthConnected') : t('profile.connectHealth')}
                 onPress={() => (health.granted ? router.push('/health-dashboard') : health.request())}
               />
               <SettingsRow
                 icon="bar-chart-outline"
-                label="Ver dashboard de salud"
+                label={t('profile.viewHealthDashboard')}
                 onPress={() => router.push('/health-dashboard')}
               />
               {health.granted ? (
                 <SettingsRow
                   icon="trash-outline"
-                  label="Revocar acceso"
+                  label={t('profile.revokeAccess')}
                   onPress={() => health.revoke()}
                   last
                 />
@@ -264,7 +267,7 @@ export default function ProfileScreen() {
         ) : null}
 
         <Text variant="h2" color={colors.cream} style={{ marginTop: spacing['8'] }}>
-          Ajustes
+          {t('profile.settingsHeading')}
         </Text>
         <Card style={{ marginTop: spacing['3'], padding: 0 }}>
           <SettingsRow
@@ -272,16 +275,16 @@ export default function ProfileScreen() {
             label={t('profile.stats.rowLabel')}
             onPress={() => router.push('/profile/stats')}
           />
-          <SettingsRow icon="person-outline" label="Editar perfil" onPress={() => router.push('/settings/profile')} />
-          <SettingsRow icon="lock-closed-outline" label="Privacidad" onPress={() => router.push('/settings/privacy')} />
-          <SettingsRow icon="notifications-outline" label="Notificaciones" onPress={() => router.push('/settings/notifications')} />
-          <SettingsRow icon="map-outline" label="Mapa & unidades" onPress={() => router.push('/settings/map')} />
-          <SettingsRow icon="cloud-download-outline" label="Descargas offline" onPress={() => router.push('/settings/downloads')} />
-          <SettingsRow icon="language-outline" label="Idioma" onPress={() => router.push('/settings/language')} last />
+          <SettingsRow icon="person-outline" label={t('profile.editProfile')} onPress={() => router.push('/settings/profile')} />
+          <SettingsRow icon="lock-closed-outline" label={t('profile.privacy')} onPress={() => router.push('/settings/privacy')} />
+          <SettingsRow icon="notifications-outline" label={t('profile.notifications')} onPress={() => router.push('/settings/notifications')} />
+          <SettingsRow icon="map-outline" label={t('profile.mapUnits')} onPress={() => router.push('/settings/map')} />
+          <SettingsRow icon="cloud-download-outline" label={t('profile.offlineDownloads')} onPress={() => router.push('/settings/downloads')} />
+          <SettingsRow icon="language-outline" label={t('profile.language')} onPress={() => router.push('/settings/language')} last />
         </Card>
 
         <Button
-          label="Cerrar sesión"
+          label={t('profile.signOut')}
           variant="ghost"
           fullWidth
           style={{ marginTop: spacing['8'] }}
@@ -329,7 +332,12 @@ function SettingsRow({
   last?: boolean;
 }) {
   return (
-    <Pressable onPress={onPress} style={[styles.row, !last && styles.rowBorder]}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.row, !last && styles.rowBorder]}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
       <Ionicons name={icon} size={20} color={colors.stone300} />
       <Text variant="body" color={colors.cream} style={{ flex: 1, marginLeft: spacing['3'] }}>
         {label}

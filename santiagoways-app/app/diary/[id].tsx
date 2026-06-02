@@ -172,11 +172,23 @@ export default function DiaryEntryDetail() {
                   </Text>
                 </View>
                 {entry.isPrivate ? (
-                  <Pressable onPress={onShare} disabled={busy} hitSlop={12}>
+                  <Pressable
+                    onPress={onShare}
+                    disabled={busy}
+                    hitSlop={12}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('diary.shareLink')}
+                  >
                     <Ionicons name="share-outline" size={22} color={colors.amber400} />
                   </Pressable>
                 ) : (
-                  <Pressable onPress={onRevoke} disabled={busy} hitSlop={12}>
+                  <Pressable
+                    onPress={onRevoke}
+                    disabled={busy}
+                    hitSlop={12}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('diary.revokeLink')}
+                  >
                     <Ionicons name="link-outline" size={22} color={colors.stone400} />
                   </Pressable>
                 )}

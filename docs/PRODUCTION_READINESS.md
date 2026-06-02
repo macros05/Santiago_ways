@@ -207,22 +207,40 @@ Tras una auditoría profunda (backend + cliente), corregido:
 - 🟡 **`signOut`** no limpiaba la caché de React Query → el siguiente usuario
   podía ver datos del anterior. Añadido `queryClient.clear()`.
 
-### Documentado pero NO resuelto (deuda priorizada para el siguiente sprint)
-- **i18n en pantallas críticas**: `plans.tsx` (paywall) y `profile.tsx` tienen
-  textos en español hardcodeados que ignoran `t()` → un usuario en inglés ve el
-  paywall en español. Extraer a claves `plans.*`/`profile.*`. (Alta — es una
-  pantalla de ingresos.)
-- **Colores hardcodeados** fuera de `tokens.ts` en `ads/HomeBanner.tsx`,
-  `profile.tsx`, `diary/index.tsx`, `(auth)/_layout.tsx`. Mover a tokens.
-- **Etapa marcada como completada al pulsar "Parar"** sin validar distancia
-  recorrida ni proximidad al final (`stage/[id].tsx`). Gatear por % de
-  `distanceKm` o cercanía al endpoint.
-- **Accesibilidad**: algunos `Pressable` de iconos (login, diary detail) sin
-  `accessibilityLabel`/`Role`.
+### Tercera pasada — i18n, estilo, gating y a11y (esta rama) ✅
+- **i18n del paywall y el perfil**: `plans.tsx` y `profile.tsx` totalmente
+  traducidos (nuevo namespace `plans.*` + `profile.*` extendido en es/en),
+  incluyendo logros, planes, suscripción, salud y ajustes. Un usuario en inglés
+  ya no ve el paywall en español. También localizados los toasts de tracking y
+  offline de `stage/[id].tsx` y el banner de anuncios.
+- **Colores → tokens**: eliminados los hex/rgba hardcodeados de
+  `ads/HomeBanner.tsx` (acentos morado/naranja fuera del sistema de 2 colores →
+  verdes de la paleta), `profile.tsx`, `diary/index.tsx` y `(auth)/_layout.tsx`.
+  Nuevo gradiente `premiumCard` en tokens.
+- **Gating de etapa completada**: `stage/[id].tsx` solo emite `stageCompleted` y
+  muestra "Etapa completada" si lo recorrido ≥ 80% de `distanceKm`; si no, guarda
+  el track sin reclamar la etapa.
+- **Accesibilidad**: `accessibilityRole`/`Label` en login (atrás, olvidé
+  contraseña), diary detail (compartir/revocar), filas de ajustes del perfil,
+  paywall (restaurar, términos, privacidad) y banner de anuncios.
+
+### Sigue pendiente (deuda real, honesta)
+- **i18n incompleta en otras pantallas**: `ai-guide.tsx`, `health-dashboard.tsx`,
+  `credential/*`, `diary/new.tsx`, `post/new.tsx` aún tienen literales en
+  español. El núcleo de ingresos (paywall/perfil) ya está; el resto es trabajo
+  mecánico de extracción a `t()`.
+- **~48 colores hardcodeados** en otras pantallas (`ai-guide`, `health-dashboard`,
+  `chat`, `credential`, `map`, etc.) y en componentes de diseño (algunos son
+  primitivas legítimas: `Glass`, `AuroraBackground`, `Button`). Migrar los de
+  pantalla a tokens; auditar los de componentes caso por caso.
+- **Logros del perfil aún son demo**: los flags `unlocked` están hardcodeados;
+  falta calcularlos con `evaluate()` de `@lib/achievements` + stats reales.
 - **Next.js**: quedan advisories que solo se cierran en **Next 16** (major).
   Se subió al último parche 15.5.19; planificar el salto a 16 con pruebas.
 - **`npm audit`**: ~24 vulns, la mayoría en tooling de build (xcode/xmldom/uuid),
   bajo riesgo en runtime. `ws` y otras moderadas se cierran con `npm audit fix`.
+- **Verificación en dispositivo físico** sigue siendo obligatoria (GPS background,
+  compras, offline, push) — nada de esto se puede validar en este entorno.
 
 ---
 

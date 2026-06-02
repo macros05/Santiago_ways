@@ -27,6 +27,7 @@ import {
 import { OfflineStageMap } from '@components/OfflineStageMap';
 import { useOfflineMap } from '@hooks/useOfflineMap';
 import { toast } from '@stores/toast';
+import { t } from '@lib/i18n';
 import { ElevationProfile } from '@components/ElevationProfile';
 import { useTracking } from '@lib/tracking';
 import { useMyPilgrimage } from '@hooks/usePilgrimage';
@@ -112,9 +113,9 @@ export default function StageDetail() {
       try {
         await deleteStageOffline(id);
         setDownloaded(false);
-        toast.success('Mapas eliminados.');
+        toast.success(t('stage.offlineRemoved'));
       } catch {
-        toast.error('No pudimos borrar los mapas.');
+        toast.error(t('stage.offlineDeleteFailed'));
       }
       return;
     }
@@ -126,13 +127,13 @@ export default function StageDetail() {
       });
       setDownloaded(true);
       setDownloadPct(100);
-      toast.success('Etapa disponible offline.');
+      toast.success(t('stage.offlineDone'));
     } catch (e) {
       const msg = e instanceof Error ? e.message : '';
       if (msg === 'MBTILES_BASE_URL_NOT_SET') {
-        toast.info('Mapas offline llegan próximamente para esta ruta.');
+        toast.info(t('stage.offlineSoon'));
       } else {
-        toast.error('No pudimos completar la descarga.');
+        toast.error(t('stage.offlineFailed'));
       }
     } finally {
       setDownloading(false);
@@ -163,25 +164,34 @@ export default function StageDetail() {
 
   const startTrack = async () => {
     if (!stage || !myQ.data) {
-      toast.info('Necesitas tener una peregrinación activa.');
+      toast.info(t('stage.needActivePilgrimage'));
       return;
     }
     const polyline = (stage.coordinates?.coordinates ?? []).map(([lng, lat]) => ({ lat, lng }));
     try {
       await startTracking(myQ.data.id, polyline);
       Analytics.trackingStarted();
-      toast.success('Tracking iniciado.');
+      toast.success(t('stage.trackingStarted'));
     } catch {
-      toast.error('Necesitamos permiso de ubicación.');
+      toast.error(t('stage.trackingLocationNeeded'));
     }
   };
 
   const stopTrack = async () => {
     const result = await stopTracking();
-    if (result) {
-      Analytics.trackingStopped(result.distanceMeters / 1000, result.durationMin);
+    if (!result) return;
+    const km = result.distanceMeters / 1000;
+    Analytics.trackingStopped(km, result.durationMin);
+    // Only count the stage as completed if the walk actually covered most of it
+    // (≥ 80% of the stage distance). A start-then-immediate-stop must not award
+    // a "completed" stage.
+    const stageKm = stage?.distanceKm ?? 0;
+    const completed = stageKm > 0 && km >= stageKm * 0.8;
+    if (completed) {
       Analytics.stageCompleted(stage?.id ?? '', 'gps');
-      toast.success(`Etapa registrada · ${(result.distanceMeters / 1000).toFixed(1)} km`);
+      toast.success(t('stage.stageRecorded', { km: km.toFixed(1) }));
+    } else {
+      toast.success(t('stage.trackSaved', { km: km.toFixed(1) }));
     }
   };
 
@@ -197,16 +207,16 @@ export default function StageDetail() {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing['8'] }}>
           <Ionicons name="cloud-offline-outline" size={48} color={colors.stone600} />
           <Text variant="bodyMedium" color={colors.stone300} style={{ marginTop: spacing['3'], textAlign: 'center' }}>
-            No pudimos cargar esta etapa.
+            {t('stage.loadFailed')}
           </Text>
           <Pressable
             onPress={() => stageQ.refetch()}
             hitSlop={12}
             accessibilityRole="button"
-            accessibilityLabel="Reintentar carga de etapa"
+            accessibilityLabel={t('stage.retryLoad')}
             style={{ marginTop: spacing['4'] }}
           >
-            <Text variant="bodyMedium" color={colors.amber400}>Reintentar</Text>
+            <Text variant="bodyMedium" color={colors.amber400}>{t('common.retry')}</Text>
           </Pressable>
         </View>
       </View>

@@ -10,36 +10,39 @@ import { PlanCard, type PlanFeature } from '@features/plans/PlanCard';
 import { PriceToggle, type Period } from '@features/plans/PriceToggle';
 import { useSubscription } from '@stores/subscription';
 import { toast } from '@stores/toast';
+import { t } from '@lib/i18n';
 import type { PurchasesPackage } from '@lib/purchases';
 
-const FEATURES: Record<'free' | 'buen_camino' | 'compostelero', PlanFeature[]> = {
-  free: [
-    { text: 'Camino Francés completo', included: true },
-    { text: 'Mapa interactivo', included: true },
-    { text: 'Solo 3 albergues por etapa', included: false },
-    { text: 'Sin mapas offline', included: false },
-    { text: 'Comunidad solo lectura', included: false },
-    { text: 'Sin IA ni recomendaciones', included: false },
-    { text: 'Anuncios', included: false },
-  ],
-  buen_camino: [
-    { text: 'Todas las rutas del Camino', included: true },
-    { text: 'Todos los albergues + disponibilidad', included: true },
-    { text: 'Mapas offline ilimitados', included: true },
-    { text: 'Comunidad completa', included: true },
-    { text: 'GPS tracking + historial', included: true },
-    { text: 'Sin anuncios', included: true },
-  ],
-  compostelero: [
-    { text: 'Todo lo de Buen Camino', included: true },
-    { text: 'IA personalizada con Gemini', included: true, highlight: true },
-    { text: 'Apple Health / Google Fit', included: true, highlight: true },
-    { text: 'Chat privado Compostelero', included: true, highlight: true },
-    { text: 'Seguro de viaje integrado', included: true, highlight: true },
-    { text: 'Acceso anticipado a nuevas rutas', included: true, highlight: true },
-    { text: 'Badge exclusivo 🐚 en comunidad', included: true, highlight: true },
-  ],
-};
+function featuresByTier(): Record<'free' | 'buen_camino' | 'compostelero', PlanFeature[]> {
+  return {
+    free: [
+      { text: t('plans.features.freeFrances'), included: true },
+      { text: t('plans.features.freeMap'), included: true },
+      { text: t('plans.features.free3Albergues'), included: false },
+      { text: t('plans.features.freeNoOffline'), included: false },
+      { text: t('plans.features.freeReadOnly'), included: false },
+      { text: t('plans.features.freeNoAI'), included: false },
+      { text: t('plans.features.freeAds'), included: false },
+    ],
+    buen_camino: [
+      { text: t('plans.features.buenAllRoutes'), included: true },
+      { text: t('plans.features.buenAllAlbergues'), included: true },
+      { text: t('plans.features.buenOffline'), included: true },
+      { text: t('plans.features.buenCommunity'), included: true },
+      { text: t('plans.features.buenGps'), included: true },
+      { text: t('plans.features.buenNoAds'), included: true },
+    ],
+    compostelero: [
+      { text: t('plans.features.compAllBuen'), included: true },
+      { text: t('plans.features.compAI'), included: true, highlight: true },
+      { text: t('plans.features.compHealth'), included: true, highlight: true },
+      { text: t('plans.features.compChat'), included: true, highlight: true },
+      { text: t('plans.features.compInsurance'), included: true, highlight: true },
+      { text: t('plans.features.compEarlyAccess'), included: true, highlight: true },
+      { text: t('plans.features.compBadge'), included: true, highlight: true },
+    ],
+  };
+}
 
 export default function PlansScreen() {
   const router = useRouter();
@@ -58,20 +61,21 @@ export default function PlansScreen() {
 
   const buenPkg = useMemo(() => pickPackage(offerings, 'buen_camino', period), [offerings, period]);
   const compPkg = useMemo(() => pickPackage(offerings, 'compostelero', period), [offerings, period]);
+  const features = featuresByTier();
 
   const handlePurchase = async (pkg: PurchasesPackage | null, planLabel: string) => {
     if (!pkg) {
-      toast.error('Compras no disponibles en este entorno');
+      toast.error(t('plans.purchaseUnavailable'));
       return;
     }
     try {
       const newPlan = await purchase(pkg);
       if (newPlan) {
-        toast.success(`¡Bienvenido a ${planLabel}!`);
+        toast.success(t('plans.welcomeTo', { plan: planLabel }));
         router.back();
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Error en la compra';
+      const msg = e instanceof Error ? e.message : t('plans.purchaseError');
       toast.error(msg);
     }
   };
@@ -79,9 +83,9 @@ export default function PlansScreen() {
   const handleRestore = async () => {
     const plan = await restore();
     if (plan && plan !== 'free') {
-      toast.success(`Restaurado: ${plan}`);
+      toast.success(t('plans.restored', { plan }));
     } else {
-      toast.info('No se encontraron compras anteriores');
+      toast.info(t('plans.restoreNone'));
     }
   };
 
@@ -108,25 +112,25 @@ export default function PlansScreen() {
       >
         <View style={{ alignItems: 'center', marginTop: spacing['2'], gap: spacing['2'] }}>
           <Text variant="display" align="center" color={colors.cream}>
-            Elige tu Camino
+            {t('plans.title')}
           </Text>
           <Text variant="body" align="center" color={colors.stone400}>
-            Desbloquea la experiencia completa del peregrino
+            {t('plans.subtitle')}
           </Text>
         </View>
 
         <View style={{ alignItems: 'center', marginTop: spacing['3'] }}>
-          <PriceToggle value={period} onChange={setPeriod} savingsLabel="Ahorra hasta un 58%" />
+          <PriceToggle value={period} onChange={setPeriod} savingsLabel={t('plans.savings')} />
         </View>
 
         <PlanCard
           tier="free"
-          title="Peregrino"
-          subtitle="Para empezar el Camino"
-          priceLine="Gratis"
-          secondaryPrice="para siempre"
-          features={FEATURES.free}
-          ctaLabel={currentPlan === 'free' ? 'Tu plan actual' : 'Continuar gratis'}
+          title={t('plans.tierFreeTitle')}
+          subtitle={t('plans.tierFreeSubtitle')}
+          priceLine={t('plans.free')}
+          secondaryPrice={t('plans.forever')}
+          features={features.free}
+          ctaLabel={currentPlan === 'free' ? t('plans.currentPlan') : t('plans.continueFree')}
           ctaDisabled={currentPlan === 'free'}
           onPressCta={() => router.back()}
           delay={0}
@@ -134,79 +138,85 @@ export default function PlansScreen() {
 
         <PlanCard
           tier="buen_camino"
-          title="Buen Camino"
-          subtitle="La experiencia completa"
-          priceLine={priceLineFor(buenPkg, period, '€3,99/mes', '€19,99/año')}
+          title={t('plans.buenTitle')}
+          subtitle={t('plans.buenSubtitle')}
+          priceLine={priceLineFor(buenPkg, period, t('plans.perMonthFallbackBuen'), t('plans.perYearFallbackBuen'))}
           secondaryPrice={
-            period === 'annual' ? 'Equivale a €1,66/mes · 7 días gratis' : 'Cancela cuando quieras'
+            period === 'annual' ? t('plans.buenSecondaryAnnual') : t('plans.cancelAnytime')
           }
-          features={FEATURES.buen_camino}
+          features={features.buen_camino}
           ctaLabel={
             currentPlan === 'buen_camino'
-              ? 'Tu plan actual'
+              ? t('plans.currentPlan')
               : currentPlan === 'compostelero'
-                ? 'Bajar a Buen Camino'
-                : 'Empezar — 7 días gratis'
+                ? t('plans.downgradeBuen')
+                : t('plans.startTrial')
           }
           ctaDisabled={currentPlan === 'buen_camino'}
           ctaLoading={isLoading}
-          onPressCta={() => handlePurchase(buenPkg, 'Buen Camino')}
-          badge="MÁS POPULAR"
+          onPressCta={() => handlePurchase(buenPkg, t('plans.buenTitle'))}
+          badge={t('plans.mostPopular')}
           delay={120}
         />
 
         <PlanCard
           tier="compostelero"
-          title="Compostelero"
-          subtitle="Tu guía personal del Camino"
-          priceLine={priceLineFor(compPkg, period, '€9,99/mes', '€59,99/año')}
+          title={t('plans.compTitle')}
+          subtitle={t('plans.compSubtitle')}
+          priceLine={priceLineFor(compPkg, period, t('plans.perMonthFallbackComp'), t('plans.perYearFallbackComp'))}
           secondaryPrice={
-            period === 'annual' ? 'Equivale a €5,00/mes · 7 días gratis' : 'IA + Salud + Chat'
+            period === 'annual' ? t('plans.compSecondaryAnnual') : t('plans.compSecondaryMonthly')
           }
-          features={FEATURES.compostelero}
+          features={features.compostelero}
           ctaLabel={
-            currentPlan === 'compostelero' ? 'Tu plan actual' : 'Hacerse Compostelero'
+            currentPlan === 'compostelero' ? t('plans.currentPlan') : t('plans.becomeComp')
           }
           ctaDisabled={currentPlan === 'compostelero'}
           ctaLoading={isLoading}
-          onPressCta={() => handlePurchase(compPkg, 'Compostelero')}
-          badge="PREMIUM"
+          onPressCta={() => handlePurchase(compPkg, t('plans.compTitle'))}
+          badge={t('plans.premium')}
           delay={240}
         />
 
         <View style={{ alignItems: 'center', marginTop: spacing['4'], gap: spacing['2'] }}>
           <Text variant="small" align="center" color={colors.stone400}>
-            Cancela cuando quieras · Sin permanencia
+            {t('plans.noCommitment')}
           </Text>
           <Pressable
             onPress={handleRestore}
             hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={t('plans.restore')}
           >
             <Text variant="bodyMedium" color={colors.amber400}>
-              Restaurar compra anterior
+              {t('plans.restore')}
             </Text>
           </Pressable>
           <View style={{ flexDirection: 'row', gap: spacing['4'], marginTop: spacing['2'] }}>
             <Pressable
+              accessibilityRole="link"
+              accessibilityLabel={t('plans.terms')}
               onPress={() =>
                 Linking.openURL('https://santiagoways.app/terms').catch(() => {
-                  Alert.alert('Términos', 'No se pudo abrir el enlace.');
+                  Alert.alert(t('plans.terms'), t('plans.linkError'));
                 })
               }
             >
               <Text variant="caption" color={colors.stone400}>
-                Términos
+                {t('plans.terms')}
               </Text>
             </Pressable>
             <Pressable
+              accessibilityRole="link"
+              accessibilityLabel={t('plans.privacy')}
               onPress={() =>
                 Linking.openURL('https://santiagoways.app/privacy').catch(() => {
-                  Alert.alert('Privacidad', 'No se pudo abrir el enlace.');
+                  Alert.alert(t('plans.privacy'), t('plans.linkError'));
                 })
               }
             >
               <Text variant="caption" color={colors.stone400}>
-                Privacidad
+                {t('plans.privacy')}
               </Text>
             </Pressable>
           </View>
@@ -235,8 +245,8 @@ function priceLineFor(
 ): string {
   if (pkg) {
     return period === 'annual'
-      ? `${pkg.product.priceString}/año`
-      : `${pkg.product.priceString}/mes`;
+      ? `${pkg.product.priceString}${t('plans.perYear')}`
+      : `${pkg.product.priceString}${t('plans.perMonth')}`;
   }
   return period === 'annual' ? annualFallback : monthlyFallback;
 }
