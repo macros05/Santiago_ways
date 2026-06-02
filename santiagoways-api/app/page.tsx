@@ -7,6 +7,9 @@ export default function Home() {
         <li><a href="/api/health">/api/health</a></li>
         <li><a href="/api/routes">/api/routes</a></li>
       </ul>
+      <p style={{ marginTop: '2rem', fontSize: 14 }}>
+        <a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a>
+      </p>
     </main>
   );
 }

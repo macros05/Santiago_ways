@@ -259,21 +259,21 @@ cd santiagoways-app && npx expo export --platform ios --output-dir .expo-export
 > [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md).
 
 **Bloqueantes de configuración / contenido (no de código):**
-1. Subir `version` a `1.0.0` (`package.json` + `app.json`) y `eas init` para
-   rellenar `extra.eas.projectId` (vacío hoy).
+1. `eas init` para rellenar `extra.eas.projectId` (vacío hoy).
 2. Definir `EXPO_PUBLIC_API_BASE_URL` en los builds (hoy `apiBaseUrl` =
    `http://localhost:3000/api`, la app no carga datos en el móvil).
-3. **Páginas legales** `/terms` y `/privacy` (el paywall las enlaza; Apple/Google
-   las exigen) — aún no existen.
+3. **Páginas legales** `/terms` y `/privacy` — **creadas** en `app/(legal)/`;
+   falta rellenar datos de empresa, revisión legal y publicarlas en
+   `santiagoways.app` (el dominio que enlaza el paywall).
 4. **RevenueCat**: crear productos en App Store Connect + Play Console + API keys.
 5. Rellenar secretos de `.env.production.example` y desplegar el backend
    (`docker compose` + `prisma migrate deploy`).
 6. **Verificar en dispositivo físico**: GPS background, compras, offline, push.
 
-**Ya resuelto (antes listado como pendiente):** subida de imágenes a Cloudinary
+**Ya resuelto:** versión a `1.0.0`, subida de imágenes a Cloudinary
 (`uploads.ts`), Apple Sign In (implementado, ya no es 501), background GPS
 (`backgroundTask.ts`), iconos/splash (PNGs presentes), descarga offline
-(`offline.ts`). Seed con guarda de producción (no crea cuentas demo en prod).
+(`offline.ts`), seed con guarda de producción, páginas legales, CSP corregida.
 
 **Mejoras de calidad pendientes:** observabilidad (Sentry), push **remoto**
 (solo hay locales hoy), más tests (0 cobertura de las rutas API), reactivar lint

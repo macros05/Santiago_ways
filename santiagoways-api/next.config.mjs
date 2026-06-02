@@ -17,7 +17,7 @@ const securityHeaders = [
       "img-src 'self' data: https://res.cloudinary.com https://*.tile.openstreetmap.org",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      "connect-src 'self' https://api.openweathermap.org https://api.open-meteo.com https://*.pusher.com wss://*.pusher.com https://api.cloudinary.com https://res.cloudinary.com",
+      "connect-src 'self' https://api.open-meteo.com https://*.pusher.com wss://*.pusher.com https://api.cloudinary.com https://res.cloudinary.com",
       "font-src 'self' data:",
       "frame-ancestors 'none'",
       "base-uri 'self'",

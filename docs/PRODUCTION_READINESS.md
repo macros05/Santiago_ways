@@ -23,10 +23,10 @@ contexto del rediseño "Liquid Dawn", pero su checklist quedó desactualizado).
 | Seguridad backend | 🟢 | Rate-limit, CSP/HSTS, JWT con rotación, webhook firmado, cron protegido |
 | Infraestructura / deploy | 🟢 | Stack Docker (Postgres + API + Caddy HTTPS), healthchecks, `eas.json` |
 | Cobertura de features | 🟢 | Mucho más completo de lo que dice el README viejo |
-| Tests automatizados | 🟠 | Solo 6 tests de libs del cliente; 0 tests de API; lint fuera del build |
+| Tests automatizados | 🟠 | 10 suites / 61 tests de libs del cliente (ampliado en esta rama); 0 tests de API |
 | Observabilidad | 🔴 | Sin Sentry/error-tracking ni métricas |
-| Config de release | 🔴 | `version 0.1.0`, `eas.projectId` vacío, `apiBaseUrl` = localhost |
-| Páginas legales | 🔴 | Terms/Privacy no existen → **bloqueante de tienda** |
+| Config de release | 🟠 | `version` → **`1.0.0`** (hecho); falta `eas init` (projectId) y `EXPO_PUBLIC_API_BASE_URL` |
+| Páginas legales | 🟠 | `/terms` y `/privacy` **creadas** en esta rama; faltan rellenar datos de empresa y publicarlas en el dominio |
 | Pagos (RevenueCat) | 🔴 | Productos sin crear en App Store / Play; sin API keys |
 | Push remoto | 🟠 | Solo notificaciones **locales**; no hay envío server→dispositivo |
 | Verificación en dispositivo | 🔴 | Nada probado en iPhone/Android físico (GPS background, compras, offline) |
@@ -90,17 +90,19 @@ El backend tiene **67 rutas API**. Más allá del CRUD base, ya existen en códi
 Ninguno es "difícil"; son tareas de configuración/contenido que **solo tú**
 puedes completar (requieren cuentas, dominios, decisiones legales).
 
-1. **Versión `0.1.0`** en `package.json` **y** `app.json`. Subir a `1.0.0` para
-   el primer release. EAS gestiona `buildNumber`/`versionCode` (remote).
+1. ~~**Versión `0.1.0`**~~ → **HECHO**: subida a `1.0.0` en todos los manifests.
+   EAS gestiona `buildNumber`/`versionCode` (remote).
 2. **`extra.eas.projectId` vacío** en `app.json`. Ejecutar `eas init` para
    generarlo (necesario para builds de tienda y OTA).
 3. **`extra.apiBaseUrl = http://localhost:3000/api`**. En los builds de
    producción hay que definir **`EXPO_PUBLIC_API_BASE_URL`** apuntando al backend
    desplegado. Mientras siga en localhost, la app **no carga datos** en el móvil.
-4. **Páginas legales inexistentes.** El paywall enlaza a
-   `https://santiagoways.app/terms` y `/privacy`, pero **no hay esas páginas** en
-   `santiagoways-api/app` (solo `page.tsx` raíz y `reset-password`). **Apple y
-   Google exigen Privacy Policy y Terms públicos.** → Bloqueante duro de tienda.
+4. **Páginas legales** → **CREADAS** en esta rama (`app/(legal)/terms`,
+   `/privacy`). Falta: (a) rellenar los placeholders `[COMPANY NAME]`/
+   `[CONTACT EMAIL]`/`[ADDRESS]`/`[JURISDICTION]`, (b) revisión legal, y
+   (c) **publicarlas en el dominio `santiagoways.app`** que enlaza el paywall
+   (hoy el Next app se despliega como `api.santiagoways.app`). Apple/Google
+   exigen estas URLs accesibles.
 5. **RevenueCat sin productos.** Hay que crear las ofertas (p. ej. `buen_camino`,
    `compostelero` mensual/anual) en App Store Connect + Google Play Console y en
    el dashboard de RevenueCat, y rellenar las API keys. Sin esto el paywall no
@@ -152,6 +154,19 @@ puedes completar (requieren cuentas, dominios, decisiones legales).
   En prod, por defecto, solo se siembran datos de referencia (rutas, etapas,
   albergues, waypoints, logros). Esto cierra un agujero real: cuentas con
   contraseña pública y el riesgo de borrar datos de peregrinos reales.
+- **Versión `1.0.0`** en root, app, api y `app.json` (antes `0.1.0`).
+- **Páginas legales** `/terms` y `/privacy` creadas como rutas Next.js
+  (`app/(legal)/`), enlazadas desde la landing del API. Cubren lo que la app
+  realmente recoge (ubicación incl. background, fotos, salud, GPS, diario,
+  suscripciones) e incluyen un disclaimer de seguridad ("no es un dispositivo de
+  navegación/emergencia"). **Pendiente:** rellenar `[COMPANY NAME]`,
+  `[CONTACT EMAIL]`, `[ADDRESS]`, `[JURISDICTION]`, revisión legal y publicarlas
+  en `santiagoways.app` (el dominio que enlaza el paywall).
+- **CSP corregida**: `connect-src` apuntaba a `api.openweathermap.org`; el
+  cliente usa Open-Meteo. Eliminado el host muerto.
+- **Cobertura de tests ampliada**: nuevos tests de `format`, `dailyQuote`,
+  `achievements` y `compostela` (incluye prueba de **escape XSS** en la
+  generación del HTML de la Compostela). Suite: 61 tests en verde.
 
 ---
 
